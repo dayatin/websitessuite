@@ -2,53 +2,48 @@
 import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
 import { renderMetaTags, buildWebApplicationSchema } from "@suite/seo-core";
 import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { PAPER_STANDARDS } from "../lib/print-layout.ts";
 
-const siteTitle = "OptiPixel Studio";
-const siteUrl = Astro.site?.toString() || "https://ai-image-toolkit.suite.local";
-const description = "Ultra-fast, accessible, and privacy-first ${siteTitle} platform.";
+const siteTitle = "OptiPixel Studio: Free AI Image Resize, Target-KB Compress & Print Layout Studio";
+const canonicalUrl = Astro.site ? new URL("", Astro.site).href : "https://ai-image-toolkit.suite.local/";
+const description = "100% private, client-side image processing toolkit. Print multi-photo sheets on A4, A3, B4, B3, Letter, and 4x6 photo cards. Target-KB binary compression and format conversion.";
 
 const metaHtml = renderMetaTags({
-  title: `${siteTitle} | Fast, Accessible & Free`,
+  title: siteTitle,
   description,
-  canonicalUrl: siteUrl,
-  siteName: siteTitle,
+  canonicalUrl,
+  siteName: "OptiPixel Studio",
+  type: "website",
 });
 
-const schemaJson = buildWebApplicationSchema({
-  name: siteTitle,
-  url: siteUrl,
+const appSchema = buildWebApplicationSchema({
+  name: "OptiPixel Studio",
+  url: canonicalUrl,
   description,
-  applicationCategory: "UtilitiesApplication",
+  applicationCategory: "MultimediaApplication",
 });
 
-const headerHtml = renderHeaderHTML({
-  siteTitle,
-  navItems: [
-    { label: "Home", href: "/" },
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" },
-  ],
-});
-
-const footerHtml = renderFooterHTML({
-  siteTitle,
-  tagline: "Instant, accessible, and privacy-first digital utility suite.",
-});
-
-const adSlotHtml = renderAdSlotHTML({
+const adSlotTop = renderAdSlotHTML({
   client: "ca-pub-0000000000000000",
-  slotId: "1234567890",
+  slotId: "5001001001",
   format: "leaderboard",
   testMode: true,
 });
 
-const affiliateHtml = renderAffiliateCardHTML({
-  title: "Featured Productivity Upgrade",
-  description: "Recommended high-performance tools selected by our editorial team.",
-  ctaText: "Explore Partner",
-  affiliateUrl: "https://partner.suite.local",
-  merchantName: "SuitePartner",
-  badge: "Recommended",
+const adSlotBottom = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "5001001002",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Premium Archival Photo Paper & Studio Printers",
+  description: "Lab-quality gloss, luster, and matte photo papers guaranteed smudge-free and fade-resistant for official government documents and biometric passports.",
+  ctaText: "Shop Photo Paper Deals",
+  affiliateUrl: "https://partner.suite.local/photo-supplies",
+  merchantName: "Print Supplies Direct",
+  badge: "Studio Recommended",
 });
 ---
 
@@ -60,34 +55,505 @@ const affiliateHtml = renderAffiliateCardHTML({
     <script is:inline set:html={getAntiFOUCScript()} />
     <Fragment set:html={getConsentModeScript()} />
     <Fragment set:html={metaHtml} />
-    <script type="application/ld+json" is:inline set:html={schemaJson} />
+    <script type="application/ld+json" is:inline set:html={appSchema} />
     <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+    <style>
+      .studio-tab-btn {
+        padding: 10px 18px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.15s ease;
+      }
+      .studio-tab-btn.active {
+        color: var(--accent-primary);
+        border-bottom-color: var(--accent-primary);
+      }
+      .drop-zone {
+        border: 2px dashed var(--border-subtle);
+        border-radius: var(--radius-md, 8px);
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        background: var(--bg-surface);
+        cursor: pointer;
+        transition: border-color 0.2s ease, background 0.2s ease;
+      }
+      .drop-zone:hover, .drop-zone.dragover {
+        border-color: var(--accent-primary);
+        background: rgba(var(--accent-primary-rgb, 99, 102, 241), 0.05);
+      }
+      .canvas-viewport {
+        background: #1e293b;
+        border-radius: var(--radius-md, 8px);
+        padding: 1.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: auto;
+        min-height: 400px;
+      }
+      #print-canvas {
+        background: #ffffff;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        max-width: 100%;
+        height: auto;
+      }
+    </style>
   </head>
   <body>
-    <Fragment set:html={headerHtml} />
-    <main class="suite-container" style="flex: 1; padding-block: 2.5rem;">
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "OptiPixel", navItems: [{ label: "Print Studio", href: "/" }, { label: "Resize & Convert", href: "#resize" }, { label: "Target-KB", href: "#compress" }, { label: "About", href: "/about" }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2rem; max-width: 1100px;">
+      <!-- Hero -->
       <section style="text-align: center; margin-bottom: 2rem;">
-        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem;">{siteTitle}</h1>
-        <p style="font-size: 1.125rem; color: var(--text-secondary); max-width: 650px; margin-inline: auto;">
-          {description}
+        <span class="suite-badge" style="margin-bottom: 8px;">🔒 100% Client-Side Privacy &bull; Zero Server Uploads</span>
+        <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px;">
+          Print & Paper Layout Studio
+        </h1>
+        <p style="font-size: 1rem; color: var(--text-secondary); max-width: 700px; margin-inline: auto;">
+          Tile multiple passport & portrait photos onto A4, A3, B4, B3, Letter, and 4x6" cards with millimeter-exact trim guidelines. Target-KB binary compression and WebWorker speed.
         </p>
       </section>
 
-      <!-- Zero-CLS Ad Unit -->
-      <Fragment set:html={adSlotHtml} />
-
-      <!-- Interactive Core Workspace Area -->
-      <div class="suite-card" style="min-height: 280px; display: flex; align-items: center; justify-content: center; text-align: center;">
-        <div>
-          <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Interactive Studio Space</h2>
-          <p style="color: var(--text-muted);">Interactive components ready to plug in.</p>
-        </div>
+      <!-- Monetization: Top Leaderboard -->
+      <div style="margin-bottom: 2rem;">
+        <Fragment set:html={adSlotTop} />
       </div>
 
-      <!-- Affiliate Partner Card -->
-      <Fragment set:html={affiliateHtml} />
+      <!-- Studio Tabs Navigation -->
+      <nav style="display: flex; border-bottom: 1px solid var(--border-subtle); margin-bottom: 2rem; gap: 8px;">
+        <button id="tab-print" type="button" class="studio-tab-btn active">
+          🖨️ Print & Paper Tiling Studio
+        </button>
+        <button id="tab-resize" type="button" class="studio-tab-btn">
+          📐 Resize & Format Converter
+        </button>
+        <button id="tab-targetkb" type="button" class="studio-tab-btn">
+          ⚖️ Exact Target-KB Compressor
+        </button>
+      </nav>
+
+      <!-- Global File Upload Dropzone -->
+      <section class="suite-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <div id="drop-zone" class="drop-zone">
+          <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp,image/avif" style="display: none;" />
+          <div style="font-size: 2.5rem; margin-bottom: 8px;">📸</div>
+          <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 4px;">
+            Drag & drop an image or click to browse
+          </h2>
+          <p style="font-size: 0.8125rem; color: var(--text-muted); margin: 0;">
+            Supports JPG, PNG, WebP, AVIF up to 50MB. Processed entirely within your browser's WebWorkers.
+          </p>
+          <div id="file-info" style="display: none; margin-top: 10px; font-weight: 600; color: var(--accent-primary); font-size: 0.875rem;"></div>
+        </div>
+      </section>
+
+      <!-- TAB 1: Print & Paper Layout Studio Content -->
+      <section id="panel-print" class="suite-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+          <!-- Controls Column -->
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+              <label for="paper-select" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+                Paper Sheet Size:
+              </label>
+              <select id="paper-select" class="suite-select" style="width: 100%; padding: 8px 12px; font-size: 0.875rem;">
+                {PAPER_STANDARDS.map((p) => (
+                  <option value={p.id} selected={p.id === "photo-4x6"}>
+                    {p.name} ({p.widthMm} x {p.heightMm} mm) — {p.category}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div>
+                <label for="photo-size-preset" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+                  Photo Cut Size:
+                </label>
+                <select id="photo-size-preset" class="suite-select" style="width: 100%; padding: 8px; font-size: 0.8125rem;">
+                  <option value="35x45" selected>Standard Passport (35 x 45 mm)</option>
+                  <option value="51x51">US / India Visa 2x2" (51 x 51 mm)</option>
+                  <option value="33x48">China Visa (33 x 48 mm)</option>
+                  <option value="30x40">ID Stamp (30 x 40 mm)</option>
+                  <option value="custom">Custom Dimensions</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="dpi-select" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+                  Print Resolution (DPI):
+                </label>
+                <select id="dpi-select" class="suite-select" style="width: 100%; padding: 8px; font-size: 0.8125rem;">
+                  <option value="300" selected>300 DPI (Standard Print)</option>
+                  <option value="600">600 DPI (Ultra Archival)</option>
+                  <option value="150">150 DPI (Draft / Screen)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div>
+                <label for="orientation-select" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+                  Orientation:
+                </label>
+                <select id="orientation-select" class="suite-select" style="width: 100%; padding: 8px; font-size: 0.8125rem;">
+                  <option value="portrait" selected>Portrait</option>
+                  <option value="landscape">Landscape</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="guides-toggle" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+                  Trim Guidelines:
+                </label>
+                <select id="guides-toggle" class="suite-select" style="width: 100%; padding: 8px; font-size: 0.8125rem;">
+                  <option value="true" selected>✂️ Hairline Corner Ticks</option>
+                  <option value="false">None (Clean Edge)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Tiling Stats Badge -->
+            <div id="tiling-summary" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm, 6px); padding: 10px 14px; font-size: 0.8125rem; color: var(--text-primary);">
+              ✨ Sheet accommodates <strong>6 photos</strong> (2 columns &times; 3 rows) on 4x6" card.
+            </div>
+
+            <!-- Export Actions -->
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button id="download-print-btn" type="button" class="suite-btn-primary" style="flex: 1; padding: 10px; font-size: 0.875rem;">
+                📥 Download High-Res Sheet
+              </button>
+              <button id="print-sheet-btn" type="button" class="suite-btn-secondary" style="padding: 10px 16px; font-size: 0.875rem;">
+                🖨️ Print
+              </button>
+            </div>
+          </div>
+
+          <!-- Canvas Preview Column -->
+          <div class="canvas-viewport">
+            <canvas id="print-canvas" width="600" height="900"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: Quick Resize & Format Converter (Initially Hidden) -->
+      <section id="panel-resize" class="suite-card" style="padding: 1.5rem; margin-bottom: 2rem; display: none;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">
+          Quick Resize & Multi-Format Converter
+        </h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+          <div>
+            <label for="resize-mode" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+              Resize Mode:
+            </label>
+            <select id="resize-mode" class="suite-select" style="width: 100%; padding: 8px;">
+              <option value="percent">Percentage Scale (50%, 75%, etc.)</option>
+              <option value="exact">Exact Width & Height (px)</option>
+              <option value="max">Max Dimension (px)</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="convert-format" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+              Target Format:
+            </label>
+            <select id="convert-format" class="suite-select" style="width: 100%; padding: 8px;">
+              <option value="image/webp" selected>WebP (High Quality & Small Size)</option>
+              <option value="image/jpeg">JPEG (Universal Compatibility)</option>
+              <option value="image/png">PNG (Lossless & Transparency)</option>
+              <option value="image/avif">AVIF (Next-Gen Ultra Compression)</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="execute-resize-btn" type="button" class="suite-btn-primary" style="padding: 10px 20px;">
+          ⚡ Convert & Download Image
+        </button>
+      </section>
+
+      <!-- TAB 3: Target-KB Compressor (Initially Hidden) -->
+      <section id="panel-targetkb" class="suite-card" style="padding: 1.5rem; margin-bottom: 2rem; display: none;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 6px;">
+          Exact Target-KB Binary Search Compressor
+        </h2>
+        <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+          Strict government portals, visa forms, and academic admissions often reject uploads above 50KB or 100KB. This tool iterates through quality steps to find the highest possible fidelity under your exact target limit.
+        </p>
+
+        <div style="max-width: 500px; margin-bottom: 1.5rem;">
+          <label for="target-kb-input" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px;">
+            Target Maximum File Size:
+          </label>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input
+              type="number"
+              id="target-kb-input"
+              value="50"
+              min="10"
+              max="5000"
+              style="padding: 8px 12px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm, 6px); background: var(--bg-surface); font-size: 1rem; width: 120px;"
+            />
+            <span style="font-weight: 700; font-size: 0.875rem;">Kilobytes (KB)</span>
+            <div style="display: flex; gap: 4px; margin-left: 12px;">
+              <button type="button" class="suite-btn-secondary set-kb-preset" data-kb="50" style="padding: 4px 8px; font-size: 0.75rem;">50 KB</button>
+              <button type="button" class="suite-btn-secondary set-kb-preset" data-kb="100" style="padding: 4px 8px; font-size: 0.75rem;">100 KB</button>
+              <button type="button" class="suite-btn-secondary set-kb-preset" data-kb="200" style="padding: 4px 8px; font-size: 0.75rem;">200 KB</button>
+            </div>
+          </div>
+        </div>
+
+        <button id="execute-compress-btn" type="button" class="suite-btn-primary" style="padding: 10px 20px;">
+          ⚖️ Compress to Target KB
+        </button>
+        <div id="compress-result-box" style="display: none; margin-top: 1rem; padding: 12px; border-radius: 6px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3);"></div>
+      </section>
+
+      <!-- Monetization: Contextual Photo Supplies Offer -->
+      <Fragment set:html={affiliateOffer} />
+
+      <!-- Monetization: Bottom Rectangle AdSlot -->
+      <section style="margin-top: 2rem;">
+        <Fragment set:html={adSlotBottom} />
+      </section>
     </main>
-    <Fragment set:html={footerHtml} />
+
+    <Fragment set:html={renderFooterHTML({ authorName: "OptiPixel Editorial", currentYear: 2026, privacyUrl: "/privacy-policy", termsUrl: "/terms-of-service", editorialUrl: "/editorial-policy", contactUrl: "/contact" })} />
     <Fragment set:html={renderConsentBannerHTML()} />
+
+    <!-- Client-Side Layout & Tiling Engine -->
+    <script is:inline define:vars={{ PAPER_STANDARDS }}>
+      (() => {
+        let loadedImage = null;
+        let loadedFileName = "photo.jpg";
+
+        const dropZone = document.getElementById("drop-zone");
+        const fileInput = document.getElementById("file-input");
+        const fileInfo = document.getElementById("file-info");
+        const paperSelect = document.getElementById("paper-select");
+        const photoSizePreset = document.getElementById("photo-size-preset");
+        const dpiSelect = document.getElementById("dpi-select");
+        const orientationSelect = document.getElementById("orientation-select");
+        const guidesToggle = document.getElementById("guides-toggle");
+        const canvas = document.getElementById("print-canvas");
+        const tilingSummary = document.getElementById("tiling-summary");
+        const downloadPrintBtn = document.getElementById("download-print-btn");
+        const printSheetBtn = document.getElementById("print-sheet-btn");
+
+        const papersMap = new Map(PAPER_STANDARDS.map(p => [p.id, p]));
+
+        // Tab Switching
+        const tabs = ["print", "resize", "targetkb"];
+        tabs.forEach(t => {
+          const btn = document.getElementById(`tab-${t}`);
+          const panel = document.getElementById(`panel-${t}`);
+          if (btn && panel) {
+            btn.addEventListener("click", () => {
+              tabs.forEach(ot => {
+                document.getElementById(`tab-${ot}`)?.classList.remove("active");
+                const op = document.getElementById(`panel-${ot}`);
+                if (op) op.style.display = "none";
+              });
+              btn.classList.add("active");
+              panel.style.display = "block";
+            });
+          }
+        });
+
+        // File Drag & Drop
+        if (dropZone && fileInput) {
+          dropZone.addEventListener("click", () => fileInput.click());
+          dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("dragover"); });
+          dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+          dropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropZone.classList.remove("dragover");
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+              handleFile(e.dataTransfer.files[0]);
+            }
+          });
+          fileInput.addEventListener("change", (e) => {
+            if (e.target.files && e.target.files[0]) {
+              handleFile(e.target.files[0]);
+            }
+          });
+        }
+
+        function handleFile(file) {
+          loadedFileName = file.name;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+              loadedImage = img;
+              if (fileInfo) {
+                fileInfo.style.display = "block";
+                fileInfo.textContent = `✅ Loaded: ${file.name} (${img.width} x ${img.height}px, ${(file.size / 1024).toFixed(1)} KB)`;
+              }
+              renderTilingCanvas();
+            };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+
+        function getPhotoDimensionsMm() {
+          const val = photoSizePreset ? photoSizePreset.value : "35x45";
+          switch (val) {
+            case "51x51": return { w: 50.8, h: 50.8 }; // 2x2 inches
+            case "33x48": return { w: 33.0, h: 48.0 };
+            case "30x40": return { w: 30.0, h: 40.0 };
+            case "35x45":
+            default: return { w: 35.0, h: 45.0 };
+          }
+        }
+
+        function mmToPx(mm, dpi) {
+          return Math.round((mm / 25.4) * dpi);
+        }
+
+        function renderTilingCanvas() {
+          if (!canvas) return;
+          const paperId = paperSelect ? paperSelect.value : "photo-4x6";
+          const paper = papersMap.get(paperId) || papersMap.get("photo-4x6");
+          const orientation = orientationSelect ? orientationSelect.value : "portrait";
+          const dpi = parseInt(dpiSelect ? dpiSelect.value : "300", 10);
+          const { w: photoWMm, h: photoHMm } = getPhotoDimensionsMm();
+          const includeGuides = guidesToggle ? guidesToggle.value === "true" : true;
+
+          const sheetWMm = orientation === "portrait" ? paper.widthMm : paper.heightMm;
+          const sheetHMm = orientation === "portrait" ? paper.heightMm : paper.widthMm;
+
+          const marginMm = 5;
+          const spacingMm = 2;
+          const availWMm = sheetWMm - 2 * marginMm;
+          const availHMm = sheetHMm - 2 * marginMm;
+
+          const cols = Math.max(1, Math.floor((availWMm + spacingMm) / (photoWMm + spacingMm)));
+          const rows = Math.max(1, Math.floor((availHMm + spacingMm) / (photoHMm + spacingMm)));
+          const totalPhotos = cols * rows;
+
+          const gridWMm = cols * photoWMm + (cols - 1) * spacingMm;
+          const gridHMm = rows * photoHMm + (rows - 1) * spacingMm;
+          const startXmm = (sheetWMm - gridWMm) / 2;
+          const startYmm = (sheetHMm - gridHMm) / 2;
+
+          // Target canvas internal resolution at selected DPI
+          const pageW = mmToPx(sheetWMm, dpi);
+          const pageH = mmToPx(sheetHMm, dpi);
+          canvas.width = pageW;
+          canvas.height = pageH;
+
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, pageW, pageH);
+
+          const photoWPx = mmToPx(photoWMm, dpi);
+          const photoHPx = mmToPx(photoHMm, dpi);
+          const tickPx = mmToPx(2, dpi);
+
+          for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+              const xMm = startXmm + c * (photoWMm + spacingMm);
+              const yMm = startYmm + r * (photoHMm + spacingMm);
+              const xPx = mmToPx(xMm, dpi);
+              const yPx = mmToPx(yMm, dpi);
+
+              if (loadedImage) {
+                // Center-crop loaded image to photo aspect ratio
+                const targetAspect = photoWPx / photoHPx;
+                const sourceAspect = loadedImage.width / loadedImage.height;
+                let sx = 0, sy = 0, sw = loadedImage.width, sh = loadedImage.height;
+
+                if (sourceAspect > targetAspect) {
+                  sw = Math.round(loadedImage.height * targetAspect);
+                  sx = Math.round((loadedImage.width - sw) / 2);
+                } else {
+                  sh = Math.round(loadedImage.width / targetAspect);
+                  sy = Math.round((loadedImage.height - sh) / 2);
+                }
+
+                ctx.drawImage(loadedImage, sx, sy, sw, sh, xPx, yPx, photoWPx, photoHPx);
+              } else {
+                // Placeholder preview outline
+                ctx.fillStyle = "#f1f5f9";
+                ctx.fillRect(xPx, yPx, photoWPx, photoHPx);
+                ctx.strokeStyle = "#cbd5e1";
+                ctx.lineWidth = Math.max(1, Math.round(dpi / 150));
+                ctx.strokeRect(xPx, yPx, photoWPx, photoHPx);
+
+                ctx.fillStyle = "#94a3b8";
+                ctx.font = `${Math.round(14 * (dpi / 150))}px sans-serif`;
+                ctx.textAlign = "center";
+                ctx.fillText(`${photoWMm}x${photoHMm}mm`, xPx + photoWPx / 2, yPx + photoHPx / 2);
+              }
+
+              // Draw Hairline Trim Guides
+              if (includeGuides) {
+                ctx.strokeStyle = "#94a3b8";
+                ctx.lineWidth = Math.max(1, Math.round(dpi / 300));
+
+                // TL
+                ctx.beginPath(); ctx.moveTo(xPx - tickPx, yPx); ctx.lineTo(xPx, yPx); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(xPx, yPx - tickPx); ctx.lineTo(xPx, yPx); ctx.stroke();
+                // TR
+                ctx.beginPath(); ctx.moveTo(xPx + photoWPx, yPx); ctx.lineTo(xPx + photoWPx + tickPx, yPx); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(xPx + photoWPx, yPx - tickPx); ctx.lineTo(xPx + photoWPx, yPx); ctx.stroke();
+                // BL
+                ctx.beginPath(); ctx.moveTo(xPx - tickPx, yPx + photoHPx); ctx.lineTo(xPx, yPx + photoHPx); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(xPx, yPx + photoHPx); ctx.lineTo(xPx, yPx + photoHPx + tickPx); ctx.stroke();
+                // BR
+                ctx.beginPath(); ctx.moveTo(xPx + photoWPx, yPx + photoHPx); ctx.lineTo(xPx + photoWPx + tickPx, yPx + photoHPx); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(xPx + photoWPx, yPx + photoHPx); ctx.lineTo(xPx + photoWPx, yPx + photoHPx + tickPx); ctx.stroke();
+              }
+            }
+          }
+
+          if (tilingSummary) {
+            tilingSummary.innerHTML = `✨ Sheet accommodates <strong>${totalPhotos} photos</strong> (${cols} cols &times; ${rows} rows) on <strong>${paper.name}</strong> at <strong>${dpi} DPI</strong>.`;
+          }
+        }
+
+        // Event listeners for re-renders
+        [paperSelect, photoSizePreset, dpiSelect, orientationSelect, guidesToggle].forEach(el => {
+          if (el) el.addEventListener("change", renderTilingCanvas);
+        });
+
+        // Download Sheet Action
+        if (downloadPrintBtn) {
+          downloadPrintBtn.addEventListener("click", () => {
+            if (!canvas) return;
+            const a = document.createElement("a");
+            a.download = `optipixel-sheet-${paperSelect ? paperSelect.value : "print"}.png`;
+            a.href = canvas.toDataURL("image/png");
+            a.click();
+          });
+        }
+
+        // Print Action
+        if (printSheetBtn) {
+          printSheetBtn.addEventListener("click", () => {
+            window.print();
+          });
+        }
+
+        // Quick Preset Buttons in Target-KB
+        document.querySelectorAll(".set-kb-preset").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            const kb = e.currentTarget.getAttribute("data-kb");
+            const inp = document.getElementById("target-kb-input");
+            if (inp && kb) inp.value = kb;
+          });
+        });
+
+        // Initial placeholder render
+        renderTilingCanvas();
+      })();
+    </script>
   </body>
 </html>
