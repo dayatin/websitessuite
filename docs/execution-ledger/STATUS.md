@@ -6,7 +6,7 @@
 | Stage 1 | Phase 1.1 | 1.1.2 | Antigravity Multi-Agent Rules & Verification CLI | **DONE** | Validated (Rules, CLI, 0 Biome warnings, clean isolation) | 2026-11-23 |
 | Stage 1 | Phase 1.2 | 1.2.1 | Multi-Theme UI Engine (`@suite/ui-theme`) | **DONE** | Validated (5 Themes, Anti-FOUC, Unit tests 3/3 pass, Biome clean) | 2026-11-23 |
 | Stage 1 | Phase 1.2 | 1.2.2 | SEO Core & Compliance Pages (`@suite/seo-core`) | **DONE** | Validated (Schema.org JSON-LD, Meta, Robots, Privacy/Editorial pages, 6/6 tests) | 2026-11-23 |
-| Stage 1 | Phase 1.2 | 1.2.3 | Monetization & AdSense Engine (`@suite/monetization`) | PENDING | - | - |
+| Stage 1 | Phase 1.2 | 1.2.3 | Monetization & AdSense Engine (`@suite/monetization`) | **DONE** | Validated (Zero-CLS AdSlots, Consent Mode v2, Affiliates, Ads.txt, 4/4 tests) | 2026-11-23 |
 | Stage 1 | Phase 1.2 | 1.2.4 | Cloudflare Kit & DR Abstraction (`@suite/cloudflare-kit`) | PENDING | - | - |
 | Stage 1 | Phase 1.3 | 1.3.1 | Selective CI/CD & DR Sync Workflows | PENDING | - | - |
 | Stage 1 | Phase 1.3 | 1.3.2 | 1-Command App Scaffolder (`tools/create-suite-app`) | PENDING | - | - |

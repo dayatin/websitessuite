@@ -26,6 +26,12 @@ importers:
 
   packages/config: {}
 
+  packages/monetization:
+    devDependencies:
+      '@suite/config':
+        specifier: workspace:*
+        version: link:../config
+
   packages/seo-core:
     devDependencies:
       '@suite/config':
