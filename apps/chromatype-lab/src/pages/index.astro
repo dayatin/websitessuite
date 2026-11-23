@@ -1,0 +1,279 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildFAQSchema, buildBreadcrumbSchema, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { CHROMA_TOOLS } from "../lib/chroma-engine.ts";
+
+const siteTitle = "Chromatype Lab | Modern OKLCH Color & Fluid Typography Studio";
+const canonicalUrl = Astro.site ? Astro.site.href : "https://chromatype-lab.suite.local/";
+const description = "Design with modern perceptual OKLCH color spaces, audit WCAG 2.2 / APCA accessibility contrast, and generate responsive fluid typography with CSS clamp(). 100% free with zero CLS.";
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "Chromatype Lab",
+  type: "website",
+});
+
+const appSchema = buildWebApplicationSchema({
+  name: "Chromatype Lab",
+  url: canonicalUrl,
+  description,
+  applicationCategory: "DesignApplication",
+});
+
+const faqs = [
+  {
+    question: "Why is the OKLCH color space better than traditional RGB or HSL?",
+    answer: "OKLCH is perceptually uniform. Unlike HSL where yellow appears blindingly bright at 50% lightness while blue appears dark, OKLCH guarantees that 70% lightness looks equally bright across every hue, eliminating hue shift distortions.",
+  },
+  {
+    question: "What is the difference between WCAG 2.2 and APCA contrast scoring?",
+    answer: "WCAG 2.2 calculates a static mathematical ratio based on relative luminance (targeting 4.5:1 for normal text). APCA (Accessible Perceptual Contrast Algorithm) models human ocular perception and spatial frequency, providing more accurate readability assessment for modern digital displays.",
+  },
+  {
+    question: "How does fluid typography with CSS clamp() improve responsive design?",
+    answer: "CSS clamp() smoothly interpolates font sizes between viewport minimums (e.g. 360px mobile) and maximums (e.g. 1280px desktop) without requiring jagged CSS media query breakpoints.",
+  },
+];
+
+const faqSchema = buildFAQSchema(faqs);
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: canonicalUrl },
+]);
+
+const adSlotTop = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "13001001001",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const adSlotBottom = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "13001001002",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Fontfabric Type Foundry — Premium Web Typography",
+  description: "Award-winning geometric, sans-serif, and variable font families engineered for digital products and design systems.",
+  ctaText: "Explore Type Foundry",
+  affiliateUrl: "https://partner.suite.local/fontfabric",
+  merchantName: "Fontfabric Partner Network",
+  badge: "Typography Standard",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <Fragment set:html={metaHtml} />
+    <Fragment set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={appSchema} />
+    <Fragment set:html={faqSchema} />
+    <Fragment set:html={breadcrumbSchema} />
+    <style>
+      .hero-section {
+        text-align: center;
+        padding: 3rem 1rem 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .chroma-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(14, 165, 233, 0.1);
+        color: #0284c7;
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 0.35rem 0.85rem;
+        border-radius: 9999px;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(14, 165, 233, 0.25);
+      }
+      .hero-title {
+        font-size: 2.75rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        margin-bottom: 1rem;
+      }
+      .hero-subtitle {
+        font-size: 1.2rem;
+        color: #64748b;
+        max-width: 720px;
+        margin: 0 auto 2rem;
+        line-height: 1.6;
+      }
+      .lab-showcase {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 2rem;
+        max-width: 800px;
+        margin: 1.5rem auto 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      .spectrum-bar {
+        height: 28px;
+        border-radius: 0.5rem;
+        background: linear-gradient(to right, 
+          oklch(65% 0.25 0), 
+          oklch(65% 0.25 60), 
+          oklch(65% 0.25 120), 
+          oklch(65% 0.25 180), 
+          oklch(65% 0.25 240), 
+          oklch(65% 0.25 300), 
+          oklch(65% 0.25 360)
+        );
+        margin-bottom: 1.5rem;
+      }
+      .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        max-width: 1000px;
+        margin: 2.5rem auto;
+      }
+      .tool-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.85rem;
+        padding: 1.75rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        text-align: left;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .tool-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+      }
+      .tool-badge {
+        align-self: flex-start;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        background: #f1f5f9;
+        color: #475569;
+        padding: 0.2rem 0.5rem;
+        border-radius: 0.35rem;
+        margin-bottom: 0.75rem;
+      }
+      .tool-icon {
+        font-size: 2.25rem;
+        margin-bottom: 0.75rem;
+      }
+      .tool-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: #0f172a;
+      }
+      .tool-desc {
+        font-size: 0.92rem;
+        color: #64748b;
+        line-height: 1.5;
+        margin-bottom: 1.25rem;
+      }
+      .tool-btn {
+        display: inline-block;
+        text-align: center;
+        background: #0284c7;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.9rem;
+        padding: 0.7rem 1.2rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        transition: background 0.15s ease;
+      }
+      .tool-btn:hover {
+        background: #0369a1;
+      }
+    </style>
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ currentPath: "/" })} />
+
+    <main class="container">
+      <section class="hero-section">
+        <div class="chroma-pill">
+          <span>🌈</span> CSS Color Module Level 4 & WCAG 2.2 Ready
+        </div>
+        <h1 class="hero-title">Modern Color Science & Fluid Typography</h1>
+        <p class="hero-subtitle">
+          Master perceptually uniform OKLCH colors, audit accessibility contrast with WCAG 2.2 and APCA algorithms, and generate responsive fluid typography scales.
+        </p>
+
+        <!-- Zero-CLS Monetization Slot -->
+        <div style="margin: 1.5rem 0 2rem;">
+          <Fragment set:html={adSlotTop} />
+        </div>
+
+        <div class="lab-showcase">
+          <div class="spectrum-bar"></div>
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #475569;">
+            <span>Perceptually Uniform Lightness (L: 65%)</span>
+            <span style="font-weight: 700; color: #0284c7;">Display P3 Wide Gamut</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tools Grid -->
+      <section id="tools">
+        <h2 style="text-align: center; font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Color & Typography Tool Suite</h2>
+        <p style="text-align: center; color: #64748b; margin-bottom: 2rem;">Next-generation design tokens with instant CSS code generation</p>
+
+        <div class="tools-grid">
+          {CHROMA_TOOLS.map((tool) => (
+            <article class="tool-card">
+              <div>
+                <span class="tool-badge">{tool.badge}</span>
+                <div class="tool-icon">{tool.icon}</div>
+                <h3 class="tool-title">{tool.title}</h3>
+                <p class="tool-desc">{tool.description}</p>
+              </div>
+              <a href={`/tools/${tool.slug}`} class="tool-btn">
+                Launch {tool.title} →
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <!-- Affiliate Partner Section -->
+      <section style="max-width: 800px; margin: 3rem auto;">
+        <Fragment set:html={affiliateOffer} />
+      </section>
+
+      <!-- FAQs -->
+      <section style="max-width: 800px; margin: 2.5rem auto; text-align: left;">
+        <h2 style="text-align: center; font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem;">Frequently Asked Questions</h2>
+        {faqs.map((faq) => (
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; color: #0f172a;">{faq.question}</h3>
+            <p style="font-size: 0.92rem; color: #475569; margin: 0; line-height: 1.5;">{faq.answer}</p>
+          </div>
+        ))}
+      </section>
+
+      <!-- Zero-CLS Monetization Slot -->
+      <div style="margin: 2.5rem 0;">
+        <Fragment set:html={adSlotBottom} />
+      </div>
+    </main>
+
+    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>

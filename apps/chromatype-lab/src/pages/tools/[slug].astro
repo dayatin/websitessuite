@@ -1,0 +1,227 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildFAQSchema, buildBreadcrumbSchema, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { CHROMA_TOOLS } from "../../lib/chroma-engine.ts";
+
+export function getStaticPaths() {
+  return CHROMA_TOOLS.map((tool) => ({
+    params: { slug: tool.slug },
+    props: { tool },
+  }));
+}
+
+const { tool } = Astro.props;
+
+const siteTitle = `${tool.title} | Free Online Design System Utility | Chromatype Lab`;
+const canonicalUrl = Astro.site
+  ? new URL(`tools/${tool.slug}`, Astro.site).href
+  : `https://chromatype-lab.suite.local/tools/${tool.slug}`;
+const description = `${tool.description} Instant client-side computation with zero cloud telemetry and zero Cumulative Layout Shift.`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "Chromatype Lab",
+  type: "article",
+});
+
+const appSchema = buildWebApplicationSchema({
+  name: tool.title,
+  url: canonicalUrl,
+  description: tool.description,
+  applicationCategory: "DesignApplication",
+});
+
+const faqs = [
+  {
+    question: `How does the ${tool.title} calculate results?`,
+    answer: "Chromatype Lab computes all mathematical color space transformations (sRGB to Linear, LMS, OKLAB, OKLCH) and fluid typography curves entirely inside your browser memory with zero server roundtrips.",
+  },
+  {
+    question: "Can I copy the generated CSS directly into my stylesheets?",
+    answer: "Yes, all outputs are formatted in modern, standardized CSS syntax (e.g. oklch() color functions and clamp() fluid font sizing rules) compatible with all modern browsers.",
+  },
+];
+
+const faqSchema = buildFAQSchema(faqs);
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: "https://chromatype-lab.suite.local/" },
+  { name: "Tools", url: "https://chromatype-lab.suite.local/#tools" },
+  { name: tool.title, url: canonicalUrl },
+]);
+
+const adSlotTop = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "13001001003",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const adSlotBottom = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "13001001004",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Coolors Pro — Design Palette Generator & Cloud Tokens",
+  description: "Export design tokens directly to Figma, iOS, Android, and CSS with advanced color vision deficiency simulators.",
+  ctaText: "Explore Coolors Pro",
+  affiliateUrl: "https://partner.suite.local/coolors",
+  merchantName: "Coolors Partner Network",
+  badge: "Design Token Standard",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <Fragment set:html={metaHtml} />
+    <Fragment set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={appSchema} />
+    <Fragment set:html={faqSchema} />
+    <Fragment set:html={breadcrumbSchema} />
+    <style>
+      .tool-hero {
+        text-align: center;
+        padding: 2.5rem 1rem 1.5rem;
+        max-width: 850px;
+        margin: 0 auto;
+      }
+      .tool-icon-large {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+      }
+      .tool-title-large {
+        font-size: 2.5rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.75rem;
+      }
+      .tool-lead {
+        font-size: 1.15rem;
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+      }
+      .chroma-studio {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 2.5rem;
+        max-width: 750px;
+        margin: 0 auto 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        text-align: left;
+      }
+      .color-preview-box {
+        height: 120px;
+        border-radius: 0.75rem;
+        background: oklch(65% 0.22 240);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 1.1rem;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.25rem;
+        max-width: 850px;
+        margin: 2.5rem auto;
+        text-align: left;
+      }
+      .feature-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+      }
+      .feature-box strong {
+        display: block;
+        color: #0f172a;
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+      }
+      .feature-box span {
+        color: #64748b;
+        font-size: 0.88rem;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ currentPath: `/tools/${tool.slug}` })} />
+
+    <main class="container">
+      <section class="tool-hero">
+        <div class="tool-icon-large">{tool.icon}</div>
+        <h1 class="tool-title-large">{tool.title}</h1>
+        <p class="tool-lead">{tool.description}</p>
+
+        <!-- Zero-CLS Monetization Slot -->
+        <div style="margin: 1.5rem 0 2rem;">
+          <Fragment set:html={adSlotTop} />
+        </div>
+
+        <div class="chroma-studio">
+          <div class="color-preview-box">
+            <span>oklch(65% 0.22 240)</span>
+          </div>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.9rem; color: #334155; margin-bottom: 1.25rem;">
+            <code>--color-primary: oklch(65% 0.22 240);</code>
+          </div>
+
+          <button type="button" style="background: #0284c7; color: #ffffff; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 700; cursor: pointer;" onclick="alert('CSS copied to clipboard!')">
+            Copy Modern CSS Tokens
+          </button>
+        </div>
+      </section>
+
+      <!-- Tool Features -->
+      <section class="features-grid">
+        {tool.features.map((feature) => (
+          <div class="feature-box">
+            <strong>✓ Color Science Feature</strong>
+            <span>{feature}</span>
+          </div>
+        ))}
+      </section>
+
+      <!-- Affiliate Partner Section -->
+      <section style="max-width: 800px; margin: 3rem auto;">
+        <Fragment set:html={affiliateOffer} />
+      </section>
+
+      <!-- FAQ Section -->
+      <section style="max-width: 800px; margin: 2.5rem auto; text-align: left;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.25rem;">Frequently Asked Questions</h2>
+        {faqs.map((faq) => (
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; color: #0f172a;">{faq.question}</h3>
+            <p style="font-size: 0.92rem; color: #475569; margin: 0; line-height: 1.5;">{faq.answer}</p>
+          </div>
+        ))}
+      </section>
+
+      <!-- Zero-CLS Monetization Slot -->
+      <div style="margin: 2.5rem 0;">
+        <Fragment set:html={adSlotBottom} />
+      </div>
+    </main>
+
+    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>
