@@ -1,0 +1,267 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildFAQSchema, buildBreadcrumbSchema, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { CONVERSION_TOOLS } from "../lib/alchemist-engine.ts";
+
+const siteTitle = "FileAlchemist | 100% Client-Side Local Media & Data Converter";
+const canonicalUrl = Astro.site ? Astro.site.href : "https://file-alchemist.suite.local/";
+const description = "Convert CSV to JSON, JSON to CSV, synthesize lossless WAV audio, and extract Base64 data URIs. Zero cloud uploads, zero privacy leaks, and instant in-memory processing.";
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "FileAlchemist",
+  type: "website",
+});
+
+const appSchema = buildWebApplicationSchema({
+  name: "FileAlchemist",
+  url: canonicalUrl,
+  description,
+  applicationCategory: "MultimediaApplication",
+});
+
+const faqs = [
+  {
+    question: "Do my files ever get uploaded to any external server during conversion?",
+    answer: "No. Never. FileAlchemist performs 100% of format transcoding, parsing, and serialization directly in your web browser memory. Your documents and media never leave your device.",
+  },
+  {
+    question: "Does the WAV audio synthesizer support standard PCM bit depths?",
+    answer: "Yes, FileAlchemist generates standard 44-byte RIFF/WAVE container headers with 16-bit linear PCM audio compatible with all media players and digital audio workstations.",
+  },
+  {
+    question: "Is FileAlchemist free with no file size limitations?",
+    answer: "Yes, all conversion tools are completely free, private, and engineered to adhere to strict Google Webmaster standards with zero Cumulative Layout Shift.",
+  },
+];
+
+const faqSchema = buildFAQSchema(faqs);
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: canonicalUrl },
+]);
+
+const adSlotTop = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "10001001001",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const adSlotBottom = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "10001001002",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Figma Professional — Design Systems & Vector Export",
+  description: "Collaborative vector graphics, advanced SVG optimization, and interactive design prototypes for engineering teams.",
+  ctaText: "Try Figma Free",
+  affiliateUrl: "https://partner.suite.local/figma-pro",
+  merchantName: "Figma Partner Network",
+  badge: "Design Suite",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <Fragment set:html={metaHtml} />
+    <Fragment set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={appSchema} />
+    <Fragment set:html={faqSchema} />
+    <Fragment set:html={breadcrumbSchema} />
+    <style>
+      .hero-section {
+        text-align: center;
+        padding: 3rem 1rem 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .privacy-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(168, 85, 247, 0.1);
+        color: #9333ea;
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 0.35rem 0.85rem;
+        border-radius: 9999px;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(168, 85, 247, 0.25);
+      }
+      .hero-title {
+        font-size: 2.75rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        margin-bottom: 1rem;
+      }
+      .hero-subtitle {
+        font-size: 1.2rem;
+        color: #64748b;
+        max-width: 720px;
+        margin: 0 auto 2rem;
+        line-height: 1.6;
+      }
+      .studio-box {
+        background: #ffffff;
+        border: 2px dashed #cbd5e1;
+        border-radius: 1rem;
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        max-width: 750px;
+        margin: 1.5rem auto 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+      }
+      .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        max-width: 1000px;
+        margin: 2.5rem auto;
+      }
+      .tool-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.85rem;
+        padding: 1.75rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        text-align: left;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .tool-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+      }
+      .tool-badge {
+        align-self: flex-start;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        background: #f1f5f9;
+        color: #475569;
+        padding: 0.2rem 0.5rem;
+        border-radius: 0.35rem;
+        margin-bottom: 0.75rem;
+      }
+      .tool-icon {
+        font-size: 2.25rem;
+        margin-bottom: 0.75rem;
+      }
+      .tool-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: #0f172a;
+      }
+      .tool-desc {
+        font-size: 0.92rem;
+        color: #64748b;
+        line-height: 1.5;
+        margin-bottom: 1.25rem;
+      }
+      .tool-btn {
+        display: inline-block;
+        text-align: center;
+        background: #0f172a;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.9rem;
+        padding: 0.7rem 1.2rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        transition: background 0.15s ease;
+      }
+      .tool-btn:hover {
+        background: #9333ea;
+      }
+    </style>
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ currentPath: "/" })} />
+
+    <main class="container">
+      <section class="hero-section">
+        <div class="privacy-badge">
+          <span>🔮</span> 100% In-Memory Conversion — Zero Cloud Uploads
+        </div>
+        <h1 class="hero-title">Universal Format Alchemist</h1>
+        <p class="hero-subtitle">
+          Transform data tables, synthesize linear PCM audio, rasterize vector SVGs, and decode Base64 data URIs completely inside your browser.
+        </p>
+
+        <!-- Zero-CLS Monetization Slot -->
+        <div style="margin: 1.5rem 0 2rem;">
+          <Fragment set:html={adSlotTop} />
+        </div>
+
+        <div class="studio-box">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">✨</div>
+          <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem;">Drag & drop any file to convert</h2>
+          <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem;">Select from our dedicated media and data transmutation suites below</p>
+          <a href="/convert/csv-to-json" class="tool-btn" style="padding: 0.85rem 1.75rem; font-size: 1rem;">
+            Open CSV to JSON Converter →
+          </a>
+        </div>
+      </section>
+
+      <!-- Conversion Tools Catalog -->
+      <section id="tools">
+        <h2 style="text-align: center; font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Transmutation Tools Catalog</h2>
+        <p style="text-align: center; color: #64748b; margin-bottom: 2rem;">Instant client-side execution with zero subscription paywalls</p>
+
+        <div class="tools-grid">
+          {CONVERSION_TOOLS.map((tool) => (
+            <article class="tool-card">
+              <div>
+                <span class="tool-badge">{tool.badge}</span>
+                <div class="tool-icon">{tool.icon}</div>
+                <h3 class="tool-title">{tool.title}</h3>
+                <p class="tool-desc">{tool.description}</p>
+              </div>
+              <a href={`/convert/${tool.slug}`} class="tool-btn">
+                Launch {tool.title} →
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <!-- Affiliate Partner Section -->
+      <section style="max-width: 800px; margin: 3rem auto;">
+        <Fragment set:html={affiliateOffer} />
+      </section>
+
+      <!-- FAQs -->
+      <section style="max-width: 800px; margin: 2.5rem auto; text-align: left;">
+        <h2 style="text-align: center; font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem;">Frequently Asked Questions</h2>
+        {faqs.map((faq) => (
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; color: #0f172a;">{faq.question}</h3>
+            <p style="font-size: 0.92rem; color: #475569; margin: 0; line-height: 1.5;">{faq.answer}</p>
+          </div>
+        ))}
+      </section>
+
+      <!-- Zero-CLS Monetization Slot -->
+      <div style="margin: 2.5rem 0;">
+        <Fragment set:html={adSlotBottom} />
+      </div>
+    </main>
+
+    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>
