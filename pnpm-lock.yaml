@@ -20,6 +20,14 @@ importers:
 
   packages/config: {}
 
+  packages/ui-theme:
+    devDependencies:
+      '@suite/config':
+        specifier: workspace:*
+        version: link:../config
+
+  tools/verify-subphase: {}
+
 packages:
 
   '@biomejs/biome@1.9.4':

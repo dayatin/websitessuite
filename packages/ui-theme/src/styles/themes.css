@@ -1,0 +1,109 @@
+/* ==========================================================================
+   @suite/ui-theme - 5-Theme Engine (OKLCH Semantic Tokens)
+   ========================================================================== */
+
+:root,
+[data-theme="light-minimal"] {
+  --theme-id: "light-minimal";
+  --bg-base: oklch(0.99 0.003 240);
+  --bg-surface: oklch(0.96 0.005 240);
+  --bg-surface-elevated: oklch(1 0 0);
+  --bg-surface-glass: rgba(255, 255, 255, 0.85);
+  --border-subtle: oklch(0.88 0.01 240);
+  --border-strong: oklch(0.75 0.02 240);
+  --text-primary: oklch(0.18 0.02 240);
+  --text-secondary: oklch(0.42 0.02 240);
+  --text-muted: oklch(0.6 0.01 240);
+  --accent-primary: oklch(0.55 0.22 260);
+  --accent-primary-hover: oklch(0.48 0.24 260);
+  --accent-secondary: oklch(0.65 0.18 190);
+  --accent-glow: rgba(79, 70, 229, 0.15);
+  --focus-ring: oklch(0.55 0.22 260);
+  --glass-blur: 16px;
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark-oled"] {
+  --theme-id: "dark-oled";
+  --bg-base: oklch(0.1 0.005 240);
+  --bg-surface: oklch(0.14 0.008 240);
+  --bg-surface-elevated: oklch(0.18 0.01 240);
+  --bg-surface-glass: rgba(18, 20, 26, 0.85);
+  --border-subtle: oklch(0.24 0.01 240);
+  --border-strong: oklch(0.35 0.02 240);
+  --text-primary: oklch(0.98 0.005 240);
+  --text-secondary: oklch(0.75 0.01 240);
+  --text-muted: oklch(0.52 0.01 240);
+  --accent-primary: oklch(0.65 0.2 250);
+  --accent-primary-hover: oklch(0.72 0.18 250);
+  --accent-secondary: oklch(0.75 0.15 190);
+  --accent-glow: rgba(99, 102, 241, 0.25);
+  --focus-ring: oklch(0.7 0.18 250);
+  --glass-blur: 20px;
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --shadow-card: 0 8px 30px -4px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="glass-aurora"] {
+  --theme-id: "glass-aurora";
+  --bg-base: oklch(0.15 0.05 270);
+  --bg-surface: rgba(255, 255, 255, 0.08);
+  --bg-surface-elevated: rgba(255, 255, 255, 0.14);
+  --bg-surface-glass: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.18);
+  --border-strong: rgba(255, 255, 255, 0.35);
+  --text-primary: oklch(0.99 0.005 270);
+  --text-secondary: oklch(0.85 0.03 270);
+  --text-muted: oklch(0.68 0.04 270);
+  --accent-primary: oklch(0.72 0.22 310);
+  --accent-primary-hover: oklch(0.78 0.2 310);
+  --accent-secondary: oklch(0.78 0.18 200);
+  --accent-glow: rgba(236, 72, 153, 0.35);
+  --focus-ring: oklch(0.8 0.2 310);
+  --glass-blur: 24px;
+  --glass-border: rgba(255, 255, 255, 0.25);
+  --shadow-card: 0 12px 40px -4px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+[data-theme="cyberpunk-neon"] {
+  --theme-id: "cyberpunk-neon";
+  --bg-base: oklch(0.12 0.02 285);
+  --bg-surface: oklch(0.16 0.03 285);
+  --bg-surface-elevated: oklch(0.2 0.04 285);
+  --bg-surface-glass: rgba(18, 14, 30, 0.9);
+  --border-subtle: oklch(0.35 0.12 300);
+  --border-strong: oklch(0.75 0.25 195);
+  --text-primary: oklch(0.98 0.01 200);
+  --text-secondary: oklch(0.82 0.08 195);
+  --text-muted: oklch(0.6 0.1 300);
+  --accent-primary: oklch(0.78 0.24 195);
+  --accent-primary-hover: oklch(0.85 0.2 195);
+  --accent-secondary: oklch(0.7 0.3 350);
+  --accent-glow: rgba(0, 240, 255, 0.4);
+  --focus-ring: oklch(0.85 0.26 195);
+  --glass-blur: 12px;
+  --glass-border: rgba(0, 240, 255, 0.45);
+  --shadow-card: 0 0 25px -2px rgba(0, 240, 255, 0.25), inset 0 0 15px -2px rgba(255, 0, 128, 0.2);
+}
+
+[data-theme="a11y-contrast"] {
+  --theme-id: "a11y-contrast";
+  --bg-base: #000000;
+  --bg-surface: #121212;
+  --bg-surface-elevated: #1e1e1e;
+  --bg-surface-glass: #121212;
+  --border-subtle: #ffffff;
+  --border-strong: #ffff00;
+  --text-primary: #ffffff;
+  --text-secondary: #f0f0f0;
+  --text-muted: #d0d0d0;
+  --accent-primary: #ffff00;
+  --accent-primary-hover: #ffffff;
+  --accent-secondary: #00ffff;
+  --accent-glow: transparent;
+  --focus-ring: #ffff00;
+  --glass-blur: 0px;
+  --glass-border: #ffffff;
+  --shadow-card: none;
+}
