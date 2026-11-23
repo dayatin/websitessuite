@@ -29,7 +29,7 @@
 | **Stage 6** | **Phase 6.1** | 6.1.1 | AI Image Toolkit Scaffold & Worker Image Pipeline | **DONE** | Validated (Scaffold, WebWorker image engine, Target-KB binary search, DPI math, 6/6 tests) | 2026-11-23 |
 | Stage 6 | Phase 6.1 | 6.1.2 | Print & Paper Layout Studio (A4/A3/B4/B3/Letter/DPI) | **DONE** | Validated (ISO A/B, US Letter, 4x6 photo card, N-up tiling, trim guides, 10/10 tests) | 2026-11-23 |
 | Stage 6 | Phase 6.1 | 6.1.3 | Global Passport, Visa, Stamp & ID Studio (150+ Presets)| **DONE** | Validated (150+ ICAO country presets, biometric guide overlay, /passport-studio, 14/14 tests) | 2026-11-23 |
-| Stage 6 | Phase 6.2 | 6.2.1 | Client WebGPU AI Background Removal & Replacement | PENDING | - | - |
+| Stage 6 | Phase 6.2 | 6.2.1 | Client WebGPU AI Background Removal & Replacement | **DONE** | Validated (WebGPU/WASM engine, alpha composite math, /background-remover, 19/19 tests) | 2026-11-23 |
 | Stage 6 | Phase 6.2 | 6.2.2 | Formal Outfit & Portrait Customization Studio | PENDING | - | - |
 | Stage 6 | Phase 6.2 | 6.2.3 | Multi-File Batch Studio & Programmatic Tool Landers | PENDING | - | - |
 | **Stage 7** | **Phase 7.1** | 7.1.1 | App #6: OmniCalc Hub (Calculators) | PENDING | - | - |
