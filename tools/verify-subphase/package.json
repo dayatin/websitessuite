@@ -1,0 +1,12 @@
+{
+  "name": "@suite/verify-subphase",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "verify-subphase": "./index.mjs"
+  },
+  "scripts": {
+    "verify": "node ./index.mjs"
+  }
+}
