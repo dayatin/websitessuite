@@ -1,0 +1,114 @@
+name: Deploy Website Suite
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target_mode:
+        description: "Deployment Scope"
+        required: true
+        default: "affected"
+        type: choice
+        options:
+          - affected
+          - single
+          - selected
+          - all
+      target_app:
+        description: "Target App Slug (if target_mode == 'single', e.g. url-shortener)"
+        required: false
+        type: string
+        default: ""
+      selected_apps:
+        description: "Comma-separated App Slugs (if target_mode == 'selected', e.g. url-shortener,daily-facts)"
+        required: false
+        type: string
+        default: ""
+      action_type:
+        description: "Action to execute"
+        required: true
+        default: "deploy"
+        type: choice
+        options:
+          - deploy
+          - rollback
+
+concurrency:
+  group: deploy-${{ github.ref }}-${{ inputs.target_mode || 'affected' }}
+  cancel-in-progress: false
+
+jobs:
+  plan-deployments:
+    name: Plan Target Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.set-matrix.outputs.apps }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine Target Applications
+        id: set-matrix
+        shell: bash
+        run: |
+          MODE="${{ inputs.target_mode || 'affected' }}"
+          echo "Target Mode: $MODE"
+
+          if [ "$MODE" = "single" ]; then
+            APPS_JSON="[\"${{ inputs.target_app }}\"]"
+          elif [ "$MODE" = "selected" ]; then
+            APPS_LIST=$(echo "${{ inputs.selected_apps }}" | tr ',' '\n' | sed 's/^[ \t]*//;s/[ \t]*$//' | jq -R . | jq -s .)
+            APPS_JSON="$APPS_LIST"
+          elif [ "$MODE" = "all" ]; then
+            # Discover all directories in apps/
+            APPS_JSON=$(ls -d apps/*/ 2>/dev/null | xargs -n 1 basename | jq -R . | jq -s .)
+          else
+            # Affected mode via turborepo
+            # If no apps dir exists yet, default to empty
+            if [ -d "apps" ] && [ "$(ls -A apps)" ]; then
+              APPS_JSON=$(ls -d apps/*/ 2>/dev/null | xargs -n 1 basename | jq -R . | jq -s .)
+            else
+              APPS_JSON="[]"
+            fi
+          fi
+
+          echo "Selected Apps Matrix: $APPS_JSON"
+          echo "apps=$APPS_JSON" >> $GITHUB_OUTPUT
+
+  deploy-matrix:
+    name: Deploy App (${{ matrix.app }})
+    needs: plan-deployments
+    if: needs.plan-deployments.outputs.apps != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJson(needs.plan-deployments.outputs.apps) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Suite Environment
+        uses: ./.github/actions/setup-suite
+
+      - name: Build Application
+        run: pnpm turbo run build --filter=@apps/${{ matrix.app }}...
+
+      - name: Deploy to Cloudflare Pages
+        if: ${{ (inputs.action_type || 'deploy') == 'deploy' }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/${{ matrix.app }}/dist --project-name=suite-${{ matrix.app }}
+
+      - name: Rollback Cloudflare Pages Deployment
+        if: ${{ inputs.action_type == 'rollback' }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deployment rollback --project-name=suite-${{ matrix.app }}

@@ -1,0 +1,38 @@
+name: CI (Affected Workspaces)
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main, staging]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-test:
+    name: Lint, Test & Typecheck Affected
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Suite Environment
+        uses: ./.github/actions/setup-suite
+
+      - name: Biome Linter & Formatter Check
+        run: pnpm exec biome check .
+
+      - name: Monorepo Governance Verification
+        run: node tools/verify-subphase/index.mjs
+
+      - name: Run Tests & Typechecks (Affected Only)
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            pnpm turbo run test typecheck lint --filter=...[origin/${{ github.base_ref }}]
+          else
+            pnpm turbo run test typecheck lint --filter=...[HEAD^1]
+          fi

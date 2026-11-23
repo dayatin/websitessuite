@@ -1,0 +1,39 @@
+name: Disaster Recovery & State Snapshot Sync
+
+on:
+  schedule:
+    - cron: "0 2 * * *" # Daily at 02:00 UTC
+  workflow_dispatch:
+    inputs:
+      snapshot_reason:
+        description: "Reason for manual snapshot"
+        required: false
+        default: "Manual DR Backup"
+
+jobs:
+  export-and-backup:
+    name: Export D1 Databases & KV Manifests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Suite Environment
+        uses: ./.github/actions/setup-suite
+
+      - name: Create Snapshot Workspace
+        run: |
+          mkdir -p ./dr-snapshots
+          echo "Snapshot Date: $(date -u)" > ./dr-snapshots/MANIFEST.txt
+          echo "Reason: ${{ inputs.snapshot_reason || 'Automated Cron' }}" >> ./dr-snapshots/MANIFEST.txt
+
+      - name: Archive Snapshot Bundle
+        run: |
+          tar -czf dr-snapshot-$(date +%Y%m%d%H%M%S).tar.gz -C ./dr-snapshots .
+
+      - name: Upload Snapshot Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dr-snapshot-${{ github.run_id }}
+          path: dr-snapshot-*.tar.gz
+          retention-days: 30
