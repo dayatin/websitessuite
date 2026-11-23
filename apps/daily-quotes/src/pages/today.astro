@@ -1,0 +1,135 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildQuotationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { QuoteCorpusLoader } from "../lib/corpus/loader.ts";
+
+const loader = new QuoteCorpusLoader();
+const today = new Date();
+const quote = loader.getQuoteOfTheDay(today);
+const dateStr = today.toISOString().split("T")[0];
+
+const siteTitle = `Quote of the Day (#QOTD): "${quote.quote_text}" by ${quote.author.name} | VerbaLogos`;
+const canonicalUrl = Astro.site ? new URL("today", Astro.site).href : "https://daily-quotes.suite.local/today";
+const description = `Read today's timeless Quote of the Day (${dateStr}): "${quote.quote_text}" by ${quote.author.name}. In-depth commentary, biographical context, and aesthetic wallpaper studio.`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "VerbaLogos",
+  type: "article",
+  publishedTime: today.toISOString(),
+});
+
+const quoteSchema = buildQuotationSchema({
+  quoteText: quote.quote_text,
+  authorName: quote.author.name,
+  authorSameAs: quote.author.wikipedia_url,
+  workTitle: quote.work_title,
+});
+
+const adSlot = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "3001001001",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const affiliateCard = renderAffiliateCardHTML({
+  title: `Read ${quote.author.name}'s Original Works`,
+  description: `Discover timeless translations of ${quote.work_title || "classic philosophy"} and complete literary archives with our independent bookseller partner.`,
+  ctaText: "Browse Collection",
+  affiliateUrl: "https://partner.suite.local/books",
+  merchantName: "BookShop.org",
+  badge: "Literature Partner",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={quoteSchema} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "VerbaLogos", navItems: [{ label: "Today (#QOTD)", href: "/today" }, { label: "Wallpaper Studio", href: "/" }, { label: "Authors", href: "/" }, { label: "RSS Feed", href: "/feed.xml", external: true }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2.5rem; max-width: 820px;">
+      <!-- Date & Badge Header -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px;">
+        <span style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-primary);">
+          ✨ Quote of the Day &bull; {dateStr}
+        </span>
+        <div style="display: flex; gap: 6px;">
+          {quote.mood_tags.map((tag) => (
+            <span style="font-size: 0.75rem; text-transform: capitalize; color: var(--text-muted); background: var(--bg-surface-elevated); padding: 3px 8px; border-radius: 9999px; border: 1px solid var(--border-subtle);">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <!-- Main Typographic Quote Card -->
+      <article class="suite-card" style="padding: 3rem 2.25rem; margin-bottom: 2rem; position: relative;">
+        <div style="font-size: 4rem; line-height: 1; color: var(--accent-primary); opacity: 0.35; font-serif; user-select: none; margin-bottom: -1rem;">
+          &ldquo;
+        </div>
+
+        <blockquote style="font-size: 2rem; font-weight: 800; line-height: 1.4; color: var(--text-primary); margin-bottom: 2rem; font-style: italic;">
+          {quote.quote_text}
+        </blockquote>
+
+        <!-- Author Bio Pill -->
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; border-top: 1px solid var(--border-subtle); padding-top: 1.5rem;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            {quote.author.avatar_url ? (
+              <img
+                src={quote.author.avatar_url}
+                alt={quote.author.name}
+                width="54"
+                height="54"
+                style="width: 54px; height: 54px; border-radius: 9999px; object-fit: cover; border: 2px solid var(--border-strong);"
+              />
+            ) : null}
+            <div>
+              <div style="font-size: 1.125rem; font-weight: 700;">{quote.author.name}</div>
+              <div style="font-size: 0.8125rem; color: var(--text-muted);">
+                {quote.work_title ? `${quote.work_title} (${quote.work_year || ""})` : quote.author.profession}
+              </div>
+            </div>
+          </div>
+
+          <a href="/" class="suite-btn-primary" style="font-size: 0.875rem; padding: 8px 18px;">
+            🎨 Open in Wallpaper Studio
+          </a>
+        </div>
+      </article>
+
+      <Fragment set:html={adSlot} />
+
+      <!-- Author Biographical Commentary -->
+      <section class="suite-card" style="padding: 2rem; margin-bottom: 2rem; line-height: 1.7;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem;">About the Author: {quote.author.name}</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+          {quote.author.bio}
+        </p>
+        {quote.author.wikipedia_url ? (
+          <a href={quote.author.wikipedia_url} target="_blank" rel="noopener noreferrer" style="color: var(--accent-primary); font-size: 0.875rem; text-decoration: underline;">
+            Read full biographical archive on Wikipedia &rarr;
+          </a>
+        ) : null}
+      </section>
+
+      <Fragment set:html={affiliateCard} />
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ siteTitle: "VerbaLogos", tagline: "Timeless philosophy and literature refreshed daily." })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>
