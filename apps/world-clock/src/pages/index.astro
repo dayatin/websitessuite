@@ -1,0 +1,93 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+
+const siteTitle = "ChronoSpatial";
+const siteUrl = Astro.site?.toString() || "https://world-clock.suite.local";
+const description = "Ultra-fast, accessible, and privacy-first ${siteTitle} platform.";
+
+const metaHtml = renderMetaTags({
+  title: `${siteTitle} | Fast, Accessible & Free`,
+  description,
+  canonicalUrl: siteUrl,
+  siteName: siteTitle,
+});
+
+const schemaJson = buildWebApplicationSchema({
+  name: siteTitle,
+  url: siteUrl,
+  description,
+  applicationCategory: "UtilitiesApplication",
+});
+
+const headerHtml = renderHeaderHTML({
+  siteTitle,
+  navItems: [
+    { label: "Home", href: "/" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
+  ],
+});
+
+const footerHtml = renderFooterHTML({
+  siteTitle,
+  tagline: "Instant, accessible, and privacy-first digital utility suite.",
+});
+
+const adSlotHtml = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "1234567890",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const affiliateHtml = renderAffiliateCardHTML({
+  title: "Featured Productivity Upgrade",
+  description: "Recommended high-performance tools selected by our editorial team.",
+  ctaText: "Explore Partner",
+  affiliateUrl: "https://partner.suite.local",
+  merchantName: "SuitePartner",
+  badge: "Recommended",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={schemaJson} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body>
+    <Fragment set:html={headerHtml} />
+    <main class="suite-container" style="flex: 1; padding-block: 2.5rem;">
+      <section style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem;">{siteTitle}</h1>
+        <p style="font-size: 1.125rem; color: var(--text-secondary); max-width: 650px; margin-inline: auto;">
+          {description}
+        </p>
+      </section>
+
+      <!-- Zero-CLS Ad Unit -->
+      <Fragment set:html={adSlotHtml} />
+
+      <!-- Interactive Core Workspace Area -->
+      <div class="suite-card" style="min-height: 280px; display: flex; align-items: center; justify-content: center; text-align: center;">
+        <div>
+          <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Interactive Studio Space</h2>
+          <p style="color: var(--text-muted);">Interactive components ready to plug in.</p>
+        </div>
+      </div>
+
+      <!-- Affiliate Partner Card -->
+      <Fragment set:html={affiliateHtml} />
+    </main>
+    <Fragment set:html={footerHtml} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>
