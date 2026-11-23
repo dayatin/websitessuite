@@ -18,6 +18,37 @@ importers:
         specifier: ^5.8.2
         version: 5.9.3
 
+  apps/daily-facts:
+    dependencies:
+      '@suite/cloudflare-kit':
+        specifier: workspace:*
+        version: link:../../packages/cloudflare-kit
+      '@suite/compliance-pages':
+        specifier: workspace:*
+        version: link:../../packages/compliance-pages
+      '@suite/monetization':
+        specifier: workspace:*
+        version: link:../../packages/monetization
+      '@suite/seo-core':
+        specifier: workspace:*
+        version: link:../../packages/seo-core
+      '@suite/ui-theme':
+        specifier: workspace:*
+        version: link:../../packages/ui-theme
+      astro:
+        specifier: ^5.4.0
+        version: 5.18.2(@types/node@26.6.6)(rollup@4.68.8)(typescript@5.9.3)(yaml@2.9.1)
+    devDependencies:
+      '@astrojs/check':
+        specifier: ^0.9.4
+        version: 0.9.12(prettier@3.10.1)(typescript@5.9.3)
+      '@suite/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      typescript:
+        specifier: ^5.8.2
+        version: 5.9.3
+
   apps/url-shortener:
     dependencies:
       '@suite/cloudflare-kit':

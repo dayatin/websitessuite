@@ -1,0 +1,26 @@
+{
+  "name": "@apps/daily-facts",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test": "node --test tests/*.test.js",
+    "typecheck": "astro check"
+  },
+  "dependencies": {
+    "@suite/ui-theme": "workspace:*",
+    "@suite/seo-core": "workspace:*",
+    "@suite/compliance-pages": "workspace:*",
+    "@suite/monetization": "workspace:*",
+    "@suite/cloudflare-kit": "workspace:*",
+    "astro": "^5.4.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@suite/config": "workspace:*",
+    "typescript": "^5.8.2"
+  }
+}
