@@ -1,0 +1,149 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildBreadcrumbSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { QuoteCorpusLoader } from "../../lib/corpus/loader.ts";
+import { getBookRecommendationForTopic } from "../../lib/books.ts";
+
+export function getStaticPaths() {
+  const loader = new QuoteCorpusLoader();
+  const occasions = loader.getAllOccasions();
+  return occasions.map((occ) => ({
+    params: { occasion: occ.slug },
+    props: { occasionMeta: occ },
+  }));
+}
+
+const { occasionMeta } = Astro.props;
+const loader = new QuoteCorpusLoader();
+const quotes = loader.getQuotesByOccasion(occasionMeta.slug);
+
+const siteTitle = `${occasionMeta.label} Quotes & Messages | VerbaLogos`;
+const canonicalUrl = Astro.site
+  ? new URL(`occasion/${occasionMeta.slug}`, Astro.site).href
+  : `https://daily-quotes.suite.local/occasion/${occasionMeta.slug}`;
+const description = `Inspirational quotes, speeches, and words of wisdom for ${occasionMeta.label.toLowerCase()}. Free 4K wallpaper studio and reading companions.`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "VerbaLogos",
+});
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: "https://daily-quotes.suite.local/" },
+  { name: "Occasions", url: "https://daily-quotes.suite.local/#occasions" },
+  { name: occasionMeta.label, url: canonicalUrl },
+]);
+
+const adSlot = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "3001001004",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = getBookRecommendationForTopic(occasionMeta.slug);
+const affiliateCard = renderAffiliateCardHTML(affiliateOffer);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={breadcrumbSchema} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "VerbaLogos", navItems: [{ label: "Today (#QOTD)", href: "/today" }, { label: "Wallpaper Studio", href: "/" }, { label: "Occasions", href: "/" }, { label: "RSS Feed", href: "/feed.xml", external: true }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2.5rem; max-width: 860px;">
+      <!-- Breadcrumb -->
+      <nav aria-label="Breadcrumb" style="margin-bottom: 1.5rem; font-size: 0.8125rem; color: var(--text-muted);">
+        <a href="/" style="color: var(--text-muted); text-decoration: none;">Home</a>
+        <span style="margin-inline: 6px;">/</span>
+        <span style="color: var(--text-secondary);">Occasions</span>
+        <span style="margin-inline: 6px;">/</span>
+        <span style="color: var(--text-primary); font-weight: 600;">{occasionMeta.label}</span>
+      </nav>
+
+      <!-- Occasion Hero -->
+      <header class="suite-card" style="padding: 2rem; margin-bottom: 2rem; text-align: center; border-top: 4px solid var(--accent-primary);">
+        <div style="font-size: 3rem; margin-bottom: 8px;">{occasionMeta.icon}</div>
+        <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 8px;">
+          {occasionMeta.label} Quotes
+        </h1>
+        <p style="font-size: 0.9375rem; color: var(--text-secondary); max-width: 600px; margin-inline: auto;">
+          Meaningful words and memorable speeches suited for {occasionMeta.label.toLowerCase()}.
+        </p>
+      </header>
+
+      <!-- Contextual Book Offer -->
+      <Fragment set:html={affiliateCard} />
+
+      <!-- Quotes Listing -->
+      <section style="margin-top: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.25rem;">
+          Curated Quotes ({quotes.length})
+        </h2>
+
+        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+          {quotes.map((quote) => (
+            <div class="suite-card" style="padding: 1.5rem; border: 1px solid var(--border-subtle);">
+              <blockquote style="margin: 0 0 1rem 0; font-size: 1.125rem; font-style: italic; line-height: 1.6; color: var(--text-primary);">
+                "{quote.quote_text}"
+              </blockquote>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 0.8125rem;">
+                <div>
+                  <a
+                    href={`/author/${quote.author.slug}`}
+                    style="font-weight: 600; color: var(--accent-primary); text-decoration: none;"
+                  >
+                    — {quote.author.name}
+                  </a>
+                  {quote.author.profession && (
+                    <span style="color: var(--text-muted); font-size: 0.75rem; margin-left: 6px;">
+                      ({quote.author.profession})
+                    </span>
+                  )}
+                </div>
+
+                <div style="display: flex; gap: 8px;">
+                  <button
+                    type="button"
+                    class="suite-btn-secondary"
+                    style="font-size: 0.75rem; padding: 4px 10px;"
+                    onclick={`navigator.clipboard.writeText("${quote.quote_text.replace(/"/g, '\\"')} — ${quote.author.name}"); alert("Copied to clipboard!");`}
+                  >
+                    📋 Copy
+                  </button>
+                  <a
+                    href={`/?quote=${encodeURIComponent(quote.quote_text)}&author=${encodeURIComponent(quote.author.name)}`}
+                    class="suite-btn-primary"
+                    style="font-size: 0.75rem; padding: 4px 10px; text-decoration: none;"
+                  >
+                    🎨 Create Wallpaper
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Zero-CLS AdSlot -->
+      <section style="margin-top: 2.5rem;">
+        <Fragment set:html={adSlot} />
+      </section>
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ authorName: "VerbaLogos Editorial", currentYear: 2026, privacyUrl: "/privacy-policy", termsUrl: "/terms-of-service", editorialUrl: "/editorial-policy", contactUrl: "/contact" })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>

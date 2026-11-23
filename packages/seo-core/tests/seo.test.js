@@ -4,6 +4,7 @@ import {
   buildBreadcrumbSchema,
   buildClaimReviewSchema,
   buildFAQSchema,
+  buildPersonSchema,
   buildQuotationSchema,
   buildWebApplicationSchema,
   generateRobotsTxt,
@@ -44,6 +45,18 @@ test("ClaimReview and Quotation schemas produce valid JSON-LD", () => {
   const quote = JSON.parse(quoteJson);
   assert.equal(quote["@type"], "Quotation");
   assert.equal(quote.creator.name, "Socrates");
+
+  const personJson = buildPersonSchema({
+    name: "Marcus Aurelius",
+    jobTitle: "Roman Emperor & Stoic Philosopher",
+    birthDate: "121 CE",
+    deathDate: "180 CE",
+    sameAs: "https://en.wikipedia.org/wiki/Marcus_Aurelius",
+  });
+  const person = JSON.parse(personJson);
+  assert.equal(person["@type"], "Person");
+  assert.equal(person.name, "Marcus Aurelius");
+  assert.equal(person.jobTitle, "Roman Emperor & Stoic Philosopher");
 });
 
 test("Meta tags and Robots.txt render accurately", () => {

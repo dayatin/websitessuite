@@ -115,6 +115,35 @@ export function buildQuotationSchema(options: QuotationOptions): string {
   return JSON.stringify(schema);
 }
 
+export interface PersonSchemaOptions {
+  name: string;
+  url?: string;
+  description?: string;
+  jobTitle?: string;
+  birthDate?: string;
+  deathDate?: string;
+  nationality?: string;
+  sameAs?: string;
+  image?: string;
+}
+
+export function buildPersonSchema(options: PersonSchemaOptions): string {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: options.name,
+    ...(options.url ? { url: options.url } : {}),
+    ...(options.description ? { description: options.description } : {}),
+    ...(options.jobTitle ? { jobTitle: options.jobTitle } : {}),
+    ...(options.birthDate ? { birthDate: options.birthDate } : {}),
+    ...(options.deathDate ? { deathDate: options.deathDate } : {}),
+    ...(options.nationality ? { nationality: options.nationality } : {}),
+    ...(options.sameAs ? { sameAs: options.sameAs } : {}),
+    ...(options.image ? { image: options.image } : {}),
+  };
+  return JSON.stringify(schema);
+}
+
 export interface BreadcrumbItem {
   name: string;
   url: string;
