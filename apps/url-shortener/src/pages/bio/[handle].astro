@@ -1,0 +1,101 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+
+export const prerender = false;
+
+const { handle } = Astro.params;
+const cleanHandle = (handle || "creator").toLowerCase();
+
+// Mock / D1 bio profile data
+const profile = {
+  handle: cleanHandle,
+  displayName: cleanHandle.charAt(0).toUpperCase() + cleanHandle.slice(1),
+  bio: "Creator, builder, and digital explorer. Explore my verified links and projects below.",
+  avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanHandle}`,
+  theme: "glass-aurora",
+  links: [
+    { title: "Personal Website & Portfolio", url: "https://example.com", icon: "🌐" },
+    { title: "Subscribe to Weekly Newsletter", url: "https://example.com/newsletter", icon: "📬" },
+    { title: "Connect on LinkedIn", url: "https://linkedin.com", icon: "💼" },
+    { title: "Watch on YouTube", url: "https://youtube.com", icon: "▶️" },
+    { title: "Latest Open-Source Code", url: "https://github.com", icon: "💻" },
+  ],
+};
+
+const siteTitle = `${profile.displayName} (@${profile.handle}) | OmniLink Bio`;
+const canonicalUrl = Astro.site ? new URL(`bio/${cleanHandle}`, Astro.site).href : `https://url-shortener.suite.local/bio/${cleanHandle}`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description: profile.bio,
+  canonicalUrl,
+  siteName: "OmniLink",
+});
+
+const adSlot = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "1002003003",
+  format: "rectangle-medium",
+  testMode: true,
+});
+---
+
+<!doctype html>
+<html lang="en" data-theme={profile.theme}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1rem;">
+    <main class="suite-card" style="width: 100%; max-width: 480px; text-align: center; padding: 2rem 1.5rem; box-shadow: var(--shadow-card);">
+      <!-- Avatar & Bio Header -->
+      <img
+        src={profile.avatarUrl}
+        alt={profile.displayName}
+        width="96"
+        height="96"
+        style="width: 96px; height: 96px; border-radius: 9999px; margin-inline: auto; margin-bottom: 1rem; border: 2px solid var(--border-strong); background: var(--bg-surface-elevated);"
+      />
+      <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem;">{profile.displayName}</h1>
+      <p style="font-size: 0.875rem; color: var(--accent-primary); font-weight: 600; margin-bottom: 0.75rem;">@{profile.handle}</p>
+      <p style="font-size: 0.9375rem; color: var(--text-secondary); margin-bottom: 1.75rem; line-height: 1.5;">
+        {profile.bio}
+      </p>
+
+      <!-- Links Stack -->
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 2rem;">
+        {profile.links.map((link) => (
+          <a
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="suite-card suite-bio-link"
+            style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; text-decoration: none; border: 1px solid var(--border-subtle); border-radius: 12px; font-weight: 600; font-size: 0.9375rem; transition: transform 0.15s ease, border-color 0.15s ease;"
+          >
+            <span style="display: flex; align-items: center; gap: 10px;">
+              <span>{link.icon}</span>
+              <span>{link.title}</span>
+            </span>
+            <span style="color: var(--text-muted);">&rarr;</span>
+          </a>
+        ))}
+      </div>
+
+      <!-- Compliant Ad Unit -->
+      <Fragment set:html={adSlot} />
+
+      <!-- Footer Attribution -->
+      <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-subtle); padding-top: 1rem; font-size: 0.75rem; color: var(--text-muted);">
+        Powered by <a href="/" style="color: var(--accent-primary); text-decoration: underline;">OmniLink</a> &bull; Create your free Link-in-Bio
+      </div>
+    </main>
+
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>
