@@ -2,54 +2,52 @@
 import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
 import { renderMetaTags, buildWebApplicationSchema } from "@suite/seo-core";
 import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { TimeEngine, WORLD_CITIES } from "../lib/time-engine.ts";
+import { build24HourTimeline } from "../lib/timeline-math.ts";
 
-const siteTitle = "ChronoSpatial";
-const siteUrl = Astro.site?.toString() || "https://world-clock.suite.local";
-const description = "Ultra-fast, accessible, and privacy-first ${siteTitle} platform.";
+const siteTitle = "ChronoSpatial: World Clock, Precision Timezone Converter & Meeting Planner";
+const canonicalUrl = Astro.site ? new URL("", Astro.site).href : "https://world-clock.suite.local/";
+const description = "Compare timezones across 500+ world cities with a draggable 24-hour timeline scrubber. Find golden meeting overlap windows, astronomical solar times, and zero-confusion time shifts.";
 
 const metaHtml = renderMetaTags({
-  title: `${siteTitle} | Fast, Accessible & Free`,
+  title: siteTitle,
   description,
-  canonicalUrl: siteUrl,
-  siteName: siteTitle,
+  canonicalUrl,
+  siteName: "ChronoSpatial",
+  type: "website",
 });
 
-const schemaJson = buildWebApplicationSchema({
-  name: siteTitle,
-  url: siteUrl,
+const appSchema = buildWebApplicationSchema({
+  name: "ChronoSpatial World Clock",
+  url: canonicalUrl,
   description,
   applicationCategory: "UtilitiesApplication",
 });
 
-const headerHtml = renderHeaderHTML({
-  siteTitle,
-  navItems: [
-    { label: "Home", href: "/" },
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" },
-  ],
-});
-
-const footerHtml = renderFooterHTML({
-  siteTitle,
-  tagline: "Instant, accessible, and privacy-first digital utility suite.",
-});
-
-const adSlotHtml = renderAdSlotHTML({
+const adSlotTop = renderAdSlotHTML({
   client: "ca-pub-0000000000000000",
-  slotId: "1234567890",
+  slotId: "4001001001",
   format: "leaderboard",
   testMode: true,
 });
 
-const affiliateHtml = renderAffiliateCardHTML({
-  title: "Featured Productivity Upgrade",
-  description: "Recommended high-performance tools selected by our editorial team.",
-  ctaText: "Explore Partner",
-  affiliateUrl: "https://partner.suite.local",
-  merchantName: "SuitePartner",
-  badge: "Recommended",
+const adSlotBottom = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "4001001002",
+  format: "rectangle",
+  testMode: true,
 });
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Supercharge Global Remote Team Collaboration",
+  description: "Seamless scheduling, automated timezone coordination, and async video messaging trusted by distributed engineering teams worldwide.",
+  ctaText: "Explore Remote Tools",
+  affiliateUrl: "https://partner.suite.local/remote-collaboration",
+  merchantName: "Global Productivity Partner",
+  badge: "Remote Work Recommended",
+});
+
+const defaultCityIds = ["london", "new-york", "san-francisco", "tokyo", "mumbai"];
 ---
 
 <!doctype html>
@@ -60,34 +58,518 @@ const affiliateHtml = renderAffiliateCardHTML({
     <script is:inline set:html={getAntiFOUCScript()} />
     <Fragment set:html={getConsentModeScript()} />
     <Fragment set:html={metaHtml} />
-    <script type="application/ld+json" is:inline set:html={schemaJson} />
+    <script type="application/ld+json" is:inline set:html={appSchema} />
     <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+    <style>
+      .scrubber-track {
+        display: grid;
+        grid-template-columns: repeat(24, 1fr);
+        gap: 2px;
+        margin-top: 6px;
+      }
+      .scrubber-hour-cell {
+        height: 28px;
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.1s ease, filter 0.1s ease;
+        user-select: none;
+      }
+      .scrubber-hour-cell:hover {
+        transform: scaleY(1.15);
+        filter: brightness(1.25);
+        z-index: 2;
+      }
+      .scrubber-hour-cell.is-selected {
+        outline: 2px solid var(--accent-primary);
+        outline-offset: 1px;
+        font-weight: 800;
+        z-index: 3;
+      }
+      .city-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md, 8px);
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        transition: border-color 0.15s ease;
+      }
+      .city-card:hover {
+        border-color: var(--accent-primary);
+      }
+      .legend-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+      }
+    </style>
   </head>
   <body>
-    <Fragment set:html={headerHtml} />
-    <main class="suite-container" style="flex: 1; padding-block: 2.5rem;">
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "ChronoSpatial", navItems: [{ label: "World Clock", href: "/" }, { label: "Meeting Planner", href: "/#planner" }, { label: "Timezones", href: "/#timezones" }, { label: "About", href: "/about" }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2rem; max-width: 1000px;">
+      <!-- Hero Header -->
       <section style="text-align: center; margin-bottom: 2rem;">
-        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem;">{siteTitle}</h1>
-        <p style="font-size: 1.125rem; color: var(--text-secondary); max-width: 650px; margin-inline: auto;">
-          {description}
+        <span class="suite-badge" style="margin-bottom: 8px;">🌐 Precision IANA Engine</span>
+        <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px;">
+          World Clock & Global Timezone Scrubber
+        </h1>
+        <p style="font-size: 1rem; color: var(--text-secondary); max-width: 650px; margin-inline: auto;">
+          Drag the 24-hour timeline scrubber to preview synchronized local times across global offices and instantly identify optimal meeting windows.
         </p>
       </section>
 
-      <!-- Zero-CLS Ad Unit -->
-      <Fragment set:html={adSlotHtml} />
-
-      <!-- Interactive Core Workspace Area -->
-      <div class="suite-card" style="min-height: 280px; display: flex; align-items: center; justify-content: center; text-align: center;">
-        <div>
-          <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Interactive Studio Space</h2>
-          <p style="color: var(--text-muted);">Interactive components ready to plug in.</p>
-        </div>
+      <!-- Monetization: Top Leaderboard -->
+      <div style="margin-bottom: 2rem;">
+        <Fragment set:html={adSlotTop} />
       </div>
 
-      <!-- Affiliate Partner Card -->
-      <Fragment set:html={affiliateHtml} />
+      <!-- Controls & City Adder -->
+      <section class="suite-card" style="padding: 1.25rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: space-between;">
+          <!-- City Search / Dropdown -->
+          <div style="display: flex; gap: 8px; flex: 1; min-width: 280px;">
+            <select id="city-selector" class="suite-select" style="flex: 1; padding: 8px 12px; font-size: 0.875rem;">
+              <option value="">➕ Select a city to add...</option>
+              {WORLD_CITIES.map((c) => (
+                <option value={c.id}>
+                  {c.flag} {c.name}, {c.country} ({c.timezone})
+                </option>
+              ))}
+            </select>
+            <button id="add-city-btn" type="button" class="suite-btn-primary" style="padding: 8px 16px; font-size: 0.875rem;">
+              Add City
+            </button>
+          </div>
+
+          <!-- Format & Reset Controls -->
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="format-toggle-btn" type="button" class="suite-btn-secondary" style="font-size: 0.8125rem; padding: 6px 12px;">
+              ⏱️ Mode: 12H
+            </button>
+            <button id="reset-cities-btn" type="button" class="suite-btn-secondary" style="font-size: 0.8125rem; padding: 6px 12px;">
+              🔄 Reset Cities
+            </button>
+            <button id="reset-time-btn" type="button" class="suite-btn-secondary" style="font-size: 0.8125rem; padding: 6px 12px;">
+              ⚡ Live Time
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 24-Hour Interactive Overlap Scrubber Header & Timeline -->
+      <section id="planner" class="suite-card" style="padding: 1.5rem; margin-bottom: 2rem; border-top: 4px solid var(--accent-primary);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 1rem;">
+          <div>
+            <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0;">
+              24-Hour Overlap Scrubber
+            </h2>
+            <p style="font-size: 0.8125rem; color: var(--text-secondary); margin-top: 2px;">
+              Scrub the timeline or drag the slider to simulate meeting hours in real-time.
+            </p>
+          </div>
+
+          <!-- Golden Window Quick Action -->
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="jump-golden-btn" type="button" class="suite-btn-primary" style="font-size: 0.8125rem; padding: 6px 14px; background: #10b981; border-color: #10b981;">
+              ✨ Jump to Best Overlap
+            </button>
+          </div>
+        </div>
+
+        <!-- Overlap Fitness Banner -->
+        <div id="overlap-banner" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm, 6px); padding: 10px 14px; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="fitness-badge" style="font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; background: #10b981; color: white;">
+              GOLDEN OVERLAP
+            </span>
+            <span id="fitness-label" style="font-size: 0.875rem; font-weight: 500; color: var(--text-primary);">
+              Selected UTC 14:00 — Standard business hours across all selected locations.
+            </span>
+          </div>
+          <span id="fitness-utc-display" style="font-size: 0.8125rem; font-weight: 700; font-family: monospace; color: var(--text-secondary);">
+            UTC 14:00
+          </span>
+        </div>
+
+        <!-- Master Slider -->
+        <div style="margin-bottom: 1.25rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-family: monospace; color: var(--text-muted); margin-bottom: 4px;">
+            <span>00:00 UTC</span>
+            <span>04:00</span>
+            <span>08:00</span>
+            <span>12:00 (Noon)</span>
+            <span>16:00</span>
+            <span>20:00</span>
+            <span>23:00 UTC</span>
+          </div>
+          <input
+            id="scrubber-slider"
+            type="range"
+            min="0"
+            max="23"
+            step="1"
+            value="14"
+            style="width: 100%; cursor: ew-resize; accent-color: var(--accent-primary);"
+          />
+        </div>
+
+        <!-- Legend -->
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+          <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted);">Hours Legend:</span>
+          <span class="legend-chip">
+            <span class="legend-dot" style="background: rgba(16, 185, 129, 0.7);"></span> Work (9am - 6pm)
+          </span>
+          <span class="legend-chip">
+            <span class="legend-dot" style="background: rgba(245, 158, 11, 0.7);"></span> Awake (8-9am, 6-10pm)
+          </span>
+          <span class="legend-chip">
+            <span class="legend-dot" style="background: rgba(100, 116, 139, 0.4);"></span> Sleep / Off-hours
+          </span>
+        </div>
+      </section>
+
+      <!-- Pinned Cities Live Dashboard Container -->
+      <section id="cities-container" style="margin-bottom: 2.5rem;">
+        <!-- Injected dynamically via client script -->
+      </section>
+
+      <!-- Contextual Affiliate Offer -->
+      <Fragment set:html={affiliateOffer} />
+
+      <!-- Monetization: Bottom Rectangle -->
+      <section style="margin-top: 2rem;">
+        <Fragment set:html={adSlotBottom} />
+      </section>
     </main>
-    <Fragment set:html={footerHtml} />
+
+    <Fragment set:html={renderFooterHTML({ authorName: "ChronoSpatial Team", currentYear: 2026, privacyUrl: "/privacy-policy", termsUrl: "/terms-of-service", editorialUrl: "/editorial-policy", contactUrl: "/contact" })} />
     <Fragment set:html={renderConsentBannerHTML()} />
+
+    <!-- Client-Side Real-Time Timezone & Scrubber Logic -->
+    <script is:inline define:vars={{ WORLD_CITIES, defaultCityIds }}>
+      (() => {
+        let pinnedCityIds = JSON.parse(localStorage.getItem("cs_cities") || JSON.stringify(defaultCityIds));
+        let is24Hour = localStorage.getItem("cs_format") === "24";
+        let isLive = true;
+        let scrubbedUtcHour = new Date().getUTCHours();
+
+        const citiesMap = new Map(WORLD_CITIES.map(c => [c.id, c]));
+
+        const citiesContainer = document.getElementById("cities-container");
+        const scrubberSlider = document.getElementById("scrubber-slider");
+        const formatToggleBtn = document.getElementById("format-toggle-btn");
+        const resetCitiesBtn = document.getElementById("reset-cities-btn");
+        const resetTimeBtn = document.getElementById("reset-time-btn");
+        const jumpGoldenBtn = document.getElementById("jump-golden-btn");
+        const citySelector = document.getElementById("city-selector");
+        const addCityBtn = document.getElementById("add-city-btn");
+        const fitnessBadge = document.getElementById("fitness-badge");
+        const fitnessLabel = document.getElementById("fitness-label");
+        const fitnessUtcDisplay = document.getElementById("fitness-utc-display");
+        const overlapBanner = document.getElementById("overlap-banner");
+
+        function saveCities() {
+          localStorage.setItem("cs_cities", JSON.stringify(pinnedCityIds));
+        }
+
+        function getCityTimeInfo(date, timezone) {
+          const dtf = new Intl.DateTimeFormat("en-US", {
+            timeZone: timezone,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+            timeZoneName: "short"
+          });
+          const parts = dtf.formatToParts(date);
+          const getP = (t) => parts.find(p => p.type === t)?.value || "0";
+          const h = parseInt(getP("hour"), 10) % 24;
+          const m = parseInt(getP("minute"), 10);
+          const s = parseInt(getP("second"), 10);
+          const abbr = getP("timeZoneName");
+
+          const dtfDate = new Intl.DateTimeFormat("en-US", {
+            timeZone: timezone,
+            weekday: "short",
+            month: "short",
+            day: "numeric"
+          });
+          const formattedDate = dtfDate.format(date);
+
+          const period = h >= 12 ? "PM" : "AM";
+          const h12 = h % 12 || 12;
+          const formattedTime12 = `${h12.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")} ${period}`;
+          const formattedTime24 = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+
+          return { hours: h, minutes: m, seconds: s, formattedTime12, formattedTime24, formattedDate, abbr };
+        }
+
+        function classifyHour(h) {
+          if (h >= 9 && h < 18) return "work";
+          if ((h >= 8 && h < 9) || (h >= 18 && h < 22)) return "awake";
+          return "sleep";
+        }
+
+        function getStatusColor(status) {
+          if (status === "work") return { bg: "rgba(16, 185, 129, 0.25)", fg: "#10b981" };
+          if (status === "awake") return { bg: "rgba(245, 158, 11, 0.2)", fg: "#f59e0b" };
+          return { bg: "rgba(100, 116, 139, 0.15)", fg: "#94a3b8" };
+        }
+
+        function renderDashboard() {
+          if (!citiesContainer) return;
+          citiesContainer.innerHTML = "";
+
+          const now = new Date();
+          const targetDate = isLive ? now : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), scrubbedUtcHour, 0, 0));
+
+          pinnedCityIds.forEach((id) => {
+            const city = citiesMap.get(id);
+            if (!city) return;
+
+            const timeInfo = getCityTimeInfo(targetDate, city.timezone);
+            const status = classifyHour(timeInfo.hours);
+            const statusStyle = getStatusColor(status);
+
+            const card = document.createElement("article");
+            card.className = "city-card";
+
+            let timelineCellsHtml = "";
+            for (let hUtc = 0; hUtc < 24; hUtc++) {
+              const slotUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), hUtc, 0, 0));
+              const slotInfo = getCityTimeInfo(slotUtc, city.timezone);
+              const slotStatus = classifyHour(slotInfo.hours);
+              const slotStyle = getStatusColor(slotStatus);
+              const isSelected = hUtc === scrubbedUtcHour;
+
+              timelineCellsHtml += `
+                <div
+                  class="scrubber-hour-cell ${isSelected ? 'is-selected' : ''}"
+                  style="background: ${slotStyle.bg}; color: ${slotStyle.fg};"
+                  title="UTC ${hUtc}:00 -> ${city.name}: ${slotInfo.hours}:00 (${slotStatus})"
+                  data-utc="${hUtc}"
+                >
+                  ${slotInfo.hours}
+                </div>
+              `;
+            }
+
+            card.innerHTML = `
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.5rem;">${city.flag}</span>
+                    <h3 style="font-size: 1.25rem; font-weight: 700; margin: 0;">${city.name}</h3>
+                    <span style="font-size: 0.8125rem; color: var(--text-muted);">${city.country}</span>
+                    <span class="suite-badge" style="font-size: 0.6875rem;">${city.timezone}</span>
+                  </div>
+                  <div style="font-size: 0.8125rem; color: var(--text-secondary); margin-top: 4px;">
+                    📅 ${timeInfo.formattedDate} &bull; ${timeInfo.abbr}
+                  </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="text-align: right;">
+                    <div style="font-size: 1.75rem; font-weight: 800; font-family: monospace; letter-spacing: -0.02em; color: var(--text-primary);">
+                      ${is24Hour ? timeInfo.formattedTime24 : timeInfo.formattedTime12}
+                    </div>
+                    <span style="font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: ${statusStyle.fg};">
+                      ● ${status.toUpperCase()} HOURS
+                    </span>
+                  </div>
+                  <button class="suite-btn-secondary remove-city-btn" data-id="${city.id}" style="font-size: 0.75rem; padding: 4px 8px;" title="Remove ${city.name}">
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              <!-- 24H Timeline Strip -->
+              <div class="scrubber-track">
+                ${timelineCellsHtml}
+              </div>
+            `;
+
+            citiesContainer.appendChild(card);
+          });
+
+          // Attach listeners to hour cells and remove buttons
+          document.querySelectorAll(".scrubber-hour-cell").forEach(cell => {
+            cell.addEventListener("click", (e) => {
+              const utc = parseInt(e.currentTarget.getAttribute("data-utc"), 10);
+              setScrubbedHour(utc);
+            });
+          });
+
+          document.querySelectorAll(".remove-city-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+              const id = e.currentTarget.getAttribute("data-id");
+              pinnedCityIds = pinnedCityIds.filter(cid => cid !== id);
+              saveCities();
+              renderDashboard();
+              updateOverlapFitness();
+            });
+          });
+        }
+
+        function setScrubbedHour(utc) {
+          isLive = false;
+          scrubbedUtcHour = utc;
+          if (scrubberSlider) scrubberSlider.value = utc;
+          if (resetTimeBtn) resetTimeBtn.style.outline = "2px solid var(--accent-primary)";
+          renderDashboard();
+          updateOverlapFitness();
+        }
+
+        function updateOverlapFitness() {
+          if (!fitnessBadge || !fitnessLabel || !fitnessUtcDisplay || !overlapBanner) return;
+
+          const now = new Date();
+          const targetDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), scrubbedUtcHour, 0, 0));
+
+          let workCount = 0;
+          let sleepCount = 0;
+          const total = pinnedCityIds.length;
+
+          pinnedCityIds.forEach(id => {
+            const city = citiesMap.get(id);
+            if (!city) return;
+            const timeInfo = getCityTimeInfo(targetDate, city.timezone);
+            const status = classifyHour(timeInfo.hours);
+            if (status === "work") workCount++;
+            if (status === "sleep") sleepCount++;
+          });
+
+          fitnessUtcDisplay.textContent = `UTC ${scrubbedUtcHour.toString().padStart(2, "0")}:00`;
+
+          if (sleepCount === 0 && workCount === total) {
+            fitnessBadge.textContent = "✨ GOLDEN OVERLAP";
+            fitnessBadge.style.background = "#10b981";
+            fitnessLabel.textContent = "Prime working hours (9am-6pm) for all selected locations!";
+            overlapBanner.style.background = "rgba(16, 185, 129, 0.15)";
+            overlapBanner.style.borderColor = "rgba(16, 185, 129, 0.4)";
+          } else if (sleepCount === 0) {
+            fitnessBadge.textContent = "👍 ACCEPTABLE";
+            fitnessBadge.style.background = "#f59e0b";
+            fitnessLabel.textContent = "All participants are awake (8am-10pm). Suitable for meetings.";
+            overlapBanner.style.background = "rgba(245, 158, 11, 0.15)";
+            overlapBanner.style.borderColor = "rgba(245, 158, 11, 0.4)";
+          } else {
+            fitnessBadge.textContent = "⚠️ ASLEEP";
+            fitnessBadge.style.background = "#ef4444";
+            fitnessLabel.textContent = `${sleepCount} of ${total} locations are in sleep hours (10pm-8am).`;
+            overlapBanner.style.background = "rgba(239, 68, 68, 0.12)";
+            overlapBanner.style.borderColor = "rgba(239, 68, 68, 0.3)";
+          }
+        }
+
+        function findBestOverlapHour() {
+          const now = new Date();
+          let bestHour = 14;
+          let highestScore = -1;
+
+          for (let h = 0; h < 24; h++) {
+            const targetDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), h, 0, 0));
+            let score = 0;
+            pinnedCityIds.forEach(id => {
+              const city = citiesMap.get(id);
+              if (!city) return;
+              const info = getCityTimeInfo(targetDate, city.timezone);
+              const status = classifyHour(info.hours);
+              if (status === "work") score += 3;
+              else if (status === "awake") score += 1;
+              else score -= 4;
+            });
+            if (score > highestScore) {
+              highestScore = score;
+              bestHour = h;
+            }
+          }
+          return bestHour;
+        }
+
+        // Event Listeners
+        if (scrubberSlider) {
+          scrubberSlider.addEventListener("input", (e) => {
+            setScrubbedHour(parseInt(e.target.value, 10));
+          });
+        }
+
+        if (formatToggleBtn) {
+          formatToggleBtn.addEventListener("click", () => {
+            is24Hour = !is24Hour;
+            localStorage.setItem("cs_format", is24Hour ? "24" : "12");
+            formatToggleBtn.textContent = is24Hour ? "⏱️ Mode: 24H" : "⏱️ Mode: 12H";
+            renderDashboard();
+          });
+        }
+
+        if (resetCitiesBtn) {
+          resetCitiesBtn.addEventListener("click", () => {
+            pinnedCityIds = [...defaultCityIds];
+            saveCities();
+            renderDashboard();
+            updateOverlapFitness();
+          });
+        }
+
+        if (resetTimeBtn) {
+          resetTimeBtn.addEventListener("click", () => {
+            isLive = true;
+            resetTimeBtn.style.outline = "none";
+            scrubbedUtcHour = new Date().getUTCHours();
+            if (scrubberSlider) scrubberSlider.value = scrubbedUtcHour;
+            renderDashboard();
+            updateOverlapFitness();
+          });
+        }
+
+        if (jumpGoldenBtn) {
+          jumpGoldenBtn.addEventListener("click", () => {
+            const bestH = findBestOverlapHour();
+            setScrubbedHour(bestH);
+          });
+        }
+
+        if (addCityBtn && citySelector) {
+          addCityBtn.addEventListener("click", () => {
+            const id = citySelector.value;
+            if (id && !pinnedCityIds.includes(id)) {
+              pinnedCityIds.push(id);
+              saveCities();
+              citySelector.value = "";
+              renderDashboard();
+              updateOverlapFitness();
+            }
+          });
+        }
+
+        // Real-time 1-second clock tick
+        setInterval(() => {
+          if (isLive) {
+            renderDashboard();
+            updateOverlapFitness();
+          }
+        }, 1000);
+
+        // Initial render
+        renderDashboard();
+        updateOverlapFitness();
+      })();
+    </script>
   </body>
 </html>
