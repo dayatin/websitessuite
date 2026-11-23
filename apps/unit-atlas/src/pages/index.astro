@@ -1,0 +1,289 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildFAQSchema, buildBreadcrumbSchema, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { DIMENSIONS, POPULAR_CONVERSIONS } from "../lib/unit-engine.ts";
+
+const siteTitle = "UnitAtlas | Universal Scientific, Engineering & Everyday Measurement Conversion";
+const canonicalUrl = Astro.site ? Astro.site.href : "https://unit-atlas.suite.local/";
+const description = "Convert units across length, mass, temperature, data storage, speed, pressure, and energy with scientific precision. Free, instant calculations with zero Cumulative Layout Shift.";
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "UnitAtlas",
+  type: "website",
+});
+
+const appSchema = buildWebApplicationSchema({
+  name: "UnitAtlas",
+  url: canonicalUrl,
+  description,
+  applicationCategory: "UtilitiesApplication",
+});
+
+const faqs = [
+  {
+    question: "How accurate are the conversions on UnitAtlas?",
+    answer: "All conversions use exact SI standard reference ratios (such as NIST and ISO 80000 definitions) with IEEE 754 floating-point arithmetic up to 8 decimal places of precision.",
+  },
+  {
+    question: "Does UnitAtlas support both Decimal and Binary digital storage units?",
+    answer: "Yes, UnitAtlas distinguishes between decimal metrics (KB, MB, GB based on powers of 10) and binary IEC standard metrics (KiB, MiB, GiB based on powers of 2).",
+  },
+  {
+    question: "Is UnitAtlas free to use for commercial and academic projects?",
+    answer: "Yes, all calculation tools are 100% free with no subscription walls, no rate limits, and full compliance with zero Cumulative Layout Shift standards.",
+  },
+];
+
+const faqSchema = buildFAQSchema(faqs);
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: canonicalUrl },
+]);
+
+const adSlotTop = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "9001001001",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const adSlotBottom = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "9001001002",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Wolfram|Alpha Pro — Computational Intelligence",
+  description: "Step-by-step calculus solutions, chemical formula stoichiometry, and advanced engineering physical unit verification.",
+  ctaText: "Explore Wolfram|Alpha",
+  affiliateUrl: "https://partner.suite.local/wolfram-alpha",
+  merchantName: "Wolfram Partner Program",
+  badge: "Engineering Standard",
+});
+
+const dimensionList = Object.values(DIMENSIONS);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <Fragment set:html={metaHtml} />
+    <Fragment set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={appSchema} />
+    <Fragment set:html={faqSchema} />
+    <Fragment set:html={breadcrumbSchema} />
+    <style>
+      .hero-section {
+        text-align: center;
+        padding: 3rem 1rem 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .metric-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(99, 102, 241, 0.1);
+        color: #4f46e5;
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 0.35rem 0.85rem;
+        border-radius: 9999px;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(99, 102, 241, 0.25);
+      }
+      .hero-title {
+        font-size: 2.75rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        margin-bottom: 1rem;
+      }
+      .hero-subtitle {
+        font-size: 1.2rem;
+        color: #64748b;
+        max-width: 720px;
+        margin: 0 auto 2rem;
+        line-height: 1.6;
+      }
+      .converter-box {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 2rem;
+        max-width: 750px;
+        margin: 1.5rem auto 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+      .dimensions-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+      }
+      .dim-tab {
+        background: #f1f5f9;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: all 0.15s ease;
+      }
+      .dim-tab:hover, .dim-tab.active {
+        background: #4f46e5;
+        color: #ffffff;
+        border-color: #4f46e5;
+      }
+      .conversions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.25rem;
+        max-width: 1000px;
+        margin: 2.5rem auto;
+      }
+      .conversion-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        text-align: left;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .conversion-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+      }
+      .conversion-card h3 {
+        font-size: 1.15rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: #0f172a;
+      }
+      .conversion-card p {
+        font-size: 0.88rem;
+        color: #64748b;
+        line-height: 1.4;
+        margin-bottom: 1rem;
+      }
+      .card-link {
+        color: #4f46e5;
+        font-weight: 700;
+        font-size: 0.88rem;
+        text-decoration: none;
+      }
+      .card-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ currentPath: "/" })} />
+
+    <main class="container">
+      <section class="hero-section">
+        <div class="metric-pill">
+          <span>📐</span> SI & NIST Compliant Precision Mathematics
+        </div>
+        <h1 class="hero-title">Universal Unit Conversion Atlas</h1>
+        <p class="hero-subtitle">
+          Instantly convert physical quantities across Length, Mass, Temperature, Digital Storage, Speed, Pressure, and Energy with scientific decimal precision.
+        </p>
+
+        <!-- Zero-CLS Monetization Slot -->
+        <div style="margin: 1.5rem 0 2rem;">
+          <Fragment set:html={adSlotTop} />
+        </div>
+
+        <div class="converter-box">
+          <div class="dimensions-nav">
+            {dimensionList.map((dim, idx) => (
+              <span class={`dim-tab ${idx === 0 ? "active" : ""}`}>
+                {dim.icon} {dim.name}
+              </span>
+            ))}
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">From Unit</label>
+              <select style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.95rem;">
+                <option>Meters (m)</option>
+                <option>Kilometers (km)</option>
+                <option>Feet (ft)</option>
+                <option>Inches (in)</option>
+              </select>
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">To Unit</label>
+              <select style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.95rem;">
+                <option>Feet (ft)</option>
+                <option>Meters (m)</option>
+                <option>Yards (yd)</option>
+                <option>Miles (mi)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1.25rem; font-size: 1.5rem; font-weight: 900; color: #4f46e5;">
+            1 Meter = 3.28084 Feet
+          </div>
+        </div>
+      </section>
+
+      <!-- Popular Conversions Matrix -->
+      <section id="conversions">
+        <h2 style="text-align: center; font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Popular Conversions Matrix</h2>
+        <p style="text-align: center; color: #64748b; margin-bottom: 2rem;">Pre-calculated high-traffic pairwise conversion guides with full reference tables</p>
+
+        <div class="conversions-grid">
+          {POPULAR_CONVERSIONS.map((pair) => (
+            <article class="conversion-card">
+              <h3>{pair.title}</h3>
+              <p>{pair.description}</p>
+              <a href={`/convert/${pair.slug}`} class="card-link">
+                Open {pair.fromKey} to {pair.toKey} Converter →
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <!-- Affiliate Partner Section -->
+      <section style="max-width: 800px; margin: 3rem auto;">
+        <Fragment set:html={affiliateOffer} />
+      </section>
+
+      <!-- FAQs -->
+      <section style="max-width: 800px; margin: 2.5rem auto; text-align: left;">
+        <h2 style="text-align: center; font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem;">Frequently Asked Questions</h2>
+        {faqs.map((faq) => (
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; color: #0f172a;">{faq.question}</h3>
+            <p style="font-size: 0.92rem; color: #475569; margin: 0; line-height: 1.5;">{faq.answer}</p>
+          </div>
+        ))}
+      </section>
+
+      <!-- Zero-CLS Monetization Slot -->
+      <div style="margin: 2.5rem 0;">
+        <Fragment set:html={adSlotBottom} />
+      </div>
+    </main>
+
+    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>

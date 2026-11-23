@@ -1,0 +1,228 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildFAQSchema, buildBreadcrumbSchema, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { POPULAR_CONVERSIONS, convertUnit, generateReferenceTable } from "../../lib/unit-engine.ts";
+
+export function getStaticPaths() {
+  return POPULAR_CONVERSIONS.map((pair) => ({
+    params: { slug: pair.slug },
+    props: { pair },
+  }));
+}
+
+const { pair } = Astro.props;
+
+const sampleConversion = convertUnit(1, pair.dimension, pair.fromKey, pair.toKey);
+const referenceTable = generateReferenceTable(pair.dimension, pair.fromKey, pair.toKey);
+
+const siteTitle = `${pair.title} | Free Online Calculator | UnitAtlas`;
+const canonicalUrl = Astro.site
+  ? new URL(`convert/${pair.slug}`, Astro.site).href
+  : `https://unit-atlas.suite.local/convert/${pair.slug}`;
+const description = `${pair.description} Complete conversion table, exact conversion formula (${sampleConversion.formula}), and instant calculation.`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "UnitAtlas",
+  type: "article",
+});
+
+const appSchema = buildWebApplicationSchema({
+  name: pair.title,
+  url: canonicalUrl,
+  description: pair.description,
+  applicationCategory: "UtilitiesApplication",
+});
+
+const faqs = [
+  {
+    question: `How do you convert ${sampleConversion.fromUnit.name} to ${sampleConversion.toUnit.name}?`,
+    answer: `To convert from ${sampleConversion.fromUnit.name} to ${sampleConversion.toUnit.name}, use the formula: ${sampleConversion.formula}. 1 ${sampleConversion.fromUnit.symbol} is equal to ${sampleConversion.formattedResult} ${sampleConversion.toUnit.symbol}.`,
+  },
+  {
+    question: "Is this conversion calculated to international SI standards?",
+    answer: "Yes, UnitAtlas references official BIPM (International Bureau of Weights and Measures) and NIST definitions for all physical dimensions.",
+  },
+];
+
+const faqSchema = buildFAQSchema(faqs);
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: "https://unit-atlas.suite.local/" },
+  { name: "Conversions", url: "https://unit-atlas.suite.local/#conversions" },
+  { name: pair.title, url: canonicalUrl },
+]);
+
+const adSlotTop = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "9001001003",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const adSlotBottom = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "9001001004",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Engineering Physical Reference Handbook",
+  description: "Comprehensive physical constants, thermodynamics tables, and fluid dynamics reference standards.",
+  ctaText: "Get Physical Handbook",
+  affiliateUrl: "https://partner.suite.local/engineering-reference",
+  merchantName: "Technical Press Partner",
+  badge: "Reference Standard",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <Fragment set:html={metaHtml} />
+    <Fragment set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={appSchema} />
+    <Fragment set:html={faqSchema} />
+    <Fragment set:html={breadcrumbSchema} />
+    <style>
+      .converter-hero {
+        text-align: center;
+        padding: 2.5rem 1rem 1.5rem;
+        max-width: 850px;
+        margin: 0 auto;
+      }
+      .title-large {
+        font-size: 2.5rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.75rem;
+      }
+      .lead-text {
+        font-size: 1.15rem;
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+      }
+      .calc-display {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 2rem;
+        max-width: 650px;
+        margin: 0 auto 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+      }
+      .formula-box {
+        background: #f1f5f9;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.95rem;
+        color: #334155;
+        margin: 1.25rem 0;
+      }
+      .ref-table-wrap {
+        max-width: 750px;
+        margin: 2.5rem auto;
+        text-align: left;
+      }
+      .ref-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      }
+      .ref-table th, .ref-table td {
+        padding: 0.85rem 1.25rem;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 0.95rem;
+      }
+      .ref-table th {
+        background: #f8fafc;
+        font-weight: 800;
+        color: #1e293b;
+      }
+    </style>
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ currentPath: `/convert/${pair.slug}` })} />
+
+    <main class="container">
+      <section class="converter-hero">
+        <h1 class="title-large">{pair.title}</h1>
+        <p class="lead-text">{pair.description}</p>
+
+        <!-- Zero-CLS Monetization Slot -->
+        <div style="margin: 1.5rem 0 2rem;">
+          <Fragment set:html={adSlotTop} />
+        </div>
+
+        <div class="calc-display">
+          <div style="font-size: 0.9rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 0.5rem;">Standard Conversion Value</div>
+          <div style="font-size: 2rem; font-weight: 900; color: #4f46e5; margin-bottom: 0.75rem;">
+            1 {sampleConversion.fromUnit.symbol} = {sampleConversion.formattedResult} {sampleConversion.toUnit.symbol}
+          </div>
+          <div class="formula-box">
+            Formula: {sampleConversion.formula}
+          </div>
+        </div>
+      </section>
+
+      <!-- Reference Conversion Table -->
+      <section class="ref-table-wrap">
+        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem;">
+          {sampleConversion.fromUnit.name} to {sampleConversion.toUnit.name} Conversion Table
+        </h2>
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th>{sampleConversion.fromUnit.name} ({sampleConversion.fromUnit.symbol})</th>
+              <th>{sampleConversion.toUnit.name} ({sampleConversion.toUnit.symbol})</th>
+            </tr>
+          </thead>
+          <tbody>
+            {referenceTable.map((row) => (
+              <tr>
+                <td><strong>{row.input} {sampleConversion.fromUnit.symbol}</strong></td>
+                <td>{row.formattedOutput} {sampleConversion.toUnit.symbol}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Affiliate Partner Section -->
+      <section style="max-width: 800px; margin: 3rem auto;">
+        <Fragment set:html={affiliateOffer} />
+      </section>
+
+      <!-- FAQ Section -->
+      <section style="max-width: 800px; margin: 2.5rem auto; text-align: left;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.25rem;">Frequently Asked Questions</h2>
+        {faqs.map((faq) => (
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; color: #0f172a;">{faq.question}</h3>
+            <p style="font-size: 0.92rem; color: #475569; margin: 0; line-height: 1.5;">{faq.answer}</p>
+          </div>
+        ))}
+      </section>
+
+      <!-- Zero-CLS Monetization Slot -->
+      <div style="margin: 2.5rem 0;">
+        <Fragment set:html={adSlotBottom} />
+      </div>
+    </main>
+
+    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>
