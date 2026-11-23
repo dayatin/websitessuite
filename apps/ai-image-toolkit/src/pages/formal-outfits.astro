@@ -1,0 +1,468 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildWebApplicationSchema, buildBreadcrumbSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { OutfitCatalog } from "../lib/outfit-catalog.ts";
+
+const catalog = new OutfitCatalog();
+const allOutfits = catalog.getAllOutfits();
+
+const siteTitle = "AI Formal Outfit & Professional Suit Customizer | OptiPixel";
+const canonicalUrl = Astro.site ? new URL("formal-outfits", Astro.site).href : "https://ai-image-toolkit.suite.local/formal-outfits";
+const description = "Instantly change casual clothes into executive suits, formal blazers, and collared shirts for professional LinkedIn portraits, resumes, and official passport photos.";
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "OptiPixel Studio",
+  type: "website",
+});
+
+const appSchema = buildWebApplicationSchema({
+  name: "OptiPixel Formal Outfit Studio",
+  url: canonicalUrl,
+  description,
+  applicationCategory: "MultimediaApplication",
+});
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: "https://ai-image-toolkit.suite.local/" },
+  { name: "Formal Outfit Studio", url: canonicalUrl },
+]);
+
+const adSlotTop = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "5001001007",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const adSlotBottom = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "5001001008",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Professional Studio Headshots & Executive Portfolios",
+  description: "AI-generated studio portraits trained on master photographer lighting. 40+ high-res LinkedIn headshots generated from your casual selfies in under 1 hour.",
+  ctaText: "Generate Studio Headshots",
+  affiliateUrl: "https://partner.suite.local/ai-headshots",
+  merchantName: "Pro Headshot Partner",
+  badge: "Career Booster",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={appSchema} />
+    <script type="application/ld+json" is:inline set:html={breadcrumbSchema} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+    <style>
+      .outfit-card-item {
+        border: 2px solid var(--border-subtle);
+        border-radius: var(--radius-md, 8px);
+        padding: 10px;
+        background: var(--bg-surface);
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .outfit-card-item:hover, .outfit-card-item.selected {
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 2px var(--accent-glow);
+      }
+      .filter-chip {
+        padding: 6px 14px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        border-radius: 9999px;
+        border: 1px solid var(--border-subtle);
+        background: transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .filter-chip.active {
+        background: var(--accent-primary);
+        color: white;
+        border-color: var(--accent-primary);
+      }
+      .workspace-canvas-wrap {
+        position: relative;
+        background: #0f172a;
+        border-radius: var(--radius-md, 8px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        min-height: 480px;
+        border: 1px solid var(--border-subtle);
+      }
+      #outfit-canvas {
+        max-width: 100%;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "OptiPixel", navItems: [{ label: "Print Studio", href: "/" }, { label: "Passport Studio", href: "/passport-studio" }, { label: "Formal Outfits", href: "/formal-outfits" }, { label: "About", href: "/about" }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2rem; max-width: 1100px;">
+      <!-- Breadcrumb -->
+      <nav aria-label="Breadcrumb" style="margin-bottom: 1.25rem; font-size: 0.8125rem; color: var(--text-muted);">
+        <a href="/" style="color: var(--text-muted); text-decoration: none;">Home</a>
+        <span style="margin-inline: 6px;">/</span>
+        <span style="color: var(--text-primary); font-weight: 600;">Formal Outfit Customizer</span>
+      </nav>
+
+      <!-- Hero Header -->
+      <header style="text-align: center; margin-bottom: 2rem;">
+        <span class="suite-badge" style="margin-bottom: 8px;">👔 Professional Executive Attire</span>
+        <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px;">
+          Formal Outfit & Suit Customizer
+        </h1>
+        <p style="font-size: 1rem; color: var(--text-secondary); max-width: 720px; margin-inline: auto;">
+          Transform casual attire into executive business suits, classic blazers, and formal collared shirts for professional LinkedIn headshots, CVs, and official passports.
+        </p>
+      </header>
+
+      <!-- Monetization: Top Leaderboard -->
+      <div style="margin-bottom: 2rem;">
+        <Fragment set:html={adSlotTop} />
+      </div>
+
+      <!-- Controls & Outfit Selector Workspace -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Left: Upload, Outfit Selection & Fine-Tuning Controls -->
+        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+          <!-- Upload Photo -->
+          <section class="suite-card" style="padding: 1.25rem;">
+            <input type="file" id="portrait-file-input" accept="image/jpeg,image/png,image/webp" style="display: none;" />
+            <button id="upload-portrait-btn" type="button" class="suite-btn-primary" style="width: 100%; padding: 10px; font-size: 0.875rem;">
+              📷 Upload Casual Portrait / Selfie
+            </button>
+            <div id="file-status" style="margin-top: 6px; font-size: 0.75rem; color: var(--text-muted); text-align: center;">
+              PNG, JPG, or WebP portrait. Front-facing with visible neck recommended.
+            </div>
+          </section>
+
+          <!-- Gender Category Filter -->
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span style="font-size: 0.8125rem; font-weight: 600; color: var(--text-muted);">Filter:</span>
+            <button type="button" class="filter-chip active" data-gender="all">All ({allOutfits.length})</button>
+            <button type="button" class="filter-chip" data-gender="men">Men's Suits</button>
+            <button type="button" class="filter-chip" data-gender="women">Women's Blazers</button>
+          </div>
+
+          <!-- Outfit Cards Grid -->
+          <div id="outfits-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 280px; overflow-y: auto; padding-right: 4px;">
+            {allOutfits.map((outfit, index) => (
+              <div
+                class={`outfit-card-item ${index === 0 ? "selected" : ""}`}
+                data-id={outfit.id}
+                data-gender={outfit.gender}
+              >
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <span style="font-size: 0.6875rem; font-weight: 700; color: var(--accent-primary); text-transform: uppercase;">
+                    {outfit.badge}
+                  </span>
+                  <span style={`width: 12px; height: 12px; border-radius: 50%; background: ${outfit.primaryColor}; border: 1px solid rgba(255,255,255,0.4);`}></span>
+                </div>
+                <h3 style="font-size: 0.8125rem; font-weight: 700; margin: 0 0 2px 0;">
+                  {outfit.name}
+                </h3>
+                <p style="font-size: 0.6875rem; color: var(--text-muted); margin: 0; line-height: 1.3;">
+                  {outfit.description}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <!-- Nudge & Collar Adjustment Controls -->
+          <section class="suite-card" style="padding: 1.25rem;">
+            <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 10px;">
+              🎯 Fine-Tune Fit & Collar Position
+            </h3>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 2px;">
+                  <span>Suit Size Scale:</span>
+                  <span id="scale-val">100%</span>
+                </div>
+                <input type="range" id="scale-slider" min="80" max="130" value="100" style="width: 100%;" />
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 2px;">
+                  <span>Vertical Shift (Up/Down):</span>
+                  <span id="y-val">0 px</span>
+                </div>
+                <input type="range" id="y-slider" min="-50" max="50" value="0" style="width: 100%;" />
+              </div>
+
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 2px;">
+                  <span>Horizontal Shift (Left/Right):</span>
+                  <span id="x-val">0 px</span>
+                </div>
+                <input type="range" id="x-slider" min="-40" max="40" value="0" style="width: 100%;" />
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Right: Live Canvas Composite Workspace -->
+        <div class="suite-card" style="padding: 1.5rem; display: flex; flex-direction: column;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0;">
+              Live Headshot Preview
+            </h2>
+            <button id="reset-nudge-btn" type="button" class="suite-btn-secondary" style="font-size: 0.75rem; padding: 4px 10px;">
+              🔄 Reset Fit
+            </button>
+          </div>
+
+          <div class="workspace-canvas-wrap" style="flex: 1;">
+            <canvas id="outfit-canvas" width="600" height="750"></canvas>
+            <div id="suit-overlay-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></div>
+          </div>
+
+          <!-- Actions Bar -->
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 1.25rem;">
+            <button id="download-headshot-btn" type="button" class="suite-btn-primary" style="flex: 1; padding: 10px; font-size: 0.875rem;">
+              📥 Download Formal Headshot
+            </button>
+            <a
+              href="/passport-studio"
+              class="suite-btn-secondary"
+              style="padding: 10px 18px; font-size: 0.875rem; text-decoration: none; text-align: center;"
+            >
+              🛂 Transfer to Passport Studio &rarr;
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monetization: Contextual AI Headshot Offer -->
+      <Fragment set:html={affiliateOffer} />
+
+      <!-- Monetization: Bottom Rectangle AdSlot -->
+      <section style="margin-top: 2rem;">
+        <Fragment set:html={adSlotBottom} />
+      </section>
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ authorName: "OptiPixel Editorial", currentYear: 2026, privacyUrl: "/privacy-policy", termsUrl: "/terms-of-service", editorialUrl: "/editorial-policy", contactUrl: "/contact" })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+
+    <!-- Client-Side Formal Outfit Composite Script -->
+    <script is:inline define:vars={{ allOutfits }}>
+      (() => {
+        let loadedPortrait = null;
+        let outfitsMap = new Map(allOutfits.map(o => [o.id, o]));
+        let activeOutfit = allOutfits[0];
+
+        let nudgeScale = 1.0;
+        let nudgeX = 0;
+        let nudgeY = 0;
+
+        const fileInput = document.getElementById("portrait-file-input");
+        const uploadBtn = document.getElementById("upload-portrait-btn");
+        const canvas = document.getElementById("outfit-canvas");
+        const overlayContainer = document.getElementById("suit-overlay-container");
+        const downloadBtn = document.getElementById("download-headshot-btn");
+        const resetNudgeBtn = document.getElementById("reset-nudge-btn");
+
+        const scaleSlider = document.getElementById("scale-slider");
+        const ySlider = document.getElementById("y-slider");
+        const xSlider = document.getElementById("x-slider");
+        const scaleVal = document.getElementById("scale-val");
+        const yVal = document.getElementById("y-val");
+        const xVal = document.getElementById("x-val");
+
+        if (uploadBtn && fileInput) {
+          uploadBtn.addEventListener("click", () => fileInput.click());
+          fileInput.addEventListener("change", (e) => {
+            if (e.target.files && e.target.files[0]) {
+              const file = e.target.files[0];
+              const reader = new FileReader();
+              reader.onload = (re) => {
+                const img = new Image();
+                img.onload = () => {
+                  loadedPortrait = img;
+                  renderHeadshot();
+                };
+                img.src = re.target.result;
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+        }
+
+        // Gender filter
+        document.querySelectorAll(".filter-chip").forEach(chip => {
+          chip.addEventListener("click", (e) => {
+            document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+            e.currentTarget.classList.add("active");
+            const g = e.currentTarget.getAttribute("data-gender");
+            document.querySelectorAll(".outfit-card-item").forEach(item => {
+              const ig = item.getAttribute("data-gender");
+              if (g === "all" || ig === g || ig === "unisex") {
+                item.style.display = "block";
+              } else {
+                item.style.display = "none";
+              }
+            });
+          });
+        });
+
+        // Outfit selection
+        document.querySelectorAll(".outfit-card-item").forEach(item => {
+          item.addEventListener("click", (e) => {
+            document.querySelectorAll(".outfit-card-item").forEach(i => i.classList.remove("selected"));
+            e.currentTarget.classList.add("selected");
+            const id = e.currentTarget.getAttribute("data-id");
+            activeOutfit = outfitsMap.get(id) || allOutfits[0];
+            renderHeadshot();
+          });
+        });
+
+        // Sliders
+        if (scaleSlider && scaleVal) {
+          scaleSlider.addEventListener("input", (e) => {
+            nudgeScale = parseInt(e.target.value, 10) / 100;
+            scaleVal.textContent = `${e.target.value}%`;
+            renderHeadshot();
+          });
+        }
+        if (ySlider && yVal) {
+          ySlider.addEventListener("input", (e) => {
+            nudgeY = parseInt(e.target.value, 10);
+            yVal.textContent = `${nudgeY} px`;
+            renderHeadshot();
+          });
+        }
+        if (xSlider && xVal) {
+          xSlider.addEventListener("input", (e) => {
+            nudgeX = parseInt(e.target.value, 10);
+            xVal.textContent = `${nudgeX} px`;
+            renderHeadshot();
+          });
+        }
+
+        if (resetNudgeBtn) {
+          resetNudgeBtn.addEventListener("click", () => {
+            nudgeScale = 1.0;
+            nudgeX = 0;
+            nudgeY = 0;
+            if (scaleSlider) scaleSlider.value = 100;
+            if (ySlider) ySlider.value = 0;
+            if (xSlider) xSlider.value = 0;
+            if (scaleVal) scaleVal.textContent = "100%";
+            if (yVal) yVal.textContent = "0 px";
+            if (xVal) xVal.textContent = "0 px";
+            renderHeadshot();
+          });
+        }
+
+        function renderSuitSvg(w, h, chinY, headW) {
+          const s = nudgeScale;
+          const suitW = Math.round(headW * activeOutfit.shoulderSpanRatio * s);
+          const suitH = Math.round((h - chinY + 40) * s);
+          const suitX = Math.round((w / 2) - (suitW / 2) + nudgeX);
+          const suitY = Math.round(chinY - 12 + nudgeY);
+          const collarW = Math.round(headW * activeOutfit.collarWidthRatio * s);
+          const cx = suitX + suitW / 2;
+          const bottomY = h + 10;
+          const shoulderY = suitY + Math.round(suitH * 0.25);
+          const suitColor = activeOutfit.primaryColor;
+          const tieColor = activeOutfit.tieColor || "#1e293b";
+
+          return `
+            <svg viewBox="0 0 ${w} ${h}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <path d="M ${cx - collarW / 2} ${suitY} L ${suitX} ${shoulderY} L ${suitX} ${bottomY} L ${suitX + suitW} ${bottomY} L ${suitX + suitW} ${shoulderY} L ${cx + collarW / 2} ${suitY} Z" fill="${suitColor}" />
+              <polygon points="${cx - collarW / 2},${suitY} ${cx + collarW / 2},${suitY} ${cx},${suitY + suitH * 0.6}" fill="#ffffff" />
+              ${activeOutfit.tieColor ? `
+                <polygon points="${cx - 8},${suitY + 4} ${cx + 8},${suitY + 4} ${cx + 6},${suitY + 16} ${cx - 6},${suitY + 16}" fill="${tieColor}" />
+                <polygon points="${cx - 6},${suitY + 16} ${cx + 6},${suitY + 16} ${cx + 12},${suitY + suitH * 0.75} ${cx},${suitY + suitH * 0.85} ${cx - 12},${suitY + suitH * 0.75}" fill="${tieColor}" />
+              ` : `
+                <path d="M ${cx - collarW * 0.4} ${suitY + 8} Q ${cx} ${suitY + suitH * 0.3} ${cx + collarW * 0.4} ${suitY + 8}" fill="none" stroke="#e2e8f0" stroke-width="2" />
+              `}
+              <polygon points="${cx - collarW / 2},${suitY} ${cx - collarW * 0.8},${suitY + suitH * 0.28} ${cx},${suitY + suitH * 0.65} ${cx - collarW * 0.2},${suitY + suitH * 0.65}" fill="${suitColor}" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+              <polygon points="${cx + collarW / 2},${suitY} ${cx + collarW * 0.8},${suitY + suitH * 0.28} ${cx},${suitY + suitH * 0.65} ${cx + collarW * 0.2},${suitY + suitH * 0.65}" fill="${suitColor}" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+            </svg>
+          `;
+        }
+
+        function renderHeadshot() {
+          if (!canvas) return;
+          const ctx = canvas.getContext("2d");
+          const w = 600, h = 750;
+          canvas.width = w;
+          canvas.height = h;
+
+          // Studio backdrop
+          const bgGrad = ctx.createRadialGradient(w / 2, h * 0.35, 50, w / 2, h * 0.5, w / 2);
+          bgGrad.addColorStop(0, "#f8fafc");
+          bgGrad.addColorStop(1, "#cbd5e1");
+          ctx.fillStyle = bgGrad;
+          ctx.fillRect(0, 0, w, h);
+
+          const chinY = h * 0.62;
+          const headW = 190;
+
+          if (loadedPortrait) {
+            // Draw user portrait
+            const targetAspect = w / h;
+            const srcAspect = loadedPortrait.width / loadedPortrait.height;
+            let sx = 0, sy = 0, sw = loadedPortrait.width, sh = loadedPortrait.height;
+
+            if (srcAspect > targetAspect) {
+              sw = Math.round(loadedPortrait.height * targetAspect);
+              sx = Math.round((loadedPortrait.width - sw) / 2);
+            } else {
+              sh = Math.round(loadedPortrait.width / targetAspect);
+              sy = Math.round((loadedPortrait.height - sh) / 2);
+            }
+            ctx.drawImage(loadedPortrait, sx, sy, sw, sh, 0, 0, w, h);
+          } else {
+            // Placeholder silhouette
+            ctx.fillStyle = "#94a3b8";
+            ctx.beginPath();
+            ctx.ellipse(w / 2, h * 0.42, 85, 115, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "16px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("Upload Portrait Photo", w / 2, h * 0.42);
+          }
+
+          if (overlayContainer) {
+            overlayContainer.innerHTML = renderSuitSvg(w, h, chinY, headW);
+          }
+        }
+
+        if (downloadBtn && canvas) {
+          downloadBtn.addEventListener("click", () => {
+            const a = document.createElement("a");
+            a.download = `optipixel-formal-${activeOutfit.id}.png`;
+            a.href = canvas.toDataURL("image/png");
+            a.click();
+          });
+        }
+
+        renderHeadshot();
+      })();
+    </script>
+  </body>
+</html>
