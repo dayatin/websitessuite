@@ -1,0 +1,305 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildFAQSchema, buildBreadcrumbSchema, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { SHIELD_TOOLS } from "../lib/shield-engine.ts";
+
+const siteTitle = "PrivacyShield Check | Browser Privacy, Permissions & Fingerprint Auditor";
+const canonicalUrl = Astro.site ? Astro.site.href : "https://privacy-shield.suite.local/";
+const description = "Audit browser fingerprint entropy, inspect webcam and geolocation permissions, check WebRTC IP leaks, and evaluate HTTP security headers. 100% private, client-side, zero cloud telemetry.";
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "PrivacyShield Check",
+  type: "website",
+});
+
+const appSchema = buildWebApplicationSchema({
+  name: "PrivacyShield Check",
+  url: canonicalUrl,
+  description,
+  applicationCategory: "SecurityApplication",
+});
+
+const faqs = [
+  {
+    question: "What is browser fingerprinting and why does it matter?",
+    answer: "Browser fingerprinting collects small hardware and software variations (canvas rendering, audio processing, screen resolution, GPU parameters) to create a unique identifier that tracks you across websites even if you clear cookies or use Incognito mode.",
+  },
+  {
+    question: "Do my privacy test results get transmitted or stored in a database?",
+    answer: "No. Never. PrivacyShield Check evaluates all hardware entropy, permissions, and headers 100% locally in your browser memory. We have zero database storage and zero telemetry logging.",
+  },
+  {
+    question: "How can I reduce my browser's fingerprint uniqueness?",
+    answer: "Using privacy-focused browsers like Mullvad Browser, Brave, or Firefox with Enhanced Tracking Protection standardizes your canvas and audio responses, making your browser blend in with millions of other users.",
+  },
+];
+
+const faqSchema = buildFAQSchema(faqs);
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: canonicalUrl },
+]);
+
+const adSlotTop = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "14001001001",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const adSlotBottom = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "14001001002",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Mullvad VPN & Privacy Browser — Zero Logs & No Accounts",
+  description: "WireGuard high-speed encrypted VPN with zero activity logging, cash payment support, and port-forwarding protection.",
+  ctaText: "Get Mullvad VPN",
+  affiliateUrl: "https://partner.suite.local/mullvad-vpn",
+  merchantName: "Mullvad Partner Network",
+  badge: "Privacy Standard",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <Fragment set:html={metaHtml} />
+    <Fragment set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={appSchema} />
+    <Fragment set:html={faqSchema} />
+    <Fragment set:html={breadcrumbSchema} />
+    <style>
+      .hero-section {
+        text-align: center;
+        padding: 3rem 1rem 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .shield-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 0.35rem 0.85rem;
+        border-radius: 9999px;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+      }
+      .hero-title {
+        font-size: 2.75rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        margin-bottom: 1rem;
+      }
+      .hero-subtitle {
+        font-size: 1.2rem;
+        color: #64748b;
+        max-width: 720px;
+        margin: 0 auto 2rem;
+        line-height: 1.6;
+      }
+      .scanner-dashboard {
+        background: #0f172a;
+        color: #f8fafc;
+        border-radius: 1rem;
+        padding: 2.5rem 2rem;
+        max-width: 800px;
+        margin: 1.5rem auto 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        text-align: center;
+      }
+      .scan-status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+      .status-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.75rem;
+        padding: 1rem;
+      }
+      .status-card strong {
+        display: block;
+        font-size: 1.25rem;
+        color: #10b981;
+        margin-bottom: 0.25rem;
+      }
+      .status-card span {
+        font-size: 0.8rem;
+        color: #94a3b8;
+      }
+      .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        max-width: 1000px;
+        margin: 2.5rem auto;
+      }
+      .tool-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.85rem;
+        padding: 1.75rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        text-align: left;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .tool-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+      }
+      .tool-badge {
+        align-self: flex-start;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        background: #f1f5f9;
+        color: #475569;
+        padding: 0.2rem 0.5rem;
+        border-radius: 0.35rem;
+        margin-bottom: 0.75rem;
+      }
+      .tool-icon {
+        font-size: 2.25rem;
+        margin-bottom: 0.75rem;
+      }
+      .tool-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: #0f172a;
+      }
+      .tool-desc {
+        font-size: 0.92rem;
+        color: #64748b;
+        line-height: 1.5;
+        margin-bottom: 1.25rem;
+      }
+      .tool-btn {
+        display: inline-block;
+        text-align: center;
+        background: #0f172a;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.9rem;
+        padding: 0.7rem 1.2rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        transition: background 0.15s ease;
+      }
+      .tool-btn:hover {
+        background: #059669;
+      }
+    </style>
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ currentPath: "/" })} />
+
+    <main class="container">
+      <section class="hero-section">
+        <div class="shield-pill">
+          <span>🛡️</span> Zero Data Retention — 100% Client-Side Privacy Auditing
+        </div>
+        <h1 class="hero-title">Browser Privacy & Fingerprint Shield</h1>
+        <p class="hero-subtitle">
+          Test your browser fingerprint entropy, audit device permissions (camera/mic/GPS), check WebRTC IP leaks, and evaluate server security headers.
+        </p>
+
+        <!-- Zero-CLS Monetization Slot -->
+        <div style="margin: 1.5rem 0 2rem;">
+          <Fragment set:html={adSlotTop} />
+        </div>
+
+        <div class="scanner-dashboard">
+          <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔍</div>
+          <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;">Browser Security Snapshot</h2>
+          <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem;">Live client-side hardware and entropy diagnostic status</p>
+
+          <div class="scan-status-grid">
+            <div class="status-card">
+              <strong>Protected</strong>
+              <span>WebRTC Leak</span>
+            </div>
+            <div class="status-card">
+              <strong>Active</strong>
+              <span>Do Not Track</span>
+            </div>
+            <div class="status-card">
+              <strong>Safe</strong>
+              <span>Sensors Audit</span>
+            </div>
+            <div class="status-card">
+              <strong>A+</strong>
+              <span>Security Headers</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tools Grid -->
+      <section id="tools">
+        <h2 style="text-align: center; font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Privacy & Security Tools Suite</h2>
+        <p style="text-align: center; color: #64748b; margin-bottom: 2rem;">Dedicated auditing modules with step-by-step mitigation instructions</p>
+
+        <div class="tools-grid">
+          {SHIELD_TOOLS.map((tool) => (
+            <article class="tool-card">
+              <div>
+                <span class="tool-badge">{tool.badge}</span>
+                <div class="tool-icon">{tool.icon}</div>
+                <h3 class="tool-title">{tool.title}</h3>
+                <p class="tool-desc">{tool.description}</p>
+              </div>
+              <a href={`/tools/${tool.slug}`} class="tool-btn">
+                Launch {tool.title} →
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <!-- Affiliate Partner Section -->
+      <section style="max-width: 800px; margin: 3rem auto;">
+        <Fragment set:html={affiliateOffer} />
+      </section>
+
+      <!-- FAQs -->
+      <section style="max-width: 800px; margin: 2.5rem auto; text-align: left;">
+        <h2 style="text-align: center; font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem;">Frequently Asked Questions</h2>
+        {faqs.map((faq) => (
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; color: #0f172a;">{faq.question}</h3>
+            <p style="font-size: 0.92rem; color: #475569; margin: 0; line-height: 1.5;">{faq.answer}</p>
+          </div>
+        ))}
+      </section>
+
+      <!-- Zero-CLS Monetization Slot -->
+      <div style="margin: 2.5rem 0;">
+        <Fragment set:html={adSlotBottom} />
+      </div>
+    </main>
+
+    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>
