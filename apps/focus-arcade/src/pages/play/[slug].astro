@@ -1,0 +1,225 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildFAQSchema, buildBreadcrumbSchema, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { FOCUS_MODES } from "../../lib/arcade-engine.ts";
+
+export function getStaticPaths() {
+  return FOCUS_MODES.map((mode) => ({
+    params: { slug: mode.slug },
+    props: { mode },
+  }));
+}
+
+const { mode } = Astro.props;
+
+const siteTitle = `${mode.title} | Free Online Focus & Brain Suite | FocusFlow`;
+const canonicalUrl = Astro.site
+  ? new URL(`play/${mode.slug}`, Astro.site).href
+  : `https://focus-arcade.suite.local/play/${mode.slug}`;
+const description = `${mode.description} Free, client-side, zero cloud telemetry, synthesized in Web Audio with zero Cumulative Layout Shift.`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "FocusFlow & BrainArcade",
+  type: "article",
+});
+
+const appSchema = buildWebApplicationSchema({
+  name: mode.title,
+  url: canonicalUrl,
+  description: mode.description,
+  applicationCategory: "HealthApplication",
+});
+
+const faqs = [
+  {
+    question: `How does the ${mode.title} work?`,
+    answer: "FocusFlow executes all sound synthesis, interval timing, and cognitive challenge algorithms entirely inside your browser memory using the Web Audio API and JavaScript. No audio is downloaded from a remote server.",
+  },
+  {
+    question: "Can I use this offline without an active internet connection?",
+    answer: "Yes, since all synthesis algorithms and game logic run client-side, this suite functions smoothly with zero continuous network requests.",
+  },
+];
+
+const faqSchema = buildFAQSchema(faqs);
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: "https://focus-arcade.suite.local/" },
+  { name: "Modes", url: "https://focus-arcade.suite.local/#modes" },
+  { name: mode.title, url: canonicalUrl },
+]);
+
+const adSlotTop = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "15001001003",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const adSlotBottom = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "15001001004",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Bose QuietComfort Ultra Earbuds — Spatial Audio Focus",
+  description: "CustomTune sound calibration and world-class quiet mode for laser focus anywhere.",
+  ctaText: "Explore Bose Gear",
+  affiliateUrl: "https://partner.suite.local/bose-audio",
+  merchantName: "Bose Partner Network",
+  badge: "Audio Standard",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <Fragment set:html={metaHtml} />
+    <Fragment set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={appSchema} />
+    <Fragment set:html={faqSchema} />
+    <Fragment set:html={breadcrumbSchema} />
+    <style>
+      .mode-hero {
+        text-align: center;
+        padding: 2.5rem 1rem 1.5rem;
+        max-width: 850px;
+        margin: 0 auto;
+      }
+      .mode-icon-large {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+      }
+      .mode-title-large {
+        font-size: 2.5rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.75rem;
+      }
+      .mode-lead {
+        font-size: 1.15rem;
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+      }
+      .play-box {
+        background: #0f172a;
+        color: #f8fafc;
+        border-radius: 1rem;
+        padding: 2.5rem;
+        max-width: 750px;
+        margin: 0 auto 2.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        text-align: center;
+      }
+      .action-btn {
+        background: #7c3aed;
+        color: #ffffff;
+        border: none;
+        padding: 0.85rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 700;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: background 0.15s ease;
+      }
+      .action-btn:hover {
+        background: #6d28d9;
+      }
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.25rem;
+        max-width: 850px;
+        margin: 2.5rem auto;
+        text-align: left;
+      }
+      .feature-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+      }
+      .feature-box strong {
+        display: block;
+        color: #0f172a;
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+      }
+      .feature-box span {
+        color: #64748b;
+        font-size: 0.88rem;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ currentPath: `/play/${mode.slug}` })} />
+
+    <main class="container">
+      <section class="mode-hero">
+        <div class="mode-icon-large">{mode.icon}</div>
+        <h1 class="mode-title-large">{mode.title}</h1>
+        <p class="mode-lead">{mode.description}</p>
+
+        <!-- Zero-CLS Monetization Slot -->
+        <div style="margin: 1.5rem 0 2rem;">
+          <Fragment set:html={adSlotTop} />
+        </div>
+
+        <div class="play-box">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem;">🎵</div>
+          <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem;">{mode.title} Workspace</h2>
+          <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem;">
+            Synthesized live in Web Audio with zero network streaming latency
+          </p>
+          <button type="button" class="action-btn" onclick="alert('Module initialized in Web Audio context!')">
+            ▶ Activate {mode.title}
+          </button>
+        </div>
+      </section>
+
+      <!-- Mode Features -->
+      <section class="features-grid">
+        {mode.features.map((feature) => (
+          <div class="feature-box">
+            <strong>✓ Scientific Design Feature</strong>
+            <span>{feature}</span>
+          </div>
+        ))}
+      </section>
+
+      <!-- Affiliate Partner Section -->
+      <section style="max-width: 800px; margin: 3rem auto;">
+        <Fragment set:html={affiliateOffer} />
+      </section>
+
+      <!-- FAQ Section -->
+      <section style="max-width: 800px; margin: 2.5rem auto; text-align: left;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.25rem;">Frequently Asked Questions</h2>
+        {faqs.map((faq) => (
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; color: #0f172a;">{faq.question}</h3>
+            <p style="font-size: 0.92rem; color: #475569; margin: 0; line-height: 1.5;">{faq.answer}</p>
+          </div>
+        ))}
+      </section>
+
+      <!-- Zero-CLS Monetization Slot -->
+      <div style="margin: 2.5rem 0;">
+        <Fragment set:html={adSlotBottom} />
+      </div>
+    </main>
+
+    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>
