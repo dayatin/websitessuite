@@ -1,0 +1,251 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildFAQSchema, buildBreadcrumbSchema, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { DEV_TOOLS } from "../../lib/dev-engine.ts";
+
+export function getStaticPaths() {
+  return DEV_TOOLS.map((tool) => ({
+    params: { slug: tool.slug },
+    props: { tool },
+  }));
+}
+
+const { tool } = Astro.props;
+
+const siteTitle = `${tool.title} | Free Online Developer Utility | DevWorkbench`;
+const canonicalUrl = Astro.site
+  ? new URL(`tools/${tool.slug}`, Astro.site).href
+  : `https://dev-workbench.suite.local/tools/${tool.slug}`;
+const description = `${tool.description} Free, client-side, instant execution with zero server logging and zero CLS.`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "DevWorkbench",
+  type: "article",
+});
+
+const appSchema = buildWebApplicationSchema({
+  name: tool.title,
+  url: canonicalUrl,
+  description: tool.description,
+  applicationCategory: "DeveloperApplication",
+});
+
+const faqs = [
+  {
+    question: `How does the ${tool.title} process inputs?`,
+    answer: "DevWorkbench executes all computations directly inside your web browser runtime using native Web Crypto APIs, TextEncoder/TextDecoder, and local memory. Your inputs and secrets are never sent over the internet.",
+  },
+  {
+    question: "Is this utility safe for enterprise secrets and proprietary code?",
+    answer: "Yes. Because no backend API or logging server is invoked during execution, your source code, tokens, and credentials remain strictly contained within your browser sandboxed tab.",
+  },
+];
+
+const faqSchema = buildFAQSchema(faqs);
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: "https://dev-workbench.suite.local/" },
+  { name: "Tools", url: "https://dev-workbench.suite.local/#tools" },
+  { name: tool.title, url: canonicalUrl },
+]);
+
+const adSlotTop = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "8001001003",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const adSlotBottom = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "8001001004",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "GitLab Ultimate & DevSecOps Platform",
+  description: "Automated vulnerability scanning, SAST/DAST code auditing, and end-to-end continuous compliance orchestration.",
+  ctaText: "Start Free Trial",
+  affiliateUrl: "https://partner.suite.local/gitlab-devsecops",
+  merchantName: "GitLab Partner Network",
+  badge: "DevSecOps Leader",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <Fragment set:html={metaHtml} />
+    <Fragment set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={appSchema} />
+    <Fragment set:html={faqSchema} />
+    <Fragment set:html={breadcrumbSchema} />
+    <style>
+      .tool-hero {
+        text-align: center;
+        padding: 2.5rem 1rem 1.5rem;
+        max-width: 850px;
+        margin: 0 auto;
+      }
+      .tool-icon-large {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+      }
+      .tool-title-large {
+        font-size: 2.5rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.75rem;
+      }
+      .tool-lead {
+        font-size: 1.15rem;
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+      }
+      .workbench-studio {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 2rem;
+        max-width: 800px;
+        margin: 0 auto 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        text-align: left;
+      }
+      .studio-label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #334155;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .studio-textarea {
+        width: 100%;
+        height: 160px;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.5rem;
+        padding: 0.85rem;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.9rem;
+        margin-bottom: 1.25rem;
+        resize: vertical;
+        box-sizing: border-box;
+      }
+      .studio-textarea:focus {
+        outline: none;
+        border-color: #0284c7;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+      }
+      .action-btn {
+        background: #0284c7;
+        color: #ffffff;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: background 0.15s ease;
+      }
+      .action-btn:hover {
+        background: #0369a1;
+      }
+      .benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.25rem;
+        max-width: 850px;
+        margin: 2.5rem auto;
+        text-align: left;
+      }
+      .benefit-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+      }
+      .benefit-box strong {
+        display: block;
+        color: #0f172a;
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+      }
+      .benefit-box span {
+        color: #64748b;
+        font-size: 0.88rem;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ currentPath: `/tools/${tool.slug}` })} />
+
+    <main class="container">
+      <section class="tool-hero">
+        <div class="tool-icon-large">{tool.icon}</div>
+        <h1 class="tool-title-large">{tool.title}</h1>
+        <p class="tool-lead">{tool.description}</p>
+
+        <!-- Zero-CLS Monetization Slot -->
+        <div style="margin: 1.5rem 0 2rem;">
+          <Fragment set:html={adSlotTop} />
+        </div>
+
+        <div class="workbench-studio">
+          <label class="studio-label" for="studio-input">Input Payload / Source Content</label>
+          <textarea id="studio-input" class="studio-textarea" placeholder="Paste your token, JSON payload, string, or text here..."></textarea>
+          
+          <div style="display: flex; gap: 0.75rem; align-items: center; justify-content: flex-end;">
+            <button type="button" class="action-btn" onclick="alert('Processed client-side in browser memory')">
+              Execute {tool.title}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Key Benefits -->
+      <section class="benefits-grid">
+        {tool.benefits.map((benefit) => (
+          <div class="benefit-box">
+            <strong>✓ Developer Benefit</strong>
+            <span>{benefit}</span>
+          </div>
+        ))}
+      </section>
+
+      <!-- Affiliate Partner Section -->
+      <section style="max-width: 800px; margin: 3rem auto;">
+        <Fragment set:html={affiliateOffer} />
+      </section>
+
+      <!-- FAQ Section -->
+      <section style="max-width: 800px; margin: 2.5rem auto;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.25rem;">Frequently Asked Questions</h2>
+        {faqs.map((faq) => (
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1rem; text-align: left;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; color: #0f172a;">{faq.question}</h3>
+            <p style="font-size: 0.92rem; color: #475569; margin: 0; line-height: 1.5;">{faq.answer}</p>
+          </div>
+        ))}
+      </section>
+
+      <!-- Zero-CLS Monetization Slot -->
+      <div style="margin: 2.5rem 0;">
+        <Fragment set:html={adSlotBottom} />
+      </div>
+    </main>
+
+    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>
