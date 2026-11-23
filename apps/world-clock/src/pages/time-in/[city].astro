@@ -1,0 +1,215 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildBreadcrumbSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { TimeEngine, WORLD_CITIES } from "../../lib/time-engine.ts";
+import { MarketHoursEngine } from "../../lib/market-hours.ts";
+import { build24HourTimeline } from "../../lib/timeline-math.ts";
+
+export function getStaticPaths() {
+  const engine = new TimeEngine();
+  const cities = engine.getAllCities();
+  return cities.map((c) => ({
+    params: { city: c.id },
+    props: { cityRecord: c },
+  }));
+}
+
+const { cityRecord } = Astro.props;
+const engine = new TimeEngine();
+const marketEngine = new MarketHoursEngine();
+
+const today = new Date();
+const timeInfo = engine.getTimeForZone(today, cityRecord.timezone);
+const solarTimes = engine.calculateSolarTimes(today, cityRecord.lat, cityRecord.lng, cityRecord.timezone);
+const exchange = marketEngine.getExchangeForCity(cityRecord.id);
+const marketStatus = exchange ? marketEngine.getMarketStatus(exchange, today) : null;
+const timelineSlots = build24HourTimeline(cityRecord.timezone, today);
+
+const siteTitle = `Current Local Time in ${cityRecord.name}, ${cityRecord.country} | ChronoSpatial`;
+const canonicalUrl = Astro.site
+  ? new URL(`time-in/${cityRecord.id}`, Astro.site).href
+  : `https://world-clock.suite.local/time-in/${cityRecord.id}`;
+const description = `Accurate local time in ${cityRecord.name}, ${cityRecord.country} (${cityRecord.timezone}). UTC offset ${timeInfo.formattedUtcOffset}, astronomical sunrise/sunset times, financial market hours, and 24-hour time converter.`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "ChronoSpatial",
+  type: "article",
+});
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: "https://world-clock.suite.local/" },
+  { name: "World Cities", url: "https://world-clock.suite.local/#cities" },
+  { name: `${cityRecord.name}, ${cityRecord.country}`, url: canonicalUrl },
+]);
+
+const adSlot = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "4001001005",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: `Traveling to or Operating in ${cityRecord.name}?`,
+  description: "Secure, high-speed international eSIM connectivity with instant mobile data activation in 160+ countries.",
+  ctaText: "Check eSIM Plans",
+  affiliateUrl: "https://partner.suite.local/travel-esim",
+  merchantName: "Global eSIM Connectivity Partner",
+  badge: "Traveler Recommended",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={breadcrumbSchema} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "ChronoSpatial", navItems: [{ label: "World Clock", href: "/" }, { label: "Meeting Planner", href: "/meet" }, { label: "Timezones", href: "/#timezones" }, { label: "About", href: "/about" }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2rem; max-width: 860px;">
+      <!-- Breadcrumb -->
+      <nav aria-label="Breadcrumb" style="margin-bottom: 1.25rem; font-size: 0.8125rem; color: var(--text-muted);">
+        <a href="/" style="color: var(--text-muted); text-decoration: none;">Home</a>
+        <span style="margin-inline: 6px;">/</span>
+        <span style="color: var(--text-secondary);">Cities</span>
+        <span style="margin-inline: 6px;">/</span>
+        <span style="color: var(--text-primary); font-weight: 600;">{cityRecord.name}</span>
+      </nav>
+
+      <!-- City Time Hero Card -->
+      <article class="suite-card" style="padding: 2rem; margin-bottom: 2rem; border-top: 4px solid var(--accent-primary);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 1.25rem;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+              <span style="font-size: 2rem;">{cityRecord.flag}</span>
+              <h1 style="font-size: 2rem; font-weight: 800; margin: 0;">
+                Current Time in {cityRecord.name}
+              </h1>
+            </div>
+            <div style="font-size: 0.9375rem; color: var(--text-secondary);">
+              {cityRecord.country} &bull; Timezone: <code>{cityRecord.timezone}</code> ({timeInfo.abbr})
+            </div>
+          </div>
+
+          <div style="text-align: right;">
+            <div id="live-city-clock" style="font-size: 2.25rem; font-weight: 800; font-family: monospace; color: var(--accent-primary);">
+              {timeInfo.formattedTime12}
+            </div>
+            <span style="font-size: 0.8125rem; font-weight: 600; color: var(--text-muted);">
+              {timeInfo.formattedDate} &bull; {timeInfo.formattedUtcOffset}
+            </span>
+          </div>
+        </div>
+
+        <!-- Quick Status Pills -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+          <span class="suite-badge" style="font-size: 0.75rem;">
+            {solarTimes.isDaylight ? "☀️ Daytime" : "🌙 Nighttime"}
+          </span>
+          <span class="suite-badge" style="font-size: 0.75rem;">
+            {timeInfo.isDST ? "⚡ Observing Daylight Saving (DST)" : "Standard Time"}
+          </span>
+          <span class="suite-badge" style="font-size: 0.75rem;">
+            Coords: {cityRecord.lat.toFixed(2)}&deg;, {cityRecord.lng.toFixed(2)}&deg;
+          </span>
+        </div>
+      </article>
+
+      <!-- Astronomical Solar Details Grid -->
+      <section class="suite-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">
+          ☀️ Sun & Astronomical Solar Schedule
+        </h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px;">
+          <div style="border: 1px solid var(--border-subtle); border-radius: 6px; padding: 12px; text-align: center;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">🌅 SUNRISE</div>
+            <div style="font-size: 1.25rem; font-weight: 700; font-family: monospace;">{solarTimes.sunriseTime}</div>
+          </div>
+
+          <div style="border: 1px solid var(--border-subtle); border-radius: 6px; padding: 12px; text-align: center;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">☀️ SOLAR NOON</div>
+            <div style="font-size: 1.25rem; font-weight: 700; font-family: monospace;">{solarTimes.solarNoonTime}</div>
+          </div>
+
+          <div style="border: 1px solid var(--border-subtle); border-radius: 6px; padding: 12px; text-align: center;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">🌇 SUNSET</div>
+            <div style="font-size: 1.25rem; font-weight: 700; font-family: monospace;">{solarTimes.sunsetTime}</div>
+          </div>
+
+          <div style="border: 1px solid var(--border-subtle); border-radius: 6px; padding: 12px; text-align: center;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">⏳ DAYLIGHT LENGTH</div>
+            <div style="font-size: 1.25rem; font-weight: 700; font-family: monospace;">
+              {Math.floor(solarTimes.dayLengthMinutes / 60)}h {solarTimes.dayLengthMinutes % 60}m
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Local Financial Market Status (if exchange exists) -->
+      {marketStatus && (
+        <section class="suite-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.25rem;">📈</span>
+              <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0;">
+                {marketStatus.exchange.name} ({marketStatus.exchange.code})
+              </h2>
+            </div>
+            <span
+              style={`font-size: 0.75rem; font-weight: 700; padding: 2px 10px; border-radius: 9999px; ${marketStatus.isOpen ? "background: #10b981; color: white;" : "background: rgba(100, 116, 139, 0.2); color: var(--text-secondary);"}`}
+            >
+              ● {marketStatus.statusText.toUpperCase()}
+            </span>
+          </div>
+          <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0;">
+            Standard trading session: <strong>{marketStatus.exchange.openHour.toString().padStart(2, "0")}:{marketStatus.exchange.openMinute.toString().padStart(2, "0")} – {marketStatus.exchange.closeHour.toString().padStart(2, "0")}:{marketStatus.exchange.closeMinute.toString().padStart(2, "0")}</strong> local time (Monday through Friday).
+          </p>
+        </section>
+      )}
+
+      <!-- Contextual Affiliate Offer -->
+      <Fragment set:html={affiliateOffer} />
+
+      <!-- Monetization: Zero-CLS AdSlot -->
+      <section style="margin-top: 2rem;">
+        <Fragment set:html={adSlot} />
+      </section>
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ authorName: "ChronoSpatial Team", currentYear: 2026, privacyUrl: "/privacy-policy", termsUrl: "/terms-of-service", editorialUrl: "/editorial-policy", contactUrl: "/contact" })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+
+    <script is:inline define:vars={{ timezone: cityRecord.timezone }}>
+      (() => {
+        const clock = document.getElementById("live-city-clock");
+        if (!clock) return;
+
+        function tick() {
+          const now = new Date();
+          const dtf = new Intl.DateTimeFormat("en-US", {
+            timeZone: timezone,
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true
+          });
+          clock.textContent = dtf.format(now);
+        }
+
+        setInterval(tick, 1000);
+      })();
+    </script>
+  </body>
+</html>

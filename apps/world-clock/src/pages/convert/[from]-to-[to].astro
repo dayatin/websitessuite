@@ -1,0 +1,199 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildFAQSchema, buildBreadcrumbSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import {
+  PAIRWISE_ROUTES,
+  buildPairwiseTable,
+  generatePairwiseFAQs,
+} from "../../lib/pairwise-matrix.ts";
+import { getStatusStyle } from "../../lib/timeline-math.ts";
+
+export function getStaticPaths() {
+  return PAIRWISE_ROUTES.map((route) => ({
+    params: { from: route.fromSlug, to: route.toSlug },
+    props: { route },
+  }));
+}
+
+const { route } = Astro.props;
+const today = new Date();
+const { rows, offsetSummary } = buildPairwiseTable(route, today);
+const faqs = generatePairwiseFAQs(route, offsetSummary);
+
+const siteTitle = `${route.fromName} to ${route.toName} Converter & Time Difference | ChronoSpatial`;
+const canonicalUrl = Astro.site
+  ? new URL(`convert/${route.fromSlug}-to-${route.toSlug}`, Astro.site).href
+  : `https://world-clock.suite.local/convert/${route.fromSlug}-to-${route.toSlug}`;
+const description = `Convert time between ${route.fromName} and ${route.toName}. Full 24-hour comparison chart, current time difference (${offsetSummary}), and best overlap hours.`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "ChronoSpatial",
+  type: "article",
+});
+
+const faqSchema = buildFAQSchema(faqs);
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: "https://world-clock.suite.local/" },
+  { name: "Converters", url: "https://world-clock.suite.local/#converters" },
+  { name: `${route.fromSlug.toUpperCase()} to ${route.toSlug.toUpperCase()}`, url: canonicalUrl },
+]);
+
+const adSlot = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "4001001004",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Cross-Border Payments & Global Team Payroll",
+  description: "Pay international team members and contractors in 70+ currencies at real mid-market exchange rates without hidden bank markups.",
+  ctaText: "Explore Global Payroll",
+  affiliateUrl: "https://partner.suite.local/global-payroll",
+  merchantName: "International Finance Partner",
+  badge: "Global Remote Partner",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={faqSchema} />
+    <script type="application/ld+json" is:inline set:html={breadcrumbSchema} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "ChronoSpatial", navItems: [{ label: "World Clock", href: "/" }, { label: "Meeting Planner", href: "/meet" }, { label: "Converters", href: "/" }, { label: "About", href: "/about" }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2rem; max-width: 900px;">
+      <!-- Breadcrumb -->
+      <nav aria-label="Breadcrumb" style="margin-bottom: 1.25rem; font-size: 0.8125rem; color: var(--text-muted);">
+        <a href="/" style="color: var(--text-muted); text-decoration: none;">Home</a>
+        <span style="margin-inline: 6px;">/</span>
+        <span style="color: var(--text-secondary);">Converters</span>
+        <span style="margin-inline: 6px;">/</span>
+        <span style="color: var(--text-primary); font-weight: 600;">{route.fromSlug.toUpperCase()} to {route.toSlug.toUpperCase()}</span>
+      </nav>
+
+      <!-- Conversion Header Hero -->
+      <header class="suite-card" style="padding: 2rem; margin-bottom: 2rem; border-top: 4px solid var(--accent-primary);">
+        <span class="suite-badge" style="font-size: 0.75rem; margin-bottom: 8px;">🔄 Timezone Conversion Matrix</span>
+        <h1 style="font-size: 1.875rem; font-weight: 800; margin: 4px 0 8px 0;">
+          {route.fromName} to {route.toName}
+        </h1>
+        <p style="font-size: 1rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+          {route.description}
+        </p>
+
+        <!-- Summary Offset Box -->
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm, 6px); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.25rem;">⏱️</span>
+            <strong style="color: var(--text-primary);">{offsetSummary}</strong>
+          </div>
+          <a
+            href={`/meet?title=${encodeURIComponent(`Meeting: ${route.fromSlug.toUpperCase()} and ${route.toSlug.toUpperCase()}`)}`}
+            class="suite-btn-primary"
+            style="font-size: 0.8125rem; padding: 6px 14px; text-decoration: none;"
+          >
+            📅 Plan Meeting in These Zones
+          </a>
+        </div>
+      </header>
+
+      <!-- 24-Hour Comparison Table -->
+      <section class="suite-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">
+          24-Hour Side-by-Side Conversion Chart
+        </h2>
+
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+            <thead>
+              <tr style="border-bottom: 2px solid var(--border-subtle); text-align: left;">
+                <th style="padding: 10px; color: var(--text-muted); font-size: 0.75rem;">{route.fromName}</th>
+                <th style="padding: 10px; color: var(--text-muted); font-size: 0.75rem;">{route.toName}</th>
+                <th style="padding: 10px; color: var(--text-muted); font-size: 0.75rem;">Day Shift</th>
+                <th style="padding: 10px; color: var(--text-muted); font-size: 0.75rem;">Working Overlap</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => {
+                const fStyle = getStatusStyle(row.fromStatus as any);
+                const tStyle = getStatusStyle(row.toStatus as any);
+                const isBothWork = row.fromStatus === "work" && row.toStatus === "work";
+
+                return (
+                  <tr style={`border-bottom: 1px solid var(--border-subtle); ${isBothWork ? "background: rgba(16, 185, 129, 0.08);" : ""}`}>
+                    <td style="padding: 10px; font-weight: 600;">
+                      {row.fromTimeFormatted}
+                      <span style={`font-size: 0.6875rem; margin-left: 6px; color: ${fStyle.fg};`}>({row.fromStatus})</span>
+                    </td>
+                    <td style="padding: 10px; font-weight: 600;">
+                      {row.toTimeFormatted}
+                      <span style={`font-size: 0.6875rem; margin-left: 6px; color: ${tStyle.fg};`}>({row.toStatus})</span>
+                    </td>
+                    <td style="padding: 10px; font-size: 0.75rem; color: var(--text-muted);">
+                      {row.dayShiftLabel}
+                    </td>
+                    <td style="padding: 10px;">
+                      {isBothWork ? (
+                        <span style="font-size: 0.75rem; font-weight: 700; color: #10b981;">
+                          ✨ Prime Work Overlap
+                        </span>
+                      ) : (
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">
+                          Normal
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Frequently Asked Questions (FAQPage) -->
+      <section class="suite-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.25rem;">
+          Frequently Asked Questions
+        </h2>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          {faqs.map((faq) => (
+            <div style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem;">
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">
+                {faq.question}
+              </h3>
+              <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+                {faq.answer}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Monetization: Contextual Affiliate Offer -->
+      <Fragment set:html={affiliateOffer} />
+
+      <!-- Monetization: Zero-CLS AdSlot -->
+      <section style="margin-top: 2rem;">
+        <Fragment set:html={adSlot} />
+      </section>
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ authorName: "ChronoSpatial Team", currentYear: 2026, privacyUrl: "/privacy-policy", termsUrl: "/terms-of-service", editorialUrl: "/editorial-policy", contactUrl: "/contact" })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>
