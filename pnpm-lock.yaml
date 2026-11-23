@@ -18,7 +18,19 @@ importers:
         specifier: ^5.8.2
         version: 5.9.3
 
+  packages/compliance-pages:
+    devDependencies:
+      '@suite/config':
+        specifier: workspace:*
+        version: link:../config
+
   packages/config: {}
+
+  packages/seo-core:
+    devDependencies:
+      '@suite/config':
+        specifier: workspace:*
+        version: link:../config
 
   packages/ui-theme:
     devDependencies:
