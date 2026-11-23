@@ -1,0 +1,211 @@
+import type { AuthorRecord, QuoteRecord } from "../db/schema.ts";
+
+export const MOODS = [
+  { slug: "wisdom", label: "Wisdom & Insight", icon: "🦉" },
+  { slug: "courage", label: "Courage & Bravery", icon: "🦁" },
+  { slug: "resilience", label: "Resilience & Stoicism", icon: "🛡️" },
+  { slug: "calm", label: "Peace & Serenity", icon: "🌊" },
+  { slug: "focus", label: "Focus & Discipline", icon: "🎯" },
+  { slug: "creativity", label: "Creativity & Art", icon: "🎨" },
+  { slug: "gratitude", label: "Gratitude & Joy", icon: "☀️" },
+] as const;
+
+export const OCCASIONS = [
+  { slug: "monday-motivation", label: "Monday Motivation", icon: "⚡" },
+  { slug: "leadership", label: "Leadership & Vision", icon: "👑" },
+  { slug: "graduation", label: "Graduation & Beginnings", icon: "🎓" },
+  { slug: "adversity", label: "Overcoming Hardship", icon: "🏔️" },
+  { slug: "solitude", label: "Solitude & Self-Reflection", icon: "🧘" },
+] as const;
+
+export const SEED_AUTHORS: Record<string, AuthorRecord> = {
+  "marcus-aurelius": {
+    id: 1,
+    slug: "marcus-aurelius",
+    name: "Marcus Aurelius",
+    bio: "Roman Emperor from 161 to 180 CE and preeminent Stoic philosopher, author of 'Meditations', a personal journal of reflections on duty, resilience, and virtue.",
+    born_year: "121 CE",
+    died_year: "180 CE",
+    nationality: "Roman",
+    profession: "Roman Emperor & Stoic Philosopher",
+    wikipedia_url: "https://en.wikipedia.org/wiki/Marcus_Aurelius",
+    avatar_url:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Marcus_Aurelius_Glyptothek_Munich_296.jpg/440px-Marcus_Aurelius_Glyptothek_Munich_296.jpg",
+  },
+  seneca: {
+    id: 2,
+    slug: "seneca",
+    name: "Lucius Annaeus Seneca",
+    bio: "Roman Stoic philosopher, statesman, and dramatist of the Silver Age of Latin literature, famous for his moral essays on the shortness of life and anger.",
+    born_year: "c. 4 BCE",
+    died_year: "65 CE",
+    nationality: "Roman",
+    profession: "Stoic Philosopher & Statesman",
+    wikipedia_url: "https://en.wikipedia.org/wiki/Seneca_the_Younger",
+    avatar_url:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Seneca_Naples.jpg/440px-Seneca_Naples.jpg",
+  },
+  "ralph-waldo-emerson": {
+    id: 3,
+    slug: "ralph-waldo-emerson",
+    name: "Ralph Waldo Emerson",
+    bio: "American essayist, lecturer, and poet who led the transcendentalist movement of the mid-19th century, championing individualism and self-reliance.",
+    born_year: "1803",
+    died_year: "1882",
+    nationality: "American",
+    profession: "Essayist, Philosopher & Poet",
+    wikipedia_url: "https://en.wikipedia.org/wiki/Ralph_Waldo_Emerson",
+  },
+  "maya-angelou": {
+    id: 4,
+    slug: "maya-angelou",
+    name: "Maya Angelou",
+    bio: "Acclaimed American memoirist, poet, and civil rights activist whose autobiographical works explore identity, resilience, and liberation.",
+    born_year: "1928",
+    died_year: "2014",
+    nationality: "American",
+    profession: "Poet, Memoirist & Civil Rights Activist",
+    wikipedia_url: "https://en.wikipedia.org/wiki/Maya_Angelou",
+  },
+  "leonardo-da-vinci": {
+    id: 5,
+    slug: "leonardo-da-vinci",
+    name: "Leonardo da Vinci",
+    bio: "High Renaissance polymath active as a painter, draughtsman, engineer, scientist, theorist, sculptor, and architect.",
+    born_year: "1452",
+    died_year: "1519",
+    nationality: "Italian",
+    profession: "Polymath, Artist & Inventor",
+    wikipedia_url: "https://en.wikipedia.org/wiki/Leonardo_da_Vinci",
+  },
+  "albert-einstein": {
+    id: 6,
+    slug: "albert-einstein",
+    name: "Albert Einstein",
+    bio: "Theoretical physicist widely held to be one of the greatest and most influential scientists of all time, best known for developing the theory of relativity.",
+    born_year: "1879",
+    died_year: "1955",
+    nationality: "German-American",
+    profession: "Theoretical Physicist",
+    wikipedia_url: "https://en.wikipedia.org/wiki/Albert_Einstein",
+  },
+};
+
+export const SEED_QUOTES: QuoteRecord[] = [
+  {
+    id: 1,
+    slug: "you-have-power-over-your-mind",
+    quote_text:
+      "You have power over your mind - not outside events. Realize this, and you will find strength.",
+    author: SEED_AUTHORS["marcus-aurelius"],
+    work_title: "Meditations",
+    work_year: "c. 161–180 CE",
+    historical_era: "ancient-classical",
+    mood_tags: ["resilience", "wisdom", "calm"],
+    occasion_tags: ["monday-motivation", "adversity", "solitude"],
+    character_count:
+      "You have power over your mind - not outside events. Realize this, and you will find strength."
+        .length,
+    day_of_year: 1,
+  },
+  {
+    id: 2,
+    slug: "we-suffer-more-often-in-imagination",
+    quote_text: "We suffer more often in imagination than in reality.",
+    author: SEED_AUTHORS.seneca,
+    work_title: "Letters from a Stoic",
+    work_year: "c. 65 CE",
+    historical_era: "ancient-classical",
+    mood_tags: ["calm", "wisdom"],
+    occasion_tags: ["adversity", "solitude"],
+    character_count: "We suffer more often in imagination than in reality.".length,
+    day_of_year: 2,
+  },
+  {
+    id: 3,
+    slug: "to-be-yourself-in-a-world-constantly-changing",
+    quote_text:
+      "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment.",
+    author: SEED_AUTHORS["ralph-waldo-emerson"],
+    work_title: "Self-Reliance",
+    work_year: "1841",
+    historical_era: "19th-century",
+    mood_tags: ["courage", "wisdom"],
+    occasion_tags: ["graduation", "leadership"],
+    character_count:
+      "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment."
+        .length,
+    day_of_year: 3,
+  },
+  {
+    id: 4,
+    slug: "you-may-encounter-many-defeats",
+    quote_text:
+      "You may encounter many defeats, but you must not be defeated. In fact, it may be necessary to encounter the defeats, so you can know who you are, what you can rise from, how you can still come out of it.",
+    author: SEED_AUTHORS["maya-angelou"],
+    work_title: "The Art of Fiction Interview",
+    work_year: "1990",
+    historical_era: "modern",
+    mood_tags: ["resilience", "courage"],
+    occasion_tags: ["adversity", "monday-motivation", "graduation"],
+    character_count:
+      "You may encounter many defeats, but you must not be defeated. In fact, it may be necessary to encounter the defeats, so you can know who you are, what you can rise from, how you can still come out of it."
+        .length,
+    day_of_year: 4,
+  },
+  {
+    id: 5,
+    slug: "learning-never-exhausts-the-mind",
+    quote_text: "Learning never exhausts the mind.",
+    author: SEED_AUTHORS["leonardo-da-vinci"],
+    work_title: "Notebooks of Leonardo da Vinci",
+    work_year: "c. 1500",
+    historical_era: "renaissance",
+    mood_tags: ["creativity", "focus", "wisdom"],
+    occasion_tags: ["graduation", "monday-motivation"],
+    character_count: "Learning never exhausts the mind.".length,
+    day_of_year: 5,
+  },
+  {
+    id: 6,
+    slug: "imagination-is-more-important-than-knowledge",
+    quote_text:
+      "Imagination is more important than knowledge. For knowledge is limited, whereas imagination embraces the entire world.",
+    author: SEED_AUTHORS["albert-einstein"],
+    work_title: "What Life Means to Einstein",
+    work_year: "1929",
+    historical_era: "modern",
+    mood_tags: ["creativity", "wisdom"],
+    occasion_tags: ["graduation", "leadership"],
+    character_count:
+      "Imagination is more important than knowledge. For knowledge is limited, whereas imagination embraces the entire world."
+        .length,
+    day_of_year: 6,
+  },
+  {
+    id: 7,
+    slug: "waste-no-more-time-arguing-what-good-man-should-be",
+    quote_text: "Waste no more time arguing about what a good man should be. Be one.",
+    author: SEED_AUTHORS["marcus-aurelius"],
+    work_title: "Meditations (Book X)",
+    work_year: "c. 161–180 CE",
+    historical_era: "ancient-classical",
+    mood_tags: ["focus", "courage", "wisdom"],
+    occasion_tags: ["monday-motivation", "leadership"],
+    character_count: "Waste no more time arguing about what a good man should be. Be one.".length,
+    day_of_year: 7,
+  },
+  {
+    id: 8,
+    slug: "life-without-reflection-is-unlived",
+    quote_text: "Difficulties strengthen the mind, as labor does the body.",
+    author: SEED_AUTHORS.seneca,
+    work_title: "Moral Letters",
+    work_year: "c. 65 CE",
+    historical_era: "ancient-classical",
+    mood_tags: ["resilience", "focus"],
+    occasion_tags: ["adversity", "monday-motivation"],
+    character_count: "Difficulties strengthen the mind, as labor does the body.".length,
+    day_of_year: 8,
+  },
+];
