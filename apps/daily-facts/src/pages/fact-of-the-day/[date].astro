@@ -1,0 +1,84 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildClaimReviewSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { FactCorpusLoader } from "../../lib/corpus/loader.ts";
+
+export const prerender = false;
+
+const { date } = Astro.params;
+const targetDate = date ? new Date(date) : new Date();
+const dateStr = targetDate.toISOString().split("T")[0];
+
+const loader = new FactCorpusLoader();
+const fact = loader.getFactOfTheDay(targetDate);
+
+const siteTitle = `Fact of the Day for ${dateStr} | FactSphere`;
+const canonicalUrl = Astro.site ? new URL(`fact-of-the-day/${dateStr}`, Astro.site).href : `https://daily-facts.suite.local/fact-of-the-day/${dateStr}`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description: `Historical archive fact for ${dateStr}: ${fact.fact_text}`,
+  canonicalUrl,
+  siteName: "FactSphere",
+});
+
+const claimSchema = buildClaimReviewSchema({
+  claimReviewed: fact.fact_text,
+  reviewUrl: canonicalUrl,
+  ratingValue: "5",
+  authorName: "FactSphere Editorial Board",
+  authorUrl: "https://daily-facts.suite.local/editorial-policy",
+  appearanceDate: dateStr,
+});
+
+const adSlot = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "2001001002",
+  format: "rectangle-medium",
+  testMode: true,
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={claimSchema} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "FactSphere", navItems: [{ label: "Today", href: "/today" }, { label: "Categories", href: "/" }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2.5rem; max-width: 800px;">
+      <div style="font-size: 0.8125rem; font-weight: 700; color: var(--accent-primary); margin-bottom: 8px;">
+        ARCHIVE REWIND &bull; {dateStr}
+      </div>
+
+      <article class="suite-card" style="padding: 2.5rem 2rem; margin-bottom: 2rem;">
+        <h1 style="font-size: 2rem; font-weight: 800; line-height: 1.35; margin-bottom: 1.5rem;">
+          "{fact.fact_text}"
+        </h1>
+        <p style="font-size: 1.0625rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.5rem;">
+          {fact.explanation}
+        </p>
+        <div style="font-size: 0.875rem; color: var(--text-muted);">
+          Primary Source: <a href={fact.source_url} target="_blank" rel="noopener noreferrer" style="color: var(--accent-primary); text-decoration: underline;">{fact.source_name}</a>
+        </div>
+      </article>
+
+      <Fragment set:html={adSlot} />
+
+      <div style="display: flex; justify-content: space-between; margin-top: 2rem;">
+        <a href="/today" class="suite-btn-secondary">&larr; Return to Today's Fact</a>
+      </div>
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ siteTitle: "FactSphere", tagline: "Daily factual archives." })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>

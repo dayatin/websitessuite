@@ -1,0 +1,123 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildClaimReviewSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { FactCorpusLoader } from "../lib/corpus/loader.ts";
+
+const loader = new FactCorpusLoader();
+const today = new Date();
+const fact = loader.getFactOfTheDay(today);
+const dateStr = today.toISOString().split("T")[0];
+
+const siteTitle = `Fact of the Day: ${fact.fact_text} | FactSphere`;
+const canonicalUrl = Astro.site ? new URL("today", Astro.site).href : "https://daily-facts.suite.local/today";
+const description = `Discover today's verified fact (${dateStr}): ${fact.fact_text}. Primary source verification from ${fact.source_name}.`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "FactSphere",
+  type: "article",
+  publishedTime: today.toISOString(),
+});
+
+const claimSchema = buildClaimReviewSchema({
+  claimReviewed: fact.fact_text,
+  reviewUrl: canonicalUrl,
+  ratingValue: fact.is_myth ? "1" : "5",
+  bestRating: "5",
+  alternateName: fact.is_myth ? "Debunked Myth" : "Verified Scientific Fact",
+  authorName: "FactSphere Editorial Board",
+  authorUrl: "https://daily-facts.suite.local/editorial-policy",
+  appearanceDate: dateStr,
+});
+
+const adLeaderboard = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "2001001001",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const affiliateCard = renderAffiliateCardHTML({
+  title: "Expand Your Scientific Knowledge",
+  description: "Dive deeper into physics, space exploration, and natural history with curated audiobooks and verified documentary series.",
+  ctaText: "Listen on Audible Free",
+  affiliateUrl: "https://partner.suite.local/audible-trial",
+  merchantName: "Audible",
+  badge: "Staff Pick",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={claimSchema} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "FactSphere", navItems: [{ label: "Today", href: "/today" }, { label: "Categories", href: "/" }, { label: "Quiz", href: "/" }, { label: "RSS Feed", href: "/feed.xml", external: true }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2.5rem; max-width: 820px;">
+      <!-- Date & Badge Header -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px;">
+        <span style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-primary);">
+          ✨ Fact of the Day &bull; {dateStr}
+        </span>
+        <span style="font-size: 0.75rem; color: var(--text-muted); background: var(--bg-surface-elevated); padding: 4px 10px; border-radius: 9999px; border: 1px solid var(--border-subtle);">
+          ⏱️ {fact.reading_time_seconds}s read
+        </span>
+      </div>
+
+      <!-- Main Fact Showcase Card -->
+      <article class="suite-card" style="padding: 2.5rem 2rem; margin-bottom: 2rem;">
+        <div style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; color: var(--accent-secondary); margin-bottom: 8px;">
+          Category: {fact.category.toUpperCase()} {fact.subtopic ? `&bull; ${fact.subtopic}` : ""}
+        </div>
+
+        <h1 style="font-size: 2rem; font-weight: 800; line-height: 1.35; margin-bottom: 1.5rem; color: var(--text-primary);">
+          "{fact.fact_text}"
+        </h1>
+
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 1.5rem; margin-top: 1.5rem;">
+          <h2 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem;">Verified Scientific Context:</h2>
+          <p style="font-size: 1.0625rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.5rem;">
+            {fact.explanation}
+          </p>
+        </div>
+
+        <!-- Citation Badge -->
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; background: var(--bg-base); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-subtle);">
+          <div style="font-size: 0.875rem;">
+            <span style="color: var(--text-muted);">Verified Primary Source:</span>
+            <strong style="margin-left: 4px;">{fact.source_name}</strong>
+          </div>
+          <a
+            href={fact.source_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="suite-btn-secondary"
+            style="min-height: 36px; padding: 4px 14px; font-size: 0.8125rem;"
+          >
+            Review Citation &rarr;
+          </a>
+        </div>
+      </article>
+
+      <!-- Zero-CLS AdSlot -->
+      <Fragment set:html={adLeaderboard} />
+
+      <!-- Affiliate Partner Recommendation -->
+      <Fragment set:html={affiliateCard} />
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ siteTitle: "FactSphere", tagline: "Fact-checked knowledge updated every 24 hours." })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>
