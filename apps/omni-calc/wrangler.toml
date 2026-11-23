@@ -1,0 +1,15 @@
+name = "suite-omni-calc"
+compatibility_date = "2026-11-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "./dist"
+
+# Cloudflare D1 Database Binding
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "suite_omni_calc_db"
+# database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Cloudflare KV Namespace Binding
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

@@ -1,0 +1,236 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { CALCULATORS } from "../lib/calc-engine.ts";
+
+const siteTitle = "OmniCalc Hub: Free Financial, Health & Mathematics Calculators";
+const canonicalUrl = Astro.site ? new URL("", Astro.site).href : "https://omni-calc.suite.local/";
+const description = "Free interactive calculators for mortgage amortization, compound interest, BMI body mass index, TDEE caloric maintenance, and percentage math. Fast, accurate, and ad-compliant.";
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "OmniCalc Hub",
+  type: "website",
+});
+
+const appSchema = buildWebApplicationSchema({
+  name: "OmniCalc Multi-Calculator Hub",
+  url: canonicalUrl,
+  description,
+  applicationCategory: "UtilitiesApplication",
+});
+
+const adSlotTop = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "6001001001",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const adSlotBottom = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "6001001002",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "High-Yield Savings & Automated Wealth Investing",
+  description: "Earn 10x the national average on your liquid cash reserves with FDIC insurance and zero account management fees.",
+  ctaText: "Explore High-Yield Accounts",
+  affiliateUrl: "https://partner.suite.local/high-yield-banking",
+  merchantName: "Fintech Wealth Partner",
+  badge: "Finance Recommended",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={appSchema} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+    <style>
+      .calc-card-item {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md, 8px);
+        padding: 1.5rem;
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .calc-card-item:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent-primary);
+        box-shadow: 0 8px 20px -4px rgba(0,0,0,0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "OmniCalc", navItems: [{ label: "Calculators", href: "/" }, { label: "Finance", href: "/#finance" }, { label: "Health", href: "/#health" }, { label: "About", href: "/about" }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2rem; max-width: 1050px;">
+      <!-- Hero -->
+      <section style="text-align: center; margin-bottom: 2.5rem;">
+        <span class="suite-badge" style="margin-bottom: 8px;">📊 Precision Math & Financial Models</span>
+        <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px;">
+          Multi-Domain Calculator Suite
+        </h1>
+        <p style="font-size: 1rem; color: var(--text-secondary); max-width: 650px; margin-inline: auto;">
+          Free interactive calculators for mortgages, investment compounding, health metrics, and daily math. Clean, zero-CLS, and accurate to the cent.
+        </p>
+      </section>
+
+      <!-- Monetization: Top Leaderboard -->
+      <div style="margin-bottom: 2rem;">
+        <Fragment set:html={adSlotTop} />
+      </div>
+
+      <!-- Quick Interactive Live Widget: Instant Mortgage & BMI Tabs -->
+      <section class="suite-card" style="padding: 1.75rem; margin-bottom: 2.5rem; border-top: 4px solid var(--accent-primary);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 10px;">
+          <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0;">
+            ⚡ Quick Calculator: Loan & Mortgage Estimator
+          </h2>
+          <span style="font-size: 0.8125rem; color: var(--text-muted);">Real-time amortization</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
+          <div>
+            <label for="home-loan-amount" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+              Loan Principal Amount ($):
+            </label>
+            <input type="number" id="home-loan-amount" value="400000" step="5000" class="suite-input" style="width: 100%; padding: 8px 12px; font-size: 1rem;" />
+          </div>
+
+          <div>
+            <label for="home-interest-rate" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+              Annual Interest Rate (%):
+            </label>
+            <input type="number" id="home-interest-rate" value="6.5" step="0.1" class="suite-input" style="width: 100%; padding: 8px 12px; font-size: 1rem;" />
+          </div>
+
+          <div>
+            <label for="home-loan-term" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+              Loan Term:
+            </label>
+            <select id="home-loan-term" class="suite-select" style="width: 100%; padding: 8px 12px; font-size: 1rem;">
+              <option value="30" selected>30 Years (Fixed)</option>
+              <option value="15">15 Years (Fixed)</option>
+              <option value="20">20 Years (Fixed)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Result Highlights -->
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm, 6px); padding: 1.25rem; display: flex; justify-content: space-around; flex-wrap: wrap; gap: 1.5rem; text-align: center;">
+          <div>
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">MONTHLY PAYMENT</div>
+            <div id="home-res-monthly" style="font-size: 1.75rem; font-weight: 800; color: #10b981; font-family: monospace;">$2,528.27</div>
+          </div>
+          <div>
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">TOTAL INTEREST</div>
+            <div id="home-res-interest" style="font-size: 1.75rem; font-weight: 800; color: var(--text-primary); font-family: monospace;">$510,177.20</div>
+          </div>
+          <div>
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">TOTAL PAYMENTS</div>
+            <div id="home-res-total" style="font-size: 1.75rem; font-weight: 800; color: var(--text-primary); font-family: monospace;">$910,177.20</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Calculator Catalog Grid -->
+      <section style="margin-bottom: 2.5rem;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.25rem;">
+          Explore All Calculators ({CALCULATORS.length})
+        </h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem;">
+          {CALCULATORS.map((calc) => (
+            <a href={`/calc/${calc.slug}`} class="calc-card-item">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span style="font-size: 2rem;">{calc.icon}</span>
+                  <span class="suite-badge" style="font-size: 0.6875rem; text-transform: uppercase;">
+                    {calc.category}
+                  </span>
+                </div>
+                <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 6px 0;">
+                  {calc.title}
+                </h3>
+                <p style="font-size: 0.8125rem; color: var(--text-secondary); line-height: 1.5; margin: 0 0 1rem 0;">
+                  {calc.description}
+                </p>
+              </div>
+
+              <div style="font-size: 0.8125rem; font-weight: 600; color: var(--accent-primary);">
+                Calculate Now &rarr;
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <!-- Monetization: Contextual High Yield Offer -->
+      <Fragment set:html={affiliateOffer} />
+
+      <!-- Monetization: Bottom Rectangle AdSlot -->
+      <section style="margin-top: 2rem;">
+        <Fragment set:html={adSlotBottom} />
+      </section>
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ authorName: "OmniCalc Editorial", currentYear: 2026, privacyUrl: "/privacy-policy", termsUrl: "/terms-of-service", editorialUrl: "/editorial-policy", contactUrl: "/contact" })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+
+    <script is:inline>
+      (() => {
+        const principalInp = document.getElementById("home-loan-amount");
+        const rateInp = document.getElementById("home-interest-rate");
+        const termSelect = document.getElementById("home-loan-term");
+        const resMonthly = document.getElementById("home-res-monthly");
+        const resInterest = document.getElementById("home-res-interest");
+        const resTotal = document.getElementById("home-res-total");
+
+        function recalculate() {
+          if (!principalInp || !rateInp || !termSelect) return;
+          const p = parseFloat(principalInp.value) || 0;
+          const r = (parseFloat(rateInp.value) || 0) / 100 / 12;
+          const n = (parseInt(termSelect.value, 10) || 30) * 12;
+
+          let monthly = 0;
+          if (r === 0) {
+            monthly = p / n;
+          } else {
+            monthly = (p * (r * Math.pow(1 + r, n))) / (Math.pow(1 + r, n) - 1);
+          }
+
+          const total = monthly * n;
+          const interest = total - p;
+
+          const fmt = (v) => "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          if (resMonthly) resMonthly.textContent = fmt(monthly);
+          if (resInterest) resInterest.textContent = fmt(Math.max(0, interest));
+          if (resTotal) resTotal.textContent = fmt(Math.max(0, total));
+        }
+
+        [principalInp, rateInp, termSelect].forEach(el => {
+          if (el) el.addEventListener("input", recalculate);
+        });
+
+        recalculate();
+      })();
+    </script>
+  </body>
+</html>

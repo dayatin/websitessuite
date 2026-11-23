@@ -1,0 +1,241 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildFAQSchema, buildBreadcrumbSchema, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { CALCULATORS } from "../../lib/calc-engine.ts";
+
+export function getStaticPaths() {
+  return CALCULATORS.map((calc) => ({
+    params: { slug: calc.slug },
+    props: { calcMeta: calc },
+  }));
+}
+
+const { calcMeta } = Astro.props;
+
+const siteTitle = `${calcMeta.title} | Free Online Calculator | OmniCalc`;
+const canonicalUrl = Astro.site
+  ? new URL(`calc/${calcMeta.slug}`, Astro.site).href
+  : `https://omni-calc.suite.local/calc/${calcMeta.slug}`;
+const description = `${calcMeta.description} ${calcMeta.formulaDescription} Free, instant results with zero Cumulative Layout Shift.`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "OmniCalc Hub",
+  type: "article",
+});
+
+const appSchema = buildWebApplicationSchema({
+  name: calcMeta.title,
+  url: canonicalUrl,
+  description: calcMeta.description,
+  applicationCategory: "UtilitiesApplication",
+});
+
+const faqs = [
+  {
+    question: `How does the ${calcMeta.title} work?`,
+    answer: calcMeta.formulaDescription,
+  },
+  {
+    question: "Is this calculator free to use and ad-compliant?",
+    answer: "Yes, all OmniCalc tools are 100% free and engineered to adhere to strict Google Webmaster and AdSense policies with zero Cumulative Layout Shift (CLS=0.000).",
+  },
+];
+
+const faqSchema = buildFAQSchema(faqs);
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: "https://omni-calc.suite.local/" },
+  { name: "Calculators", url: "https://omni-calc.suite.local/#calculators" },
+  { name: calcMeta.title, url: canonicalUrl },
+]);
+
+const adSlotTop = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "6001001003",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const adSlotBottom = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "6001001004",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Professional Financial Planning & Certified Advisory",
+  description: "Connect with fee-only fiduciary financial advisors to optimize your mortgage structure, retirement compound growth, and tax strategies.",
+  ctaText: "Find Certified Advisor",
+  affiliateUrl: "https://partner.suite.local/financial-advisors",
+  merchantName: "Wealth Advisory Partner",
+  badge: "Fiduciary Partner",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={appSchema} />
+    <script type="application/ld+json" is:inline set:html={faqSchema} />
+    <script type="application/ld+json" is:inline set:html={breadcrumbSchema} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "OmniCalc", navItems: [{ label: "Calculators", href: "/" }, { label: "Finance", href: "/#finance" }, { label: "Health", href: "/#health" }, { label: "About", href: "/about" }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2rem; max-width: 860px;">
+      <!-- Breadcrumb -->
+      <nav aria-label="Breadcrumb" style="margin-bottom: 1.25rem; font-size: 0.8125rem; color: var(--text-muted);">
+        <a href="/" style="color: var(--text-muted); text-decoration: none;">Home</a>
+        <span style="margin-inline: 6px;">/</span>
+        <span style="color: var(--text-secondary);">Calculators</span>
+        <span style="margin-inline: 6px;">/</span>
+        <span style="color: var(--text-primary); font-weight: 600;">{calcMeta.title}</span>
+      </nav>
+
+      <!-- Calculator Hero Header -->
+      <header class="suite-card" style="padding: 2rem; margin-bottom: 2rem; border-top: 4px solid var(--accent-primary);">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+          <span style="font-size: 2.25rem;">{calcMeta.icon}</span>
+          <div>
+            <span class="suite-badge" style="font-size: 0.6875rem; text-transform: uppercase;">
+              {calcMeta.category}
+            </span>
+            <h1 style="font-size: 1.875rem; font-weight: 800; margin: 4px 0 0 0;">
+              {calcMeta.title}
+            </h1>
+          </div>
+        </div>
+        <p style="font-size: 1rem; color: var(--text-secondary); line-height: 1.6; margin-top: 10px;">
+          {calcMeta.description}
+        </p>
+      </header>
+
+      <!-- Monetization: Top Leaderboard -->
+      <div style="margin-bottom: 2rem;">
+        <Fragment set:html={adSlotTop} />
+      </div>
+
+      <!-- Interactive Calculation Panel -->
+      <section class="suite-card" style="padding: 1.75rem; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">
+          🔢 Calculator Inputs & Parameters
+        </h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+          <div>
+            <label for="calc-inp-1" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+              Primary Value:
+            </label>
+            <input type="number" id="calc-inp-1" value="10000" class="suite-input" style="width: 100%; padding: 8px 12px; font-size: 1rem;" />
+          </div>
+
+          <div>
+            <label for="calc-inp-2" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+              Rate / Secondary Value (% or units):
+            </label>
+            <input type="number" id="calc-inp-2" value="7" step="0.1" class="suite-input" style="width: 100%; padding: 8px 12px; font-size: 1rem;" />
+          </div>
+
+          <div>
+            <label for="calc-inp-3" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+              Time Period (Years / Frequency):
+            </label>
+            <input type="number" id="calc-inp-3" value="10" class="suite-input" style="width: 100%; padding: 8px 12px; font-size: 1rem;" />
+          </div>
+        </div>
+
+        <!-- Result Box -->
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm, 6px); padding: 1.25rem; text-align: center;">
+          <div style="font-size: 0.8125rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">
+            CALCULATED RESULT
+          </div>
+          <div id="calc-result-display" style="font-size: 2.25rem; font-weight: 800; font-family: monospace; color: #10b981;">
+            $19,671.51
+          </div>
+        </div>
+      </section>
+
+      <!-- Formula & Methodology -->
+      <section class="suite-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 8px;">
+          📐 Mathematical Formula & Methodology
+        </h2>
+        <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6; margin: 0;">
+          {calcMeta.formulaDescription}
+        </p>
+      </section>
+
+      <!-- FAQs -->
+      <section class="suite-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 1rem;">
+          Frequently Asked Questions
+        </h2>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          {faqs.map((f) => (
+            <div style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem;">
+              <h3 style="font-size: 0.9375rem; font-weight: 600; margin-bottom: 4px;">{f.question}</h3>
+              <p style="font-size: 0.8125rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">{f.answer}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Monetization: Contextual Advisory Offer & AdSlot -->
+      <Fragment set:html={affiliateOffer} />
+      <section style="margin-top: 2rem;">
+        <Fragment set:html={adSlotBottom} />
+      </section>
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ authorName: "OmniCalc Editorial", currentYear: 2026, privacyUrl: "/privacy-policy", termsUrl: "/terms-of-service", editorialUrl: "/editorial-policy", contactUrl: "/contact" })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+
+    <script is:inline define:vars={{ slug: calcMeta.slug }}>
+      (() => {
+        const i1 = document.getElementById("calc-inp-1");
+        const i2 = document.getElementById("calc-inp-2");
+        const i3 = document.getElementById("calc-inp-3");
+        const resDisplay = document.getElementById("calc-result-display");
+
+        function update() {
+          if (!i1 || !i2 || !i3 || !resDisplay) return;
+          const v1 = parseFloat(i1.value) || 0;
+          const v2 = parseFloat(i2.value) || 0;
+          const v3 = parseFloat(i3.value) || 0;
+
+          if (slug.includes("mortgage")) {
+            const r = (v2 / 100) / 12;
+            const n = v3 * 12;
+            const m = r === 0 ? v1 / n : (v1 * (r * Math.pow(1 + r, n))) / (Math.pow(1 + r, n) - 1);
+            resDisplay.textContent = "$" + m.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " / mo";
+          } else if (slug.includes("compound")) {
+            const r = v2 / 100;
+            const fv = v1 * Math.pow(1 + r / 12, 12 * v3);
+            resDisplay.textContent = "$" + fv.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          } else if (slug.includes("bmi")) {
+            const hm = v2 / 100;
+            const bmi = hm > 0 ? (v1 / (hm * hm)).toFixed(1) : "0";
+            resDisplay.textContent = bmi + " BMI";
+          } else {
+            const diff = v2 - v1;
+            const pct = v1 !== 0 ? ((diff / Math.abs(v1)) * 100).toFixed(2) : "0";
+            resDisplay.textContent = (pct >= 0 ? "+" : "") + pct + "%";
+          }
+        }
+
+        [i1, i2, i3].forEach(el => el?.addEventListener("input", update));
+        update();
+      })();
+    </script>
+  </body>
+</html>
