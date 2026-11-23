@@ -10,7 +10,7 @@
 | Stage 1 | Phase 1.2 | 1.2.4 | Cloudflare Kit & DR Abstraction (`@suite/cloudflare-kit`) | **DONE** | Validated (D1/SQLite DR abstraction, KV SWR cache, Turnstile, RateLimiter, 5/5 tests) | 2026-11-23 |
 | Stage 1 | Phase 1.3 | 1.3.1 | Selective CI/CD & DR Sync Workflows | **DONE** | Validated (Affected CI, Selective/Matrix deploy, Instant Rollback, DR Sync) | 2026-11-23 |
 | Stage 1 | Phase 1.3 | 1.3.2 | 1-Command App Scaffolder (`tools/create-suite-app`) | **DONE** | Validated (Automated Astro 5 scaffolder, pre-wired with 5 themes, SEO, AdSense, test passes) | 2026-11-23 |
-| **Stage 2** | **Phase 2.1** | 2.1.1 | URL Shortener App Scaffold & D1/KV Data Architecture | PENDING | - | - |
+| **Stage 2** | **Phase 2.1** | 2.1.1 | URL Shortener App Scaffold & D1/KV Data Architecture | **DONE** | Validated (D1 Relational Schema, Base62 Encoder, Sub-10ms Redirect Engine, 4/4 Tests) | 2026-11-23 |
 | Stage 2 | Phase 2.1 | 2.1.2 | Anti-Abuse, Phishing Guard & Safe Unshortener (`/inspect`) | PENDING | - | - |
 | Stage 2 | Phase 2.2 | 2.2.1 | Shortener Workspace, Custom QR Studio & UTM Builder | PENDING | - | - |
 | Stage 2 | Phase 2.2 | 2.2.2 | Link-in-Bio Micro-Pages & Programmatic SEO Matrix | PENDING | - | - |

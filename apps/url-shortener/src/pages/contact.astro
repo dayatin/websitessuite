@@ -1,0 +1,26 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { generateContactPageHTML } from "@suite/compliance-pages";
+
+const siteTitle = "OmniLink URL Shortener";
+const contactHtml = generateContactPageHTML({
+  siteName: siteTitle,
+  siteUrl: Astro.site?.toString() || "https://url-shortener.suite.local",
+  supportEmail: "support@" + cleanSlug + ".suite.local",
+});
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Contact Support | {siteTitle}</title>
+    <script is:inline set:html={getAntiFOUCScript()} />
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle, navItems: [{ label: "Home", href: "/" }] })} />
+    <main class="suite-container" style="padding-block: 2rem;">
+      <Fragment set:html={contactHtml} />
+    </main>
+    <Fragment set:html={renderFooterHTML({ siteTitle, tagline: "Contact Us." })} />
+  </body>
+</html>

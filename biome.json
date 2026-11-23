@@ -14,7 +14,8 @@
       "**/.turbo/**",
       "**/.wrangler/**",
       "**/package-lock.json",
-      "**/pnpm-lock.yaml"
+      "**/pnpm-lock.yaml",
+      "**/*.astro"
     ]
   },
   "formatter": {
