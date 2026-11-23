@@ -12,7 +12,7 @@
 | Stage 1 | Phase 1.3 | 1.3.2 | 1-Command App Scaffolder (`tools/create-suite-app`) | **DONE** | Validated (Automated Astro 5 scaffolder, pre-wired with 5 themes, SEO, AdSense, test passes) | 2026-11-23 |
 | **Stage 2** | **Phase 2.1** | 2.1.1 | URL Shortener App Scaffold & D1/KV Data Architecture | **DONE** | Validated (D1 Relational Schema, Base62 Encoder, Sub-10ms Redirect Engine, 4/4 Tests) | 2026-11-23 |
 | Stage 2 | Phase 2.1 | 2.1.2 | Anti-Abuse, Phishing Guard & Safe Unshortener (`/inspect`) | **DONE** | Validated (SSRF Protection, Phishing Heuristics, /unshorten & /inspect, 4/4 Tests) | 2026-11-23 |
-| Stage 2 | Phase 2.2 | 2.2.1 | Shortener Workspace, Custom QR Studio & UTM Builder | PENDING | - | - |
+| Stage 2 | Phase 2.2 | 2.2.1 | Shortener Workspace, Custom QR Studio & UTM Builder | **DONE** | Validated (Multi-tab studio, Vector QR SVG engine, UTM presets & query builder, 3/3 tests) | 2026-11-23 |
 | Stage 2 | Phase 2.2 | 2.2.2 | Link-in-Bio Micro-Pages & Programmatic SEO Matrix | PENDING | - | - |
 | **Stage 3** | **Phase 3.1** | 3.1.1 | Daily Facts App Scaffold, Corpus & Seed Pipeline | PENDING | - | - |
 | Stage 3 | Phase 3.1 | 3.1.2 | Daily Rotation Engine, Cron Worker & Archives | PENDING | - | - |

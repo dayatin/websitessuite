@@ -11,16 +11,18 @@
     "typecheck": "astro check"
   },
   "dependencies": {
-    "@suite/ui-theme": "workspace:*",
-    "@suite/seo-core": "workspace:*",
+    "@suite/cloudflare-kit": "workspace:*",
     "@suite/compliance-pages": "workspace:*",
     "@suite/monetization": "workspace:*",
-    "@suite/cloudflare-kit": "workspace:*",
-    "astro": "^5.4.0"
+    "@suite/seo-core": "workspace:*",
+    "@suite/ui-theme": "workspace:*",
+    "astro": "^5.4.0",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
     "@suite/config": "workspace:*",
+    "@types/qrcode": "^1.5.6",
     "typescript": "^5.8.2"
   }
 }

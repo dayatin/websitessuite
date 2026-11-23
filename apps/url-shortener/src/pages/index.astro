@@ -1,54 +1,73 @@
 ---
 import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
-import { renderMetaTags, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderMetaTags, buildWebApplicationSchema, buildFAQSchema } from "@suite/seo-core";
 import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { UTM_PRESETS } from "../lib/utm-builder.ts";
 
-const siteTitle = "OmniLink URL Shortener";
-const siteUrl = Astro.site?.toString() || "https://url-shortener.suite.local";
-const description = "Ultra-fast, accessible, and privacy-first ${siteTitle} platform.";
+const siteTitle = "OmniLink | Ultra-Fast URL Shortener, QR Studio & UTM Builder";
+const canonicalUrl = Astro.site ? Astro.site.toString() : "https://url-shortener.suite.local/";
+const description = "Free high-speed link shortener, custom branded QR code studio, and bulk UTM campaign builder. Safe redirects, zero tracking cookies, and real-time link analytics.";
 
 const metaHtml = renderMetaTags({
-  title: `${siteTitle} | Fast, Accessible & Free`,
+  title: siteTitle,
   description,
-  canonicalUrl: siteUrl,
-  siteName: siteTitle,
+  canonicalUrl,
+  siteName: "OmniLink",
 });
 
 const schemaJson = buildWebApplicationSchema({
-  name: siteTitle,
-  url: siteUrl,
+  name: "OmniLink URL Shortener & QR Studio",
+  url: canonicalUrl,
   description,
   applicationCategory: "UtilitiesApplication",
 });
 
+const faqItems = [
+  {
+    question: "How long do shortened links remain active on OmniLink?",
+    answer: "By default, all links created on OmniLink are permanent and do not expire. You may optionally set a custom expiration duration (e.g., 24 hours, 7 days, 30 days) during link creation."
+  },
+  {
+    question: "Are OmniLink short URLs safe from malware and spam?",
+    answer: "Yes. Every submitted URL is checked in real-time by our automated security scanner, which prevents SSRF, homoglyph deception, phishing keywords, and malicious redirects."
+  },
+  {
+    question: "Can I download vector SVG QR codes for print?",
+    answer: "Absolutely. Our integrated QR Studio exports high-resolution vector SVG and 300-DPI PNG codes compatible with professional print layouts, flyers, menus, and business cards."
+  }
+];
+
+const schemaFaq = buildFAQSchema(faqItems);
+
 const headerHtml = renderHeaderHTML({
-  siteTitle,
+  siteTitle: "OmniLink",
   navItems: [
-    { label: "Home", href: "/" },
+    { label: "Shortener", href: "/" },
+    { label: "Unshorten", href: "/unshorten" },
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ],
 });
 
 const footerHtml = renderFooterHTML({
-  siteTitle,
-  tagline: "Instant, accessible, and privacy-first digital utility suite.",
+  siteTitle: "OmniLink",
+  tagline: "Ultra-fast, secure, and privacy-first URL shortening and QR generator.",
 });
 
-const adSlotHtml = renderAdSlotHTML({
+const adSlot = renderAdSlotHTML({
   client: "ca-pub-0000000000000000",
-  slotId: "1234567890",
+  slotId: "1002003000",
   format: "leaderboard",
   testMode: true,
 });
 
-const affiliateHtml = renderAffiliateCardHTML({
-  title: "Featured Productivity Upgrade",
-  description: "Recommended high-performance tools selected by our editorial team.",
-  ctaText: "Explore Partner",
-  affiliateUrl: "https://partner.suite.local",
-  merchantName: "SuitePartner",
-  badge: "Recommended",
+const affiliateCard = renderAffiliateCardHTML({
+  title: "Build High-Converting Landing Pages",
+  description: "Connect your shortened links to custom high-speed landing pages with our recommended design partners.",
+  ctaText: "Explore Partner Tools",
+  affiliateUrl: "https://partner.suite.local/builder",
+  merchantName: "PageForge",
+  badge: "Featured Partner",
 });
 ---
 
@@ -61,33 +80,264 @@ const affiliateHtml = renderAffiliateCardHTML({
     <Fragment set:html={getConsentModeScript()} />
     <Fragment set:html={metaHtml} />
     <script type="application/ld+json" is:inline set:html={schemaJson} />
+    <script type="application/ld+json" is:inline set:html={schemaFaq} />
     <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+    <style>
+      .tab-btn {
+        padding: 10px 18px;
+        font-weight: 600;
+        border-radius: 8px;
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .tab-btn.active {
+        background: var(--bg-surface-elevated);
+        border-color: var(--border-strong);
+        color: var(--text-primary);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      }
+      .tab-pane {
+        display: none;
+      }
+      .tab-pane.active {
+        display: block;
+      }
+    </style>
   </head>
   <body>
     <Fragment set:html={headerHtml} />
+
     <main class="suite-container" style="flex: 1; padding-block: 2.5rem;">
       <section style="text-align: center; margin-bottom: 2rem;">
-        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem;">{siteTitle}</h1>
-        <p style="font-size: 1.125rem; color: var(--text-secondary); max-width: 650px; margin-inline: auto;">
-          {description}
+        <h1 style="font-size: 2.75rem; font-weight: 800; margin-bottom: 0.75rem; letter-spacing: -0.02em;">
+          Fast, Smart & Secure URL Shortener
+        </h1>
+        <p style="font-size: 1.125rem; color: var(--text-secondary); max-width: 680px; margin-inline: auto;">
+          Shorten links, generate customized vector QR codes, and build campaign UTM tags in milliseconds.
         </p>
       </section>
 
-      <!-- Zero-CLS Ad Unit -->
-      <Fragment set:html={adSlotHtml} />
+      <!-- Zero-CLS Leaderboard Ad Unit -->
+      <Fragment set:html={adSlot} />
 
-      <!-- Interactive Core Workspace Area -->
-      <div class="suite-card" style="min-height: 280px; display: flex; align-items: center; justify-content: center; text-align: center;">
-        <div>
-          <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Interactive Studio Space</h2>
-          <p style="color: var(--text-muted);">Interactive components ready to plug in.</p>
+      <!-- Interactive Multi-Tool Studio Box -->
+      <div class="suite-card" style="max-width: 820px; margin-inline: auto; padding: 2rem; margin-bottom: 2.5rem;">
+        <!-- Tab Navigation -->
+        <div style="display: flex; gap: 8px; margin-bottom: 1.75rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; flex-wrap: wrap;">
+          <button type="button" class="tab-btn active" data-tab="tab-shortener">🔗 URL Shortener</button>
+          <button type="button" class="tab-btn" data-tab="tab-qr">📱 Custom QR Studio</button>
+          <button type="button" class="tab-btn" data-tab="tab-utm">📊 UTM Campaign Builder</button>
+        </div>
+
+        <!-- TAB 1: Shortener -->
+        <div id="tab-shortener" class="tab-pane active">
+          <form id="shorten-form" style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <input
+                type="url"
+                id="target-url-input"
+                required
+                placeholder="Paste your long destination URL (e.g. https://...)"
+                style="flex: 1 1 340px; min-height: 48px; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-surface-elevated); color: var(--text-primary); font-size: 1rem;"
+              />
+              <button type="submit" class="suite-btn-primary" style="padding: 12px 28px; font-size: 1rem;">
+                Shorten Link &rarr;
+              </button>
+            </div>
+
+            <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.875rem; color: var(--text-secondary);">
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <span>Custom Alias:</span>
+                <input
+                  type="text"
+                  id="custom-alias-input"
+                  placeholder="optional-alias"
+                  style="min-height: 36px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-subtle); background: var(--bg-surface-elevated); color: var(--text-primary);"
+                />
+              </label>
+
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" id="preview-mode-input" />
+                <span>Security Preview Mode</span>
+              </label>
+            </div>
+          </form>
+
+          <div id="shorten-result" style="display: none; margin-top: 1.5rem; padding: 1.25rem; border-radius: 8px; background: var(--bg-base); border: 1px solid var(--border-strong);">
+            <div style="font-size: 0.8125rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Your Shortened Link:</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <a id="short-link-anchor" href="#" target="_blank" style="font-size: 1.25rem; font-weight: 700; color: var(--accent-primary); word-break: break-all;"></a>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" id="copy-link-btn" class="suite-btn-secondary" style="min-height: 38px; font-size: 0.875rem;">📋 Copy</button>
+                <a id="inspect-link-anchor" href="#" class="suite-btn-secondary" style="min-height: 38px; font-size: 0.875rem;">🛡️ Inspect</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: Custom QR Studio -->
+        <div id="tab-qr" class="tab-pane">
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <input
+              type="text"
+              id="qr-text-input"
+              placeholder="Enter URL or text for QR code..."
+              style="width: 100%; min-height: 48px; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-surface-elevated); color: var(--text-primary);"
+            />
+            <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.875rem;">
+              <label style="display: flex; align-items: center; gap: 6px;">
+                <span>Foreground:</span>
+                <input type="color" id="qr-dark-color" value="#000000" style="width: 38px; height: 38px; border: none; cursor: pointer; border-radius: 6px;" />
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px;">
+                <span>Background:</span>
+                <input type="color" id="qr-light-color" value="#ffffff" style="width: 38px; height: 38px; border: none; cursor: pointer; border-radius: 6px;" />
+              </label>
+              <button type="button" id="generate-qr-btn" class="suite-btn-primary" style="margin-left: auto; padding: 8px 18px;">
+                Generate QR Code
+              </button>
+            </div>
+            <div id="qr-preview-box" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 220px; padding: 1.5rem; background: var(--bg-base); border: 1px dashed var(--border-subtle); border-radius: 8px; margin-top: 10px;">
+              <div id="qr-svg-holder" style="background: #ffffff; padding: 12px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                <!-- QR Code SVG injected here -->
+                <span style="color: var(--text-muted); font-size: 0.875rem;">QR Code preview will appear here.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: UTM Campaign Builder -->
+        <div id="tab-utm" class="tab-pane">
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="font-size: 0.875rem; color: var(--text-secondary);">Select a quick platform preset:</div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              {UTM_PRESETS.map((preset) => (
+                <button type="button" class="suite-btn-secondary utm-preset-btn" data-source={preset.source} data-medium={preset.medium} data-campaign={preset.defaultCampaign} style="font-size: 0.8125rem; min-height: 36px; padding: 4px 12px;">
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 6px;">
+              <div>
+                <label style="font-size: 0.8125rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Website URL *</label>
+                <input type="url" id="utm-url-input" required placeholder="https://example.com" style="width: 100%; min-height: 40px; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); background: var(--bg-surface-elevated); color: var(--text-primary);" />
+              </div>
+              <div>
+                <label style="font-size: 0.8125rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Campaign Source (utm_source) *</label>
+                <input type="text" id="utm-source-input" placeholder="e.g. linkedin" style="width: 100%; min-height: 40px; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); background: var(--bg-surface-elevated); color: var(--text-primary);" />
+              </div>
+              <div>
+                <label style="font-size: 0.8125rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Campaign Medium (utm_medium) *</label>
+                <input type="text" id="utm-medium-input" placeholder="e.g. social" style="width: 100%; min-height: 40px; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); background: var(--bg-surface-elevated); color: var(--text-primary);" />
+              </div>
+              <div>
+                <label style="font-size: 0.8125rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Campaign Name (utm_campaign) *</label>
+                <input type="text" id="utm-campaign-input" placeholder="e.g. summer_launch" style="width: 100%; min-height: 40px; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); background: var(--bg-surface-elevated); color: var(--text-primary);" />
+              </div>
+            </div>
+
+            <div id="utm-result-box" style="margin-top: 12px; padding: 1rem; background: var(--bg-base); border: 1px solid var(--border-subtle); border-radius: 8px;">
+              <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;">Generated Campaign Link:</div>
+              <div id="utm-final-url" style="font-family: monospace; font-size: 0.875rem; word-break: break-all; color: var(--accent-primary);">https://example.com</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Affiliate Partner Card -->
-      <Fragment set:html={affiliateHtml} />
+      <!-- Affiliate Recommendation Card -->
+      <Fragment set:html={affiliateCard} />
+
+      <!-- Editorial SEO Depth & Guide -->
+      <section class="suite-card" style="max-width: 820px; margin-inline: auto; margin-block: 2.5rem; line-height: 1.7;">
+        <h2 style="font-size: 1.625rem; font-weight: 700; margin-bottom: 1rem;">Complete Guide to URL Shortening, QR Codes & Campaign Tracking</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1.25rem;">
+          Modern digital marketing campaigns require reliable attribution and clean links. Whether you are running paid advertisements, launching social media promotions, or printing QR codes on trade-show banners, understanding how link management and UTM parameters operate is critical to optimizing return on ad spend (ROAS).
+        </p>
+
+        <h3 style="font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem;">Why Combine Shortened URLs with UTM Parameters?</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+          UTM (Urchin Tracking Module) codes allow Google Analytics (GA4) and modern marketing platforms to accurately attribute pageviews, conversions, and revenue to specific channels. However, raw UTM links often contain dozens of characters, making them unsightly and prone to being truncated in text messages or social media bios. By building your UTM parameters and immediately shortening the final URL, you get complete tracking telemetry without sacrificing visual aesthetics.
+        </p>
+
+        <h3 style="font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem;">Frequently Asked Questions</h3>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          {faqItems.map((faq) => (
+            <div style="border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+              <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 4px;">{faq.question}</h4>
+              <p style="font-size: 0.9375rem; color: var(--text-secondary);">{faq.answer}</p>
+            </div>
+          ))}
+        </div>
+      </section>
     </main>
+
     <Fragment set:html={footerHtml} />
     <Fragment set:html={renderConsentBannerHTML()} />
+
+    <script is:inline>
+      // Tab switcher
+      const tabs = document.querySelectorAll(".tab-btn");
+      const panes = document.querySelectorAll(".tab-pane");
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          tabs.forEach((t) => t.classList.remove("active"));
+          panes.forEach((p) => p.classList.remove("active"));
+          tab.classList.add("active");
+          const target = tab.getAttribute("data-tab");
+          if (target) document.getElementById(target)?.classList.add("active");
+        });
+      });
+
+      // Shortener form submit handler
+      const form = document.getElementById("shorten-form");
+      if (form) {
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const urlInput = document.getElementById("target-url-input");
+          const aliasInput = document.getElementById("custom-alias-input");
+          const previewInput = document.getElementById("preview-mode-input");
+
+          try {
+            const res = await fetch("/api/shorten", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                url: urlInput.value,
+                customAlias: aliasInput.value || undefined,
+              }),
+            });
+            const data = await res.json();
+            if (data.success) {
+              const resBox = document.getElementById("shorten-result");
+              const anchor = document.getElementById("short-link-anchor");
+              const inspectAnchor = document.getElementById("inspect-link-anchor");
+              if (resBox && anchor && inspectAnchor) {
+                resBox.style.display = "block";
+                anchor.href = data.shortUrl;
+                anchor.textContent = data.shortUrl;
+                inspectAnchor.href = data.inspectUrl;
+              }
+            } else {
+              alert("Error: " + (data.error || "Failed to shorten link"));
+            }
+          } catch (err) {
+            alert("Network error: " + err.message);
+          }
+        });
+      }
+
+      // Copy Link button
+      document.getElementById("copy-link-btn")?.addEventListener("click", () => {
+        const text = document.getElementById("short-link-anchor")?.textContent;
+        if (text) {
+          navigator.clipboard.writeText(text);
+          alert("Short link copied to clipboard!");
+        }
+      });
+    </script>
   </body>
 </html>
