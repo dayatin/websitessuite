@@ -1,0 +1,300 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildBreadcrumbSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { TimeEngine } from "../lib/time-engine.ts";
+import { classifyHour, getStatusStyle } from "../lib/timeline-math.ts";
+import {
+  decodeMeetingFromQuery,
+  generateCalendarLinks,
+  generateChatTimestampTags,
+  generateICS,
+} from "../lib/meeting-planner.ts";
+
+const meeting = decodeMeetingFromQuery(Astro.url.searchParams);
+const engine = new TimeEngine();
+
+const hostCity = engine.getCityById(meeting.hostCityId) || engine.getCityById("london")!;
+const allCityIds = [hostCity.id, ...meeting.participantCityIds.filter((id) => id !== hostCity.id)];
+const cities = allCityIds.map((id) => engine.getCityById(id)).filter(Boolean);
+
+const siteTitle = `${meeting.title} | ChronoSpatial Meeting Planner`;
+const canonicalUrl = Astro.site ? new URL("meet", Astro.site).href : "https://world-clock.suite.local/meet";
+const description = `Cross-timezone meeting invitation for "${meeting.title}". View localized start times, add to Google Calendar/Outlook, or download .ics.`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "ChronoSpatial",
+  type: "article",
+});
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: "https://world-clock.suite.local/" },
+  { name: "Meeting Planner", url: canonicalUrl },
+]);
+
+const calLinks = generateCalendarLinks(meeting);
+const chatTags = generateChatTimestampTags(meeting);
+
+const adSlot = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "4001001003",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Professional HD Video Conferencing & Whiteboards",
+  description: "Crystal-clear global video meetings, automated AI notes, and instant transcription for remote engineering squads.",
+  ctaText: "Try Video Partner",
+  affiliateUrl: "https://partner.suite.local/video-conferencing",
+  merchantName: "Unified Communications Partner",
+  badge: "Meeting Essential",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={breadcrumbSchema} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "ChronoSpatial", navItems: [{ label: "World Clock", href: "/" }, { label: "Meeting Planner", href: "/meet" }, { label: "Timezones", href: "/#timezones" }, { label: "About", href: "/about" }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2rem; max-width: 860px;">
+      <!-- Breadcrumb -->
+      <nav aria-label="Breadcrumb" style="margin-bottom: 1.25rem; font-size: 0.8125rem; color: var(--text-muted);">
+        <a href="/" style="color: var(--text-muted); text-decoration: none;">Home</a>
+        <span style="margin-inline: 6px;">/</span>
+        <span style="color: var(--text-primary); font-weight: 600;">Meeting Invitation</span>
+      </nav>
+
+      <!-- Meeting Overview Hero Card -->
+      <article class="suite-card" style="padding: 2rem; margin-bottom: 2rem; border-top: 4px solid var(--accent-primary);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 1.25rem;">
+          <div>
+            <span class="suite-badge" style="font-size: 0.75rem; margin-bottom: 8px;">📅 Scheduled Sync</span>
+            <h1 style="font-size: 1.875rem; font-weight: 800; margin: 4px 0 8px 0;">{meeting.title}</h1>
+            {meeting.description && (
+              <p style="font-size: 0.9375rem; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.5;">
+                {meeting.description}
+              </p>
+            )}
+            <div style="font-size: 0.875rem; color: var(--text-muted);">
+              ⏱️ Duration: <strong>{meeting.durationMinutes} minutes</strong> &bull; Host: <strong>{hostCity.flag} {hostCity.name}</strong>
+            </div>
+          </div>
+
+          <!-- Calendar 1-Click Export Actions -->
+          <div style="display: flex; flex-direction: column; gap: 8px; min-width: 190px;">
+            <a
+              href={calLinks.googleCalendarUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="suite-btn-primary"
+              style="text-align: center; text-decoration: none; font-size: 0.8125rem; padding: 8px 14px;"
+            >
+              📅 Add to Google Calendar
+            </a>
+            <a
+              href={calLinks.outlookUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="suite-btn-secondary"
+              style="text-align: center; text-decoration: none; font-size: 0.8125rem; padding: 8px 14px;"
+            >
+              📫 Add to Outlook Web
+            </a>
+            <a
+              href={calLinks.icsDownloadUrl}
+              download={`${meeting.title.toLowerCase().replace(/[^a-z0-9]/g, "-")}.ics`}
+              class="suite-btn-secondary"
+              style="text-align: center; text-decoration: none; font-size: 0.8125rem; padding: 8px 14px;"
+            >
+              📥 Download .ics File
+            </a>
+          </div>
+        </div>
+
+        <!-- Live Countdown Timer -->
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm, 6px); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <span style="font-size: 0.8125rem; font-weight: 600; color: var(--text-secondary);">
+            UTC Time: <span style="font-family: monospace; color: var(--text-primary);">{meeting.startTime.toUTCString()}</span>
+          </span>
+          <span id="countdown-badge" style="font-size: 0.8125rem; font-weight: 700; color: var(--accent-primary);">
+            Synchronizing...
+          </span>
+        </div>
+      </article>
+
+      <!-- Attendee Locations Breakdown -->
+      <section style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">
+          Localized Times Across All Attendee Locations ({cities.length})
+        </h2>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          {cities.map((city) => {
+            if (!city) return null;
+            const startInfo = engine.getTimeForZone(meeting.startTime, city.timezone);
+            const endTime = new Date(meeting.startTime.getTime() + meeting.durationMinutes * 60000);
+            const endInfo = engine.getTimeForZone(endTime, city.timezone);
+            const status = classifyHour(startInfo.hours);
+            const statusStyle = getStatusStyle(status);
+            const isHost = city.id === hostCity.id;
+
+            return (
+              <div class="suite-card" style="padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 1.35rem;">{city.flag}</span>
+                    <strong style="font-size: 1.125rem;">{city.name}</strong>
+                    <span style="font-size: 0.8125rem; color: var(--text-muted);">{city.country}</span>
+                    {isHost && (
+                      <span class="suite-badge" style="font-size: 0.6875rem; background: var(--accent-glow); color: var(--accent-primary);">
+                        HOST LOCATION
+                      </span>
+                    )}
+                  </div>
+                  <div style="font-size: 0.8125rem; color: var(--text-secondary); margin-top: 4px;">
+                    {startInfo.formattedDate} &bull; {city.timezone} ({startInfo.formattedUtcOffset})
+                  </div>
+                </div>
+
+                <div style="text-align: right;">
+                  <div style="font-size: 1.35rem; font-weight: 800; font-family: monospace; color: var(--text-primary);">
+                    {startInfo.formattedTime12} – {endInfo.formattedTime12}
+                  </div>
+                  <span style={`font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; color: ${statusStyle.fg};`}>
+                    ● {statusStyle.label}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <!-- Developer & Community Timestamp Tags Section -->
+      <section class="suite-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 6px;">
+          💬 Copy Community & Chat Timestamp Tags
+        </h2>
+        <p style="font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          Paste these tokens into Discord or Slack. They automatically adapt to every reader's local device timezone!
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+          <!-- Discord Tag -->
+          <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm, 6px); padding: 12px;">
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">
+              DISCORD LOCAL TIME TOKEN
+            </div>
+            <code style="display: block; background: var(--bg-surface); padding: 6px 8px; border-radius: 4px; font-size: 0.8125rem; margin-bottom: 8px;">
+              {chatTags.discordFull}
+            </code>
+            <button
+              type="button"
+              class="suite-btn-secondary"
+              style="width: 100%; font-size: 0.75rem; padding: 6px;"
+              onclick={`navigator.clipboard.writeText("${chatTags.discordFull}"); alert("Copied Discord tag!");`}
+            >
+              📋 Copy Discord Tag
+            </button>
+          </div>
+
+          <!-- Slack Date Token -->
+          <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm, 6px); padding: 12px;">
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">
+              SLACK TIME TOKEN
+            </div>
+            <code style="display: block; background: var(--bg-surface); padding: 6px 8px; border-radius: 4px; font-size: 0.8125rem; margin-bottom: 8px; overflow-x: auto;">
+              {chatTags.slackDate}
+            </code>
+            <button
+              type="button"
+              class="suite-btn-secondary"
+              style="width: 100%; font-size: 0.75rem; padding: 6px;"
+              onclick={`navigator.clipboard.writeText('${chatTags.slackDate.replace(/'/g, "\\'")}'); alert("Copied Slack date token!");`}
+            >
+              📋 Copy Slack Token
+            </button>
+          </div>
+
+          <!-- Shareable Link -->
+          <div style="border: 1px solid var(--border-subtle); border-radius: var(--radius-sm, 6px); padding: 12px;">
+            <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">
+              SHAREABLE INVITATION URL
+            </div>
+            <input
+              type="text"
+              readonly
+              value={Astro.url.href}
+              style="width: 100%; background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 6px 8px; border-radius: 4px; font-size: 0.75rem; margin-bottom: 8px;"
+            />
+            <button
+              type="button"
+              class="suite-btn-secondary"
+              style="width: 100%; font-size: 0.75rem; padding: 6px;"
+              onclick={`navigator.clipboard.writeText(window.location.href); alert("Copied link to clipboard!");`}
+            >
+              🔗 Copy Shareable Link
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Monetization: Contextual Affiliate Offer -->
+      <Fragment set:html={affiliateOffer} />
+
+      <!-- Monetization: Zero-CLS AdSlot -->
+      <section style="margin-top: 2rem;">
+        <Fragment set:html={adSlot} />
+      </section>
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ authorName: "ChronoSpatial Team", currentYear: 2026, privacyUrl: "/privacy-policy", termsUrl: "/terms-of-service", editorialUrl: "/editorial-policy", contactUrl: "/contact" })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+
+    <script is:inline define:vars={{ targetTimestamp: meeting.startTime.getTime() }}>
+      (() => {
+        const badge = document.getElementById("countdown-badge");
+        if (!badge) return;
+
+        function updateCountdown() {
+          const now = Date.now();
+          const diffMs = targetTimestamp - now;
+
+          if (diffMs <= 0) {
+            badge.textContent = "🔴 In progress or concluded";
+            badge.style.color = "#ef4444";
+            return;
+          }
+
+          const totalSeconds = Math.floor(diffMs / 1000);
+          const days = Math.floor(totalSeconds / 86400);
+          const hours = Math.floor((totalSeconds % 86400) / 3600);
+          const minutes = Math.floor((totalSeconds % 3600) / 60);
+          const seconds = totalSeconds % 60;
+
+          if (days > 0) {
+            badge.textContent = `Starts in ${days}d ${hours}h ${minutes}m`;
+          } else {
+            badge.textContent = `Starts in ${hours}h ${minutes}m ${seconds}s`;
+          }
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+      })();
+    </script>
+  </body>
+</html>
