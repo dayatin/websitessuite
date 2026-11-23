@@ -19,6 +19,7 @@
     "verify:subphase": "node tools/verify-subphase/index.mjs"
   },
   "devDependencies": {
+    "@astrojs/cloudflare": "^12.0.0",
     "@biomejs/biome": "^1.9.4",
     "turbo": "^2.4.4",
     "typescript": "^5.8.2"

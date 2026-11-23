@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { FactCorpusLoader } from "../../lib/corpus/loader.ts";
+import { FactCorpusLoader } from "../../../lib/corpus/loader.ts";
 
 export const GET: APIRoute = async ({ url }) => {
   const dateParam = url.searchParams.get("date");

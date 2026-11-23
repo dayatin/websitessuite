@@ -6,6 +6,7 @@ export type AdSlotFormat =
   | "leaderboard" // 728x90
   | "billboard" // 970x250
   | "rectangle-medium" // 300x250
+  | "rectangle" // 300x250 alias
   | "in-article" // Fluid, min-height 280px
   | "mobile-banner"; // 320x50
 
@@ -21,6 +22,7 @@ const FORMAT_STYLES: Record<AdSlotFormat, { minHeight: number; maxWidth?: number
   leaderboard: { minHeight: 90, maxWidth: 728 },
   billboard: { minHeight: 250, maxWidth: 970 },
   "rectangle-medium": { minHeight: 250, maxWidth: 300 },
+  rectangle: { minHeight: 250, maxWidth: 300 },
   "in-article": { minHeight: 280 },
   "mobile-banner": { minHeight: 50, maxWidth: 320 },
 };
@@ -30,7 +32,8 @@ const FORMAT_STYLES: Record<AdSlotFormat, { minHeight: number; maxWidth?: number
  * and >= 24px safety separation margin from interactive controls.
  */
 export function renderAdSlotHTML(config: AdSlotConfig): string {
-  const style = FORMAT_STYLES[config.format];
+  const style = FORMAT_STYLES[config.format] ||
+    FORMAT_STYLES.rectangle || { minHeight: 250, maxWidth: 300 };
   const maxWidthCSS = style.maxWidth ? `max-width: ${style.maxWidth}px;` : "width: 100%;";
   const minHeightCSS = `min-height: ${style.minHeight}px;`;
 

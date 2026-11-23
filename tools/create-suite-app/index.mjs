@@ -207,7 +207,7 @@ const siteUrl = Astro.site?.toString() || "https://${cleanSlug}.suite.local";
 const policyHtml = generatePrivacyPolicyHTML({
   siteName: siteTitle,
   siteUrl,
-  supportEmail: "support@" + cleanSlug + ".suite.local",
+  supportEmail: "support@${cleanSlug}.suite.local",
 });
 ---
 <!doctype html>
@@ -237,7 +237,7 @@ const siteTitle = "${title}";
 const termsHtml = generateTermsOfServiceHTML({
   siteName: siteTitle,
   siteUrl: Astro.site?.toString() || "https://${cleanSlug}.suite.local",
-  supportEmail: "support@" + cleanSlug + ".suite.local",
+  supportEmail: "support@${cleanSlug}.suite.local",
 });
 ---
 <!doctype html>
@@ -260,14 +260,14 @@ const termsHtml = generateTermsOfServiceHTML({
 
   // 8. src/pages/editorial-policy.astro
   const editorialAstro = `---
-import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
 import { generateEditorialPolicyHTML } from "@suite/compliance-pages";
+import { getAntiFOUCScript, renderFooterHTML, renderHeaderHTML } from "@suite/ui-theme";
 
 const siteTitle = "${title}";
 const editorialHtml = generateEditorialPolicyHTML({
   siteName: siteTitle,
   siteUrl: Astro.site?.toString() || "https://${cleanSlug}.suite.local",
-  supportEmail: "support@" + cleanSlug + ".suite.local",
+  supportEmail: "support@${cleanSlug}.suite.local",
 });
 ---
 <!doctype html>
@@ -290,14 +290,14 @@ const editorialHtml = generateEditorialPolicyHTML({
 
   // 9. src/pages/about.astro & contact.astro
   const aboutAstro = `---
-import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
 import { generateAboutPageHTML } from "@suite/compliance-pages";
+import { getAntiFOUCScript, renderFooterHTML, renderHeaderHTML } from "@suite/ui-theme";
 
 const siteTitle = "${title}";
 const aboutHtml = generateAboutPageHTML({
   siteName: siteTitle,
   siteUrl: Astro.site?.toString() || "https://${cleanSlug}.suite.local",
-  supportEmail: "support@" + cleanSlug + ".suite.local",
+  supportEmail: "support@${cleanSlug}.suite.local",
 });
 ---
 <!doctype html>
@@ -319,14 +319,14 @@ const aboutHtml = generateAboutPageHTML({
   fs.writeFileSync(path.join(appDir, "src", "pages", "about.astro"), aboutAstro);
 
   const contactAstro = `---
-import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
 import { generateContactPageHTML } from "@suite/compliance-pages";
+import { getAntiFOUCScript, renderFooterHTML, renderHeaderHTML } from "@suite/ui-theme";
 
 const siteTitle = "${title}";
 const contactHtml = generateContactPageHTML({
   siteName: siteTitle,
   siteUrl: Astro.site?.toString() || "https://${cleanSlug}.suite.local",
-  supportEmail: "support@" + cleanSlug + ".suite.local",
+  supportEmail: "support@${cleanSlug}.suite.local",
 });
 ---
 <!doctype html>
@@ -373,9 +373,9 @@ export const GET: APIRoute = async ({ site }) => {
 
   // 11. tests/app.test.js
   const appTestJs = `import assert from "node:assert/strict";
-import test from "node:test";
 import fs from "node:fs";
 import path from "node:path";
+import test from "node:test";
 
 test("${cleanSlug} smoke test: core pages exist", () => {
   const pages = ["index.astro", "privacy-policy.astro", "terms-of-service.astro", "editorial-policy.astro", "about.astro", "contact.astro", "ads.txt.ts", "robots.txt.ts"];

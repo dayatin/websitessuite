@@ -7,22 +7,30 @@ export interface NavItem {
 }
 
 export interface HeaderConfig {
-  siteTitle: string;
+  siteTitle?: string;
   logoIcon?: string;
-  navItems: NavItem[];
+  navItems?: NavItem[];
+  currentPath?: string;
 }
 
 export interface FooterConfig {
-  siteTitle: string;
-  tagline: string;
+  siteTitle?: string;
+  tagline?: string;
   copyrightYear?: number;
 }
 
 /**
  * Renders semantic header markup compatible with vanilla, Astro, or SSR templates.
  */
-export function renderHeaderHTML(config: HeaderConfig): string {
-  const navLinks = config.navItems
+export function renderHeaderHTML(config?: HeaderConfig): string {
+  const cfg = config || {};
+  const title = cfg.siteTitle || "Suite Platform";
+  const navItems = cfg.navItems || [
+    { label: "Home", href: "/" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
+  ];
+  const navLinks = navItems
     .map(
       (item) =>
         `<li><a href="${item.href}" class="suite-nav-link" ${item.external ? 'target="_blank" rel="noopener"' : ""}>${item.label}</a></li>`,
@@ -33,8 +41,8 @@ export function renderHeaderHTML(config: HeaderConfig): string {
 <header class="suite-navbar">
   <div class="suite-container suite-nav-container">
     <a href="/" class="suite-brand">
-      ${config.logoIcon ? `<span class="suite-brand-icon">${config.logoIcon}</span>` : ""}
-      <span class="suite-brand-title">${config.siteTitle}</span>
+      ${cfg.logoIcon ? `<span class="suite-brand-icon">${cfg.logoIcon}</span>` : ""}
+      <span class="suite-brand-title">${title}</span>
     </a>
     <nav class="suite-nav">
       <ul class="suite-nav-list">
@@ -55,15 +63,18 @@ export function renderHeaderHTML(config: HeaderConfig): string {
 /**
  * Renders AdSense-compliant footer with mandatory legal and trust links.
  */
-export function renderFooterHTML(config: FooterConfig): string {
-  const year = config.copyrightYear || new Date().getFullYear();
+export function renderFooterHTML(config?: FooterConfig): string {
+  const cfg = config || {};
+  const title = cfg.siteTitle || "Suite Platform";
+  const tagline = cfg.tagline || "Fast, accessible & privacy-first digital utilities.";
+  const year = cfg.copyrightYear || new Date().getFullYear();
   return `
 <footer class="suite-footer">
   <div class="suite-container suite-footer-content">
     <div class="suite-footer-col">
-      <div class="suite-footer-brand">${config.siteTitle}</div>
-      <p class="suite-footer-tagline">${config.tagline}</p>
-      <p class="suite-copyright">&copy; ${year} ${config.siteTitle}. All rights reserved.</p>
+      <div class="suite-footer-brand">${title}</div>
+      <p class="suite-footer-tagline">${tagline}</p>
+      <p class="suite-copyright">&copy; ${year} ${title}. All rights reserved.</p>
     </div>
     <div class="suite-footer-col">
       <h4 class="suite-footer-heading">Trust & Legal</h4>
