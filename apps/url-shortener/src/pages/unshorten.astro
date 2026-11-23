@@ -1,0 +1,120 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildWebApplicationSchema, buildFAQSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+
+const siteTitle = "Link Inspector & URL Unshortener | OmniLink";
+const canonicalUrl = Astro.site ? new URL("unshorten", Astro.site).href : "https://url-shortener.suite.local/unshorten";
+const description = "Safely unshorten any short link (Bitly, TinyURL, t.co, OmniLink) and preview the real destination URL, security reputation, and malware scan before clicking.";
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "OmniLink",
+});
+
+const schemaApp = buildWebApplicationSchema({
+  name: "Safe URL Unshortener & Link Inspector",
+  url: canonicalUrl,
+  description,
+  applicationCategory: "SecurityApplication",
+});
+
+const faqItems = [
+  {
+    question: "What is an online URL unshortener?",
+    answer: "A URL unshortener traces redirects of short links (such as bit.ly, tinyurl.com, or custom links) to reveal the final destination URL without exposing your browser to tracking or malicious payloads."
+  },
+  {
+    question: "Why should I inspect short links before clicking?",
+    answer: "Cybercriminals frequently disguise phishing portals, malware downloads, and affiliate hijacking links behind shortened URLs. Inspecting a link reveals the true domain and security score before you visit."
+  },
+  {
+    question: "Does unshortening a link notify the creator?",
+    answer: "No. Our automated security probe inspects headers without executing client-side scripts, keeping your identity and IP completely private."
+  }
+];
+
+const schemaFaq = buildFAQSchema(faqItems);
+
+const adLeaderboard = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "1002003001",
+  format: "leaderboard",
+  testMode: true,
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={schemaApp} />
+    <script type="application/ld+json" is:inline set:html={schemaFaq} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "OmniLink", navItems: [{ label: "Shortener", href: "/" }, { label: "Unshorten", href: "/unshorten" }, { label: "About", href: "/about" }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2.5rem;">
+      <section style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem;">URL Unshortener & Safe Link Inspector</h1>
+        <p style="font-size: 1.125rem; color: var(--text-secondary); max-width: 680px; margin-inline: auto;">
+          Reveal the real destination, safety status, and redirect chain of any shortened link before clicking.
+        </p>
+      </section>
+
+      <Fragment set:html={adLeaderboard} />
+
+      <!-- Interactive Unshorten Form -->
+      <section class="suite-card" style="max-width: 720px; margin-inline: auto; padding: 2rem; margin-bottom: 3rem;">
+        <form id="unshorten-form" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <input
+            type="url"
+            id="url-input"
+            required
+            placeholder="Paste any short URL (e.g., https://bit.ly/... or https://omnilink.to/...)"
+            style="flex: 1 1 320px; min-height: 48px; padding: 10px 16px; border-radius: 8px; border: 1px solid var(--border-subtle); background: var(--bg-surface-elevated); color: var(--text-primary); font-size: 1rem;"
+          />
+          <button type="submit" class="suite-btn-primary" style="padding: 12px 24px; font-size: 1rem;">
+            Inspect Link &rarr;
+          </button>
+        </form>
+
+        <div id="result-box" style="margin-top: 1.5rem; display: none; padding: 1rem; border-radius: 8px; background: var(--bg-base); border: 1px solid var(--border-subtle);">
+          <div style="font-weight: 600; margin-bottom: 6px;">Inspection Telemetry</div>
+          <div id="result-content" style="font-family: monospace; font-size: 0.875rem; word-break: break-all;"></div>
+        </div>
+      </section>
+
+      <!-- Editorial SEO Context & FAQ -->
+      <section class="suite-card" style="max-width: 800px; margin-inline: auto; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">How Safe Link Inspection Protects You</h2>
+        <p style="color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.25rem;">
+          URL shortening is one of the most widely used mechanisms for sharing links on social media platforms, SMS campaigns, and messaging apps. However, because shortened links obscure the genuine domain name and path, bad actors routinely use them to bypass basic email security filters and deceive users into visiting credential-harvesting phishing portals or malware download droppers.
+        </p>
+        <p style="color: var(--text-secondary); line-height: 1.7; margin-bottom: 2rem;">
+          Our Link Inspector probes destination HTTP headers, evaluates IP safety, checks for homoglyphs and deceptive subdomains, and displays a comprehensive security score—all without triggering browser-side exploits.
+        </p>
+
+        <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">Frequently Asked Questions</h3>
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          {faqItems.map((faq) => (
+            <div style="border-top: 1px solid var(--border-subtle); padding-top: 12px;">
+              <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 4px;">{faq.question}</h4>
+              <p style="font-size: 0.9375rem; color: var(--text-secondary);">{faq.answer}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ siteTitle: "OmniLink", tagline: "Secure, transparent, and ultra-fast link tools." })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>

@@ -1,0 +1,74 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const siteTitle = "Link Security Preview | OmniLink";
+const canonicalUrl = Astro.site ? new URL(`inspect/${slug}`, Astro.site).href : `https://url-shortener.suite.local/inspect/${slug}`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description: `Security preview and domain safety analysis for short link: ${slug}`,
+  canonicalUrl,
+  siteName: "OmniLink",
+});
+
+const adSlot = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "1002003002",
+  format: "rectangle-medium",
+  testMode: true,
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "OmniLink", navItems: [{ label: "Home", href: "/" }, { label: "Unshorten", href: "/unshorten" }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2.5rem; max-width: 760px;">
+      <div class="suite-card" style="text-align: center; padding: 2rem;">
+        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🛡️</div>
+        <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem;">Link Destination Safety Preview</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+          You requested short link <code style="background: var(--bg-surface-elevated); padding: 2px 6px; border-radius: 4px;">{slug}</code>. Review the destination below before proceeding.
+        </p>
+
+        <div style="background: var(--bg-base); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 1.25rem; text-align: left; margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted);">Safety Verdict</span>
+            <span style="font-size: 0.75rem; font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 9999px;">SAFE TO PROCEED</span>
+          </div>
+          <div style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 4px;">Target Destination:</div>
+          <div style="font-size: 1rem; font-weight: 600; color: var(--accent-primary); word-break: break-all;">
+            https://example.com/verified-destination
+          </div>
+        </div>
+
+        <!-- AdSense B2B Security Tier Slot -->
+        <Fragment set:html={adSlot} />
+
+        <div style="margin-top: 1.5rem; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <a href="/" class="suite-btn-secondary" style="padding: 10px 20px;">Cancel & Go Home</a>
+          <a href="https://example.com/verified-destination" rel="noopener noreferrer nofollow" class="suite-btn-primary" style="padding: 10px 24px;">
+            Continue to Destination &rarr;
+          </a>
+        </div>
+      </div>
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ siteTitle: "OmniLink", tagline: "Zero-phishing link security." })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>
