@@ -1,0 +1,149 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildFAQSchema, buildBreadcrumbSchema, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+
+export function getStaticPaths() {
+  const targets = ["20", "50", "100", "200"];
+  return targets.map((t) => ({
+    params: { target: t },
+    props: { targetKb: t },
+  }));
+}
+
+const { targetKb } = Astro.props;
+
+const siteTitle = `Compress Image to ${targetKb}KB Online (Exact Target Size) | OptiPixel`;
+const canonicalUrl = Astro.site
+  ? new URL(`tools/compress-image-to-${targetKb}kb`, Astro.site).href
+  : `https://ai-image-toolkit.suite.local/tools/compress-image-to-${targetKb}kb`;
+const description = `Compress image to exactly under ${targetKb}KB online without quality loss. Binary search compression for passport, visa, and government portals. 100% private in-browser.`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "OptiPixel Studio",
+  type: "article",
+});
+
+const appSchema = buildWebApplicationSchema({
+  name: `OptiPixel ${targetKb}KB Image Compressor`,
+  url: canonicalUrl,
+  description,
+  applicationCategory: "MultimediaApplication",
+});
+
+const faqs = [
+  {
+    question: `How do I compress an image to under ${targetKb}KB?`,
+    answer: `Simply upload your photo into our tool. Our algorithm automatically runs an iterative binary search across compression quality levels to ensure your image stays strictly below ${targetKb}KB while retaining the highest visual fidelity.`,
+  },
+  {
+    question: "Is my uploaded photo kept private and secure?",
+    answer: "Yes, 100%. All compression and processing takes place directly inside your device's browser using WebAssembly. Your photos are never uploaded to any remote server.",
+  },
+  {
+    question: "Which file formats are supported?",
+    answer: "We support JPG, JPEG, PNG, WebP, and AVIF. You can also convert to WebP or JPEG during the compression process for optimal file size reduction.",
+  },
+];
+
+const faqSchema = buildFAQSchema(faqs);
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: "https://ai-image-toolkit.suite.local/" },
+  { name: "Tools", url: "https://ai-image-toolkit.suite.local/#tools" },
+  { name: `Compress to ${targetKb}KB`, url: canonicalUrl },
+]);
+
+const adSlot = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "5001001011",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Professional Archival Storage & Backup",
+  description: "Secure, encrypted cloud storage for your compressed photos, portfolio archives, and high-res source documents with instant sync across all your devices.",
+  ctaText: "Get Cloud Storage",
+  affiliateUrl: "https://partner.suite.local/cloud-backup",
+  merchantName: "Secure Cloud Partner",
+  badge: "Recommended",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={appSchema} />
+    <script type="application/ld+json" is:inline set:html={faqSchema} />
+    <script type="application/ld+json" is:inline set:html={breadcrumbSchema} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "OptiPixel", navItems: [{ label: "Print Studio", href: "/" }, { label: "Passport Studio", href: "/passport-studio" }, { label: "Batch Studio", href: "/batch-studio" }, { label: "About", href: "/about" }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2rem; max-width: 860px;">
+      <!-- Breadcrumb -->
+      <nav aria-label="Breadcrumb" style="margin-bottom: 1.25rem; font-size: 0.8125rem; color: var(--text-muted);">
+        <a href="/" style="color: var(--text-muted); text-decoration: none;">Home</a>
+        <span style="margin-inline: 6px;">/</span>
+        <span style="color: var(--text-secondary);">Tools</span>
+        <span style="margin-inline: 6px;">/</span>
+        <span style="color: var(--text-primary); font-weight: 600;">Compress to {targetKb}KB</span>
+      </nav>
+
+      <!-- Tool Hero Card -->
+      <header class="suite-card" style="padding: 2rem; margin-bottom: 2rem; border-top: 4px solid var(--accent-primary);">
+        <span class="suite-badge" style="font-size: 0.75rem; margin-bottom: 8px;">⚖️ Exact Target Size Guarantee</span>
+        <h1 style="font-size: 2rem; font-weight: 800; margin: 4px 0 8px 0;">
+          Compress Image to {targetKb}KB Online
+        </h1>
+        <p style="font-size: 1rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.25rem;">
+          Strict government admission portals, visa applications, and exam registrations often mandate file sizes strictly under <strong>{targetKb}KB</strong>. Our binary search compressor guarantees compliance while preserving sharpness.
+        </p>
+
+        <!-- Direct Studio CTA -->
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px; padding: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <strong>Ready to compress under {targetKb}KB?</strong>
+            <div style="font-size: 0.8125rem; color: var(--text-secondary);">Upload directly into the Target-KB compressor studio.</div>
+          </div>
+          <a href="/#compress" class="suite-btn-primary" style="padding: 8px 16px; font-size: 0.875rem; text-decoration: none;">
+            ⚡ Open {targetKb}KB Studio
+          </a>
+        </div>
+      </header>
+
+      <!-- FAQ Section -->
+      <section class="suite-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">
+          Frequently Asked Questions
+        </h2>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          {faqs.map((f) => (
+            <div style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem;">
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 4px;">{f.question}</h3>
+              <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">{f.answer}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Monetization: Contextual Offer & AdSlot -->
+      <Fragment set:html={affiliateOffer} />
+      <section style="margin-top: 2rem;">
+        <Fragment set:html={adSlot} />
+      </section>
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ authorName: "OptiPixel Editorial", currentYear: 2026, privacyUrl: "/privacy-policy", termsUrl: "/terms-of-service", editorialUrl: "/editorial-policy", contactUrl: "/contact" })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>

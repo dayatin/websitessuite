@@ -1,0 +1,143 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildFAQSchema, buildBreadcrumbSchema, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+
+export function getStaticPaths() {
+  const dimensions = [
+    { slug: "passport-size", title: "Passport Size Photo (35x45mm / 2x2in)", desc: "Exact biometric dimensions for official passports and international travel visas." },
+    { slug: "instagram-square", title: "Instagram Square (1080x1080px)", desc: "Perfect 1:1 square crop optimized for Instagram feed posts and profile avatars." },
+    { slug: "youtube-banner", title: "YouTube Channel Banner (2560x1440px)", desc: "High-resolution 16:9 banner dimensions formatted for TV, desktop, and mobile displays." },
+    { slug: "linkedin-banner", title: "LinkedIn Profile Banner (1584x396px)", desc: "Professional 4:1 panoramic header dimensions for corporate LinkedIn profiles." },
+  ];
+  return dimensions.map((d) => ({
+    params: { dimension: d.slug },
+    props: { dimConfig: d },
+  }));
+}
+
+const { dimConfig } = Astro.props;
+
+const siteTitle = `Resize Image to ${dimConfig.title} | OptiPixel`;
+const canonicalUrl = Astro.site
+  ? new URL(`tools/resize-image-to-${Astro.params.dimension}`, Astro.site).href
+  : `https://ai-image-toolkit.suite.local/tools/resize-image-to-${Astro.params.dimension}`;
+const description = `Resize images to ${dimConfig.title}. ${dimConfig.desc} Free online image resizer with smart center-cropping and aspect ratio locking.`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "OptiPixel Studio",
+  type: "article",
+});
+
+const appSchema = buildWebApplicationSchema({
+  name: `OptiPixel ${dimConfig.title} Resizer`,
+  url: canonicalUrl,
+  description,
+  applicationCategory: "MultimediaApplication",
+});
+
+const faqs = [
+  {
+    question: `How do I resize my photo to ${dimConfig.title}?`,
+    answer: "Upload your picture and our tool automatically scales and center-crops the image to fit the exact pixel and aspect ratio requirements.",
+  },
+  {
+    question: "Will resizing stretch or distort my picture?",
+    answer: "No. Our resizer uses non-destructive smart cropping (fit: cover) so your subject maintains natural proportions without awkward stretching.",
+  },
+];
+
+const faqSchema = buildFAQSchema(faqs);
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: "https://ai-image-toolkit.suite.local/" },
+  { name: "Resizer", url: "https://ai-image-toolkit.suite.local/#resize" },
+  { name: dimConfig.title, url: canonicalUrl },
+]);
+
+const adSlot = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "5001001013",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Professional Social Media Scheduling & Content Planner",
+  description: "Schedule auto-sized posts across Instagram, YouTube, LinkedIn, and TikTok from a single calendar.",
+  ctaText: "Try Social Planner",
+  affiliateUrl: "https://partner.suite.local/social-planner",
+  merchantName: "Social Media Suite Partner",
+  badge: "Creator Essential",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={appSchema} />
+    <script type="application/ld+json" is:inline set:html={faqSchema} />
+    <script type="application/ld+json" is:inline set:html={breadcrumbSchema} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "OptiPixel", navItems: [{ label: "Print Studio", href: "/" }, { label: "Passport Studio", href: "/passport-studio" }, { label: "Batch Studio", href: "/batch-studio" }, { label: "About", href: "/about" }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2rem; max-width: 860px;">
+      <!-- Breadcrumb -->
+      <nav aria-label="Breadcrumb" style="margin-bottom: 1.25rem; font-size: 0.8125rem; color: var(--text-muted);">
+        <a href="/" style="color: var(--text-muted); text-decoration: none;">Home</a>
+        <span style="margin-inline: 6px;">/</span>
+        <span style="color: var(--text-secondary);">Resizer</span>
+        <span style="margin-inline: 6px;">/</span>
+        <span style="color: var(--text-primary); font-weight: 600;">{dimConfig.title}</span>
+      </nav>
+
+      <!-- Tool Header -->
+      <header class="suite-card" style="padding: 2rem; margin-bottom: 2rem; border-top: 4px solid var(--accent-primary);">
+        <span class="suite-badge" style="font-size: 0.75rem; margin-bottom: 8px;">📐 Precision Dimensions</span>
+        <h1 style="font-size: 2rem; font-weight: 800; margin: 4px 0 8px 0;">
+          Resize Image to {dimConfig.title}
+        </h1>
+        <p style="font-size: 1rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.25rem;">
+          {dimConfig.desc}
+        </p>
+
+        <a href="/#resize" class="suite-btn-primary" style="padding: 8px 16px; font-size: 0.875rem; text-decoration: none;">
+          ⚡ Open Resizer Studio
+        </a>
+      </header>
+
+      <!-- FAQs -->
+      <section class="suite-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">
+          Frequently Asked Questions
+        </h2>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          {faqs.map((f) => (
+            <div style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem;">
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 4px;">{f.question}</h3>
+              <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">{f.answer}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Monetization -->
+      <Fragment set:html={affiliateOffer} />
+      <section style="margin-top: 2rem;">
+        <Fragment set:html={adSlot} />
+      </section>
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ authorName: "OptiPixel Editorial", currentYear: 2026, privacyUrl: "/privacy-policy", termsUrl: "/terms-of-service", editorialUrl: "/editorial-policy", contactUrl: "/contact" })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>
