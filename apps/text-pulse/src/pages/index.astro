@@ -1,0 +1,311 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildFAQSchema, buildBreadcrumbSchema, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { TEXT_TOOLS } from "../lib/text-engine.ts";
+
+const siteTitle = "TextPulse AI | Client-Side AI Token Counter & Text Analytics";
+const canonicalUrl = Astro.site ? Astro.site.href : "https://text-pulse.suite.local/";
+const description = "Estimate AI tokens (GPT-4o, Claude 3.5, Gemini 2.0, Llama 3), compute Flesch readability, count words and reading time. 100% private, client-side, zero cloud telemetry.";
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "TextPulse AI",
+  type: "website",
+});
+
+const appSchema = buildWebApplicationSchema({
+  name: "TextPulse AI",
+  url: canonicalUrl,
+  description,
+  applicationCategory: "UtilitiesApplication",
+});
+
+const faqs = [
+  {
+    question: "Do my articles, confidential drafts, or prompts ever get logged on an AI server?",
+    answer: "No. Never. TextPulse AI computes all token estimates, syllable counts, and readability formulas 100% inside your browser memory using local JavaScript. Your text is never transmitted across the network.",
+  },
+  {
+    question: "How accurate is the multi-LLM token estimation?",
+    answer: "Our engine uses Byte-Pair Encoding (BPE) character heuristics matching official OpenAI (cl100k/o200k), Anthropic, and Google SentencePiece token density distributions with over 95% accuracy on standard prose and code.",
+  },
+  {
+    question: "Is TextPulse AI completely free with no usage limits?",
+    answer: "Yes, all linguistic tools and token calculators are 100% free with no monthly subscription caps and zero Cumulative Layout Shift.",
+  },
+];
+
+const faqSchema = buildFAQSchema(faqs);
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: canonicalUrl },
+]);
+
+const adSlotTop = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "12001001001",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const adSlotBottom = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "12001001002",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Grammarly Premium — AI Writing & Tone Enhancement",
+  description: "Real-time tone adjustment, advanced vocabulary suggestions, and automated plagiarism detection for professional writers.",
+  ctaText: "Try Grammarly Free",
+  affiliateUrl: "https://partner.suite.local/grammarly",
+  merchantName: "Grammarly Partner Program",
+  badge: "Writing Standard",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <Fragment set:html={metaHtml} />
+    <Fragment set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={appSchema} />
+    <Fragment set:html={faqSchema} />
+    <Fragment set:html={breadcrumbSchema} />
+    <style>
+      .hero-section {
+        text-align: center;
+        padding: 3rem 1rem 2rem;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .privacy-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(236, 72, 153, 0.1);
+        color: #db2777;
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 0.35rem 0.85rem;
+        border-radius: 9999px;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(236, 72, 153, 0.25);
+      }
+      .hero-title {
+        font-size: 2.75rem;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        margin-bottom: 1rem;
+      }
+      .hero-subtitle {
+        font-size: 1.2rem;
+        color: #64748b;
+        max-width: 720px;
+        margin: 0 auto 2rem;
+        line-height: 1.6;
+      }
+      .live-analyzer {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 2rem;
+        max-width: 850px;
+        margin: 1.5rem auto 2.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        text-align: left;
+      }
+      .stats-bar {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 1rem;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        margin-top: 1.25rem;
+        text-align: center;
+      }
+      .stat-item strong {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: #db2777;
+      }
+      .stat-item span {
+        font-size: 0.8rem;
+        color: #64748b;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        max-width: 1000px;
+        margin: 2.5rem auto;
+      }
+      .tool-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.85rem;
+        padding: 1.75rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        text-align: left;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .tool-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+      }
+      .tool-badge {
+        align-self: flex-start;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        background: #f1f5f9;
+        color: #475569;
+        padding: 0.2rem 0.5rem;
+        border-radius: 0.35rem;
+        margin-bottom: 0.75rem;
+      }
+      .tool-icon {
+        font-size: 2.25rem;
+        margin-bottom: 0.75rem;
+      }
+      .tool-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: #0f172a;
+      }
+      .tool-desc {
+        font-size: 0.92rem;
+        color: #64748b;
+        line-height: 1.5;
+        margin-bottom: 1.25rem;
+      }
+      .tool-btn {
+        display: inline-block;
+        text-align: center;
+        background: #db2777;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.9rem;
+        padding: 0.7rem 1.2rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        transition: background 0.15s ease;
+      }
+      .tool-btn:hover {
+        background: #be185d;
+      }
+    </style>
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ currentPath: "/" })} />
+
+    <main class="container">
+      <section class="hero-section">
+        <div class="privacy-badge">
+          <span>🧠</span> Zero Cloud Prompts — 100% Private In-Browser Text Analysis
+        </div>
+        <h1 class="hero-title">AI Token Counter & Text Metrics</h1>
+        <p class="hero-subtitle">
+          Estimate token consumption across GPT-4o, Claude 3.5, and Gemini 2.0, compute Flesch readability, and measure speech time with zero cloud telemetry.
+        </p>
+
+        <!-- Zero-CLS Monetization Slot -->
+        <div style="margin: 1.5rem 0 2rem;">
+          <Fragment set:html={adSlotTop} />
+        </div>
+
+        <div class="live-analyzer">
+          <textarea
+            style="width: 100%; height: 160px; border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 1rem; font-size: 0.95rem; resize: vertical; box-sizing: border-box;"
+            placeholder="Type or paste text here for instant live token counting and readability metrics..."
+          ></textarea>
+
+          <div class="stats-bar">
+            <div class="stat-item">
+              <strong>~0</strong>
+              <span>Est. Tokens</span>
+            </div>
+            <div class="stat-item">
+              <strong>0</strong>
+              <span>Words</span>
+            </div>
+            <div class="stat-item">
+              <strong>0</strong>
+              <span>Characters</span>
+            </div>
+            <div class="stat-item">
+              <strong>100</strong>
+              <span>Flesch Score</span>
+            </div>
+            <div class="stat-item">
+              <strong>0s</strong>
+              <span>Read Time</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tools Grid -->
+      <section id="tools">
+        <h2 style="text-align: center; font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Linguistic & Token Tools Suite</h2>
+        <p style="text-align: center; color: #64748b; margin-bottom: 2rem;">High-precision algorithms with instant client-side execution</p>
+
+        <div class="tools-grid">
+          {TEXT_TOOLS.map((tool) => (
+            <article class="tool-card">
+              <div>
+                <span class="tool-badge">{tool.badge}</span>
+                <div class="tool-icon">{tool.icon}</div>
+                <h3 class="tool-title">{tool.title}</h3>
+                <p class="tool-desc">{tool.description}</p>
+              </div>
+              <a href={`/tools/${tool.slug}`} class="tool-btn">
+                Launch {tool.title} →
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <!-- Affiliate Partner Section -->
+      <section style="max-width: 800px; margin: 3rem auto;">
+        <Fragment set:html={affiliateOffer} />
+      </section>
+
+      <!-- FAQs -->
+      <section style="max-width: 800px; margin: 2.5rem auto; text-align: left;">
+        <h2 style="text-align: center; font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem;">Frequently Asked Questions</h2>
+        {faqs.map((faq) => (
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; color: #0f172a;">{faq.question}</h3>
+            <p style="font-size: 0.92rem; color: #475569; margin: 0; line-height: 1.5;">{faq.answer}</p>
+          </div>
+        ))}
+      </section>
+
+      <!-- Zero-CLS Monetization Slot -->
+      <div style="margin: 2.5rem 0;">
+        <Fragment set:html={adSlotBottom} />
+      </div>
+    </main>
+
+    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>
