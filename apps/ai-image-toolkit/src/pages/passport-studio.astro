@@ -1,0 +1,471 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildWebApplicationSchema, buildBreadcrumbSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { PassportPresetCatalog } from "../lib/passport-presets.ts";
+
+const catalog = new PassportPresetCatalog();
+const allPresets = catalog.getAllPresets();
+
+const siteTitle = "Global Biometric Passport & Visa Photo Studio (150+ Countries) | OptiPixel";
+const canonicalUrl = Astro.site ? new URL("passport-studio", Astro.site).href : "https://ai-image-toolkit.suite.local/passport-studio";
+const description = "Create official, ICAO-compliant passport and visa photos for 150+ countries. Automatic head & eye alignment guides, background checks, and printable 4x6 sheet tiling.";
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "OptiPixel Studio",
+  type: "website",
+});
+
+const appSchema = buildWebApplicationSchema({
+  name: "OptiPixel Global Passport Photo Studio",
+  url: canonicalUrl,
+  description,
+  applicationCategory: "MultimediaApplication",
+});
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: "https://ai-image-toolkit.suite.local/" },
+  { name: "Passport Studio", url: canonicalUrl },
+]);
+
+const adSlotTop = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "5001001003",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const adSlotBottom = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "5001001004",
+  format: "rectangle",
+  testMode: true,
+});
+
+const affiliateOffer = renderAffiliateCardHTML({
+  title: "Expedited Passport & Travel Visa Processing",
+  description: "Skip embassy lines with registered government expeditors for rush passport renewals and electronic travel visas delivered in as little as 24-48 hours.",
+  ctaText: "Explore Expedited Services",
+  affiliateUrl: "https://partner.suite.local/expedited-visas",
+  merchantName: "Official Travel Document Partner",
+  badge: "Traveler Essential",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={appSchema} />
+    <script type="application/ld+json" is:inline set:html={breadcrumbSchema} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+    <style>
+      .cropper-container {
+        position: relative;
+        background: #0f172a;
+        border-radius: var(--radius-md, 8px);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 420px;
+        border: 1px solid var(--border-subtle);
+      }
+      .tiling-preview-container {
+        background: #1e293b;
+        border-radius: var(--radius-md, 8px);
+        padding: 1.25rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: auto;
+        min-height: 420px;
+        border: 1px solid var(--border-subtle);
+      }
+      #sheet-canvas {
+        background: #ffffff;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        max-width: 100%;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "OptiPixel", navItems: [{ label: "Print Studio", href: "/" }, { label: "Passport Studio", href: "/passport-studio" }, { label: "Resize & Convert", href: "/#resize" }, { label: "About", href: "/about" }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2rem; max-width: 1100px;">
+      <!-- Breadcrumb -->
+      <nav aria-label="Breadcrumb" style="margin-bottom: 1.25rem; font-size: 0.8125rem; color: var(--text-muted);">
+        <a href="/" style="color: var(--text-muted); text-decoration: none;">Home</a>
+        <span style="margin-inline: 6px;">/</span>
+        <span style="color: var(--text-primary); font-weight: 600;">Passport & Visa Studio</span>
+      </nav>
+
+      <!-- Hero Header -->
+      <header style="text-align: center; margin-bottom: 2rem;">
+        <span class="suite-badge" style="margin-bottom: 8px;">🛂 Official ICAO Doc 9303 Compliant</span>
+        <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px;">
+          Global Passport, Visa & ID Studio
+        </h1>
+        <p style="font-size: 1rem; color: var(--text-secondary); max-width: 720px; margin-inline: auto;">
+          Generate 100% compliant biometric photos for over 150 countries. Superimpose official head & eye alignment guides, auto-tile onto 4x6" cards, and print at any local pharmacy or home printer for pennies.
+        </p>
+      </header>
+
+      <!-- Monetization: Top Leaderboard -->
+      <div style="margin-bottom: 2rem;">
+        <Fragment set:html={adSlotTop} />
+      </div>
+
+      <!-- Country & Document Controls Bar -->
+      <section class="suite-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; align-items: flex-end;">
+          <!-- Country Preset Selector -->
+          <div>
+            <label for="country-preset-select" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+              Select Country & Document Type ({allPresets.length} available):
+            </label>
+            <select id="country-preset-select" class="suite-select" style="width: 100%; padding: 10px 12px; font-size: 0.875rem;">
+              {allPresets.map((p) => (
+                <option value={p.id}>
+                  {p.flag} {p.label} ({p.widthMm} x {p.heightMm} mm)
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <!-- Print Paper Size Selector -->
+          <div>
+            <label for="passport-paper-select" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+              Print Sheet Size:
+            </label>
+            <select id="passport-paper-select" class="suite-select" style="width: 100%; padding: 10px 12px; font-size: 0.875rem;">
+              <option value="photo-4x6" selected>4" x 6" Photo Card (Most Economical - 6 to 8 photos)</option>
+              <option value="a4">A4 Full Sheet (Up to 30 photos)</option>
+              <option value="letter">US Letter Sheet</option>
+            </select>
+          </div>
+
+          <!-- Photo Upload Trigger -->
+          <div>
+            <label style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+              Upload Portrait:
+            </label>
+            <input type="file" id="passport-file-input" accept="image/jpeg,image/png,image/webp" style="display: none;" />
+            <button id="upload-portrait-btn" type="button" class="suite-btn-primary" style="width: 100%; padding: 10px; font-size: 0.875rem;">
+              📷 Upload Portrait Photo
+            </button>
+          </div>
+        </div>
+
+        <!-- Official Guidelines Banner -->
+        <div id="guidelines-banner" style="margin-top: 1.25rem; background: rgba(99, 102, 241, 0.08); border-left: 4px solid var(--accent-primary); border-radius: 4px; padding: 10px 14px; font-size: 0.8125rem; color: var(--text-primary); line-height: 1.5;">
+          Loading country specifications...
+        </div>
+      </section>
+
+      <!-- Two-Column Interactive Studio Workspace -->
+      <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <!-- Left: Biometric Cropper & Alignment Guide -->
+        <div class="suite-card" style="padding: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0;">
+              1. Biometric Alignment Guide
+            </h2>
+            <label style="font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; cursor: pointer;">
+              <input type="checkbox" id="toggle-guide-cb" checked />
+              Show ICAO Guides
+            </label>
+          </div>
+
+          <div class="cropper-container">
+            <canvas id="crop-canvas" width="350" height="450" style="max-width: 100%; height: auto;"></canvas>
+            <div id="biometric-overlay-slot" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></div>
+          </div>
+
+          <div style="margin-top: 12px; display: flex; gap: 8px;">
+            <button id="rotate-btn" type="button" class="suite-btn-secondary" style="flex: 1; padding: 6px; font-size: 0.75rem;">
+              🔄 Rotate 90&deg;
+            </button>
+            <button id="download-single-btn" type="button" class="suite-btn-secondary" style="flex: 1; padding: 6px; font-size: 0.75rem;">
+              📥 Single Photo
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Printable Sheet Tiling Preview -->
+        <div class="suite-card" style="padding: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h2 style="font-size: 1.125rem; font-weight: 700; margin: 0;">
+              2. Printable Photo Card Sheet
+            </h2>
+            <span id="sheet-stats-badge" style="font-size: 0.75rem; font-weight: 600; color: #10b981;">
+              6 Photos Ready
+            </span>
+          </div>
+
+          <div class="tiling-preview-container">
+            <canvas id="sheet-canvas" width="600" height="900"></canvas>
+          </div>
+
+          <div style="margin-top: 12px; display: flex; gap: 8px;">
+            <button id="download-sheet-btn" type="button" class="suite-btn-primary" style="flex: 1; padding: 10px; font-size: 0.875rem;">
+              📥 Download 300 DPI Sheet
+            </button>
+            <button id="print-direct-btn" type="button" class="suite-btn-secondary" style="padding: 10px 16px; font-size: 0.875rem;">
+              🖨️ Print
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Monetization: Contextual Expedited Service Offer -->
+      <Fragment set:html={affiliateOffer} />
+
+      <!-- Monetization: Bottom Rectangle AdSlot -->
+      <section style="margin-top: 2rem;">
+        <Fragment set:html={adSlotBottom} />
+      </section>
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ authorName: "OptiPixel Editorial", currentYear: 2026, privacyUrl: "/privacy-policy", termsUrl: "/terms-of-service", editorialUrl: "/editorial-policy", contactUrl: "/contact" })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+
+    <!-- Client-Side Biometric Overlay & Tiling Script -->
+    <script is:inline define:vars={{ allPresets }}>
+      (() => {
+        let currentImage = null;
+        let presetsMap = new Map(allPresets.map(p => [p.id, p]));
+        let activePreset = presetsMap.get("us-passport") || allPresets[0];
+
+        const presetSelect = document.getElementById("country-preset-select");
+        const paperSelect = document.getElementById("passport-paper-select");
+        const fileInput = document.getElementById("passport-file-input");
+        const uploadBtn = document.getElementById("upload-portrait-btn");
+        const guidelinesBanner = document.getElementById("guidelines-banner");
+        const cropCanvas = document.getElementById("crop-canvas");
+        const sheetCanvas = document.getElementById("sheet-canvas");
+        const overlaySlot = document.getElementById("biometric-overlay-slot");
+        const toggleGuideCb = document.getElementById("toggle-guide-cb");
+        const downloadSheetBtn = document.getElementById("download-sheet-btn");
+        const downloadSingleBtn = document.getElementById("download-single-btn");
+        const printDirectBtn = document.getElementById("print-direct-btn");
+        const sheetStatsBadge = document.getElementById("sheet-stats-badge");
+
+        function updateGuidelines() {
+          if (!guidelinesBanner) return;
+          guidelinesBanner.innerHTML = `
+            <strong>${activePreset.flag} ${activePreset.label} Official Requirements:</strong><br />
+            Size: <strong>${activePreset.widthMm} &times; ${activePreset.heightMm} mm</strong> &bull;
+            Head Coverage: <strong>${activePreset.minHeadHeightMm} – ${activePreset.maxHeadHeightMm} mm</strong> &bull;
+            Background: <strong>${activePreset.backgroundColor.replace("-", " ").toUpperCase()}</strong><br />
+            <em>${activePreset.guidelines}</em>
+          `;
+        }
+
+        function renderBiometricSvgOverlay(w, h) {
+          const scale = h / activePreset.heightMm;
+          const targetHeadHeightPx = ((activePreset.minHeadHeightMm + activePreset.maxHeadHeightMm) / 2) * scale;
+          const cx = w / 2;
+          const cy = h * 0.48;
+          const ry = targetHeadHeightPx / 2;
+          const rx = ry * 0.72;
+          const crownY = cy - ry;
+          const chinY = cy + ry;
+          const eyeY1 = h * 0.42;
+          const eyeY2 = h * 0.47;
+
+          return `
+            <svg viewBox="0 0 ${w} ${h}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="rgba(99, 102, 241, 0.85)" stroke-width="2" stroke-dasharray="6,4" />
+              <line x1="${cx - rx - 10}" y1="${crownY}" x2="${cx + rx + 10}" y2="${crownY}" stroke="#10b981" stroke-width="2" />
+              <text x="${cx + rx + 14}" y="${crownY + 4}" fill="#10b981" font-size="11" font-family="sans-serif" font-weight="700">Top of Head</text>
+              <rect x="${cx - rx}" y="${eyeY1}" width="${rx * 2}" height="${eyeY2 - eyeY1}" fill="rgba(245, 158, 11, 0.2)" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" />
+              <text x="${cx + rx + 14}" y="${(eyeY1 + eyeY2) / 2 + 4}" fill="#f59e0b" font-size="11" font-family="sans-serif" font-weight="700">Eye Level</text>
+              <line x1="${cx - rx - 10}" y1="${chinY}" x2="${cx + rx + 10}" y2="${chinY}" stroke="#10b981" stroke-width="2" />
+              <text x="${cx + rx + 14}" y="${chinY + 4}" fill="#10b981" font-size="11" font-family="sans-serif" font-weight="700">Chin Limit</text>
+            </svg>
+          `;
+        }
+
+        function renderCropper() {
+          if (!cropCanvas) return;
+          const dpi = 300;
+          const wPx = Math.round((activePreset.widthMm / 25.4) * dpi);
+          const hPx = Math.round((activePreset.heightMm / 25.4) * dpi);
+
+          cropCanvas.width = wPx;
+          cropCanvas.height = hPx;
+
+          const ctx = cropCanvas.getContext("2d");
+          ctx.fillStyle = activePreset.backgroundColor === "light-grey" ? "#f1f5f9" : "#ffffff";
+          ctx.fillRect(0, 0, wPx, hPx);
+
+          if (currentImage) {
+            const targetAspect = wPx / hPx;
+            const sourceAspect = currentImage.width / currentImage.height;
+            let sx = 0, sy = 0, sw = currentImage.width, sh = currentImage.height;
+
+            if (sourceAspect > targetAspect) {
+              sw = Math.round(currentImage.height * targetAspect);
+              sx = Math.round((currentImage.width - sw) / 2);
+            } else {
+              sh = Math.round(currentImage.width / targetAspect);
+              sy = Math.round((currentImage.height - sh) / 2);
+            }
+            ctx.drawImage(currentImage, sx, sy, sw, sh, 0, 0, wPx, hPx);
+          } else {
+            ctx.fillStyle = "#cbd5e1";
+            ctx.font = "16px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("Upload Portrait Photo", wPx / 2, hPx / 2);
+          }
+
+          if (overlaySlot) {
+            overlaySlot.innerHTML = toggleGuideCb && toggleGuideCb.checked ? renderBiometricSvgOverlay(wPx, hPx) : "";
+          }
+        }
+
+        function renderTiledSheet() {
+          if (!sheetCanvas) return;
+          const paperType = paperSelect ? paperSelect.value : "photo-4x6";
+          const dpi = 300;
+
+          let sheetWMm = 101.6, sheetHMm = 152.4; // 4x6"
+          if (paperType === "a4") { sheetWMm = 210; sheetHMm = 297; }
+          else if (paperType === "letter") { sheetWMm = 215.9; sheetHMm = 279.4; }
+
+          const marginMm = 5;
+          const spacingMm = 2;
+          const availW = sheetWMm - 2 * marginMm;
+          const availH = sheetHMm - 2 * marginMm;
+
+          const cols = Math.max(1, Math.floor((availW + spacingMm) / (activePreset.widthMm + spacingMm)));
+          const rows = Math.max(1, Math.floor((availH + spacingMm) / (activePreset.heightMm + spacingMm)));
+          const totalPhotos = cols * rows;
+
+          const gridW = cols * activePreset.widthMm + (cols - 1) * spacingMm;
+          const gridH = rows * activePreset.heightMm + (rows - 1) * spacingMm;
+          const startX = (sheetWMm - gridW) / 2;
+          const startY = (sheetHMm - gridH) / 2;
+
+          const toPx = (mm) => Math.round((mm / 25.4) * dpi);
+
+          sheetCanvas.width = toPx(sheetWMm);
+          sheetCanvas.height = toPx(sheetHMm);
+
+          const ctx = sheetCanvas.getContext("2d");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, sheetCanvas.width, sheetCanvas.height);
+
+          const photoWPx = toPx(activePreset.widthMm);
+          const photoHPx = toPx(activePreset.heightMm);
+          const tickPx = toPx(2);
+
+          for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+              const xPx = toPx(startX + c * (activePreset.widthMm + spacingMm));
+              const yPx = toPx(startY + r * (activePreset.heightMm + spacingMm));
+
+              if (cropCanvas) {
+                ctx.drawImage(cropCanvas, xPx, yPx, photoWPx, photoHPx);
+              }
+
+              // Corner trim guides
+              ctx.strokeStyle = "#94a3b8";
+              ctx.lineWidth = 1;
+              ctx.beginPath(); ctx.moveTo(xPx - tickPx, yPx); ctx.lineTo(xPx, yPx); ctx.stroke();
+              ctx.beginPath(); ctx.moveTo(xPx, yPx - tickPx); ctx.lineTo(xPx, yPx); ctx.stroke();
+              ctx.beginPath(); ctx.moveTo(xPx + photoWPx, yPx); ctx.lineTo(xPx + photoWPx + tickPx, yPx); ctx.stroke();
+              ctx.beginPath(); ctx.moveTo(xPx + photoWPx, yPx - tickPx); ctx.lineTo(xPx + photoWPx, yPx); ctx.stroke();
+              ctx.beginPath(); ctx.moveTo(xPx - tickPx, yPx + photoHPx); ctx.lineTo(xPx, yPx + photoHPx); ctx.stroke();
+              ctx.beginPath(); ctx.moveTo(xPx, yPx + photoHPx); ctx.lineTo(xPx, yPx + photoHPx + tickPx); ctx.stroke();
+              ctx.beginPath(); ctx.moveTo(xPx + photoWPx, yPx + photoHPx); ctx.lineTo(xPx + photoWPx + tickPx, yPx + photoHPx); ctx.stroke();
+              ctx.beginPath(); ctx.moveTo(xPx + photoWPx, yPx + photoHPx); ctx.lineTo(xPx + photoWPx, yPx + photoHPx + tickPx); ctx.stroke();
+            }
+          }
+
+          if (sheetStatsBadge) {
+            sheetStatsBadge.textContent = `${totalPhotos} Photos (${cols}x${rows}) Ready on ${paperType.toUpperCase()}`;
+          }
+        }
+
+        // Event Listeners
+        if (presetSelect) {
+          presetSelect.addEventListener("change", (e) => {
+            activePreset = presetsMap.get(e.target.value) || allPresets[0];
+            updateGuidelines();
+            renderCropper();
+            renderTiledSheet();
+          });
+        }
+
+        if (paperSelect) {
+          paperSelect.addEventListener("change", renderTiledSheet);
+        }
+
+        if (uploadBtn && fileInput) {
+          uploadBtn.addEventListener("click", () => fileInput.click());
+          fileInput.addEventListener("change", (e) => {
+            if (e.target.files && e.target.files[0]) {
+              const file = e.target.files[0];
+              const reader = new FileReader();
+              reader.onload = (re) => {
+                const img = new Image();
+                img.onload = () => {
+                  currentImage = img;
+                  renderCropper();
+                  renderTiledSheet();
+                };
+                img.src = re.target.result;
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+        }
+
+        if (toggleGuideCb) {
+          toggleGuideCb.addEventListener("change", () => {
+            if (overlaySlot) {
+              overlaySlot.style.display = toggleGuideCb.checked ? "block" : "none";
+            }
+          });
+        }
+
+        if (downloadSheetBtn && sheetCanvas) {
+          downloadSheetBtn.addEventListener("click", () => {
+            const a = document.createElement("a");
+            a.download = `passport-sheet-${activePreset.id}.png`;
+            a.href = sheetCanvas.toDataURL("image/png");
+            a.click();
+          });
+        }
+
+        if (downloadSingleBtn && cropCanvas) {
+          downloadSingleBtn.addEventListener("click", () => {
+            const a = document.createElement("a");
+            a.download = `passport-${activePreset.id}.png`;
+            a.href = cropCanvas.toDataURL("image/png");
+            a.click();
+          });
+        }
+
+        if (printDirectBtn) {
+          printDirectBtn.addEventListener("click", () => window.print());
+        }
+
+        // Initialize
+        updateGuidelines();
+        renderCropper();
+        renderTiledSheet();
+      })();
+    </script>
+  </body>
+</html>
