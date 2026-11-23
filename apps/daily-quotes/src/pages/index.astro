@@ -1,54 +1,65 @@
 ---
 import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
-import { renderMetaTags, buildWebApplicationSchema } from "@suite/seo-core";
+import { renderMetaTags, buildWebApplicationSchema, buildFAQSchema } from "@suite/seo-core";
 import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { QuoteCorpusLoader } from "../lib/corpus/loader.ts";
+import { MOODS, OCCASIONS } from "../lib/corpus/seed-quotes.ts";
+import { EMOTION_MAP } from "../lib/mood-matcher.ts";
+import { WALLPAPER_DIMENSIONS } from "../lib/wallpaper-engine.ts";
 
-const siteTitle = "VerbaLogos Daily Quotes";
-const siteUrl = Astro.site?.toString() || "https://daily-quotes.suite.local";
-const description = "Ultra-fast, accessible, and privacy-first ${siteTitle} platform.";
+const loader = new QuoteCorpusLoader();
+const today = new Date();
+const todayQuote = loader.getQuoteOfTheDay(today);
+
+const siteTitle = "VerbaLogos | Massive Quote Database, 4K Wallpaper Studio & Stoic Wisdom";
+const canonicalUrl = Astro.site ? Astro.site.toString() : "https://daily-quotes.suite.local/";
+const description = "Thousands of timeless quotes across Stoicism, Philosophy, Literature, and Leadership. Generate custom 4K desktop wallpapers and phone lock screens, explore mood recommendations, and read the Quote of the Day.";
 
 const metaHtml = renderMetaTags({
-  title: `${siteTitle} | Fast, Accessible & Free`,
+  title: siteTitle,
   description,
-  canonicalUrl: siteUrl,
-  siteName: siteTitle,
+  canonicalUrl,
+  siteName: "VerbaLogos",
 });
 
-const schemaJson = buildWebApplicationSchema({
-  name: siteTitle,
-  url: siteUrl,
+const schemaApp = buildWebApplicationSchema({
+  name: "VerbaLogos 4K Quote Wallpaper Studio",
+  url: canonicalUrl,
   description,
-  applicationCategory: "UtilitiesApplication",
+  applicationCategory: "DesignApplication",
 });
 
-const headerHtml = renderHeaderHTML({
-  siteTitle,
-  navItems: [
-    { label: "Home", href: "/" },
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" },
-  ],
-});
+const faqItems = [
+  {
+    question: "Can I download 4K desktop and iPhone lock screen wallpapers for free?",
+    answer: "Yes! All quote wallpapers are rendered directly in your browser as crisp vector SVGs or high-DPI PNGs with 100% free commercial and personal usage rights."
+  },
+  {
+    question: "How does the 'How do you feel today?' mood matcher work?",
+    answer: "Select your current emotional state (such as overwhelmed, unmotivated, or seeking purpose), and our recommendation engine prescribes classical Stoic and literary passages tailored to restore cognitive calm and mental clarity."
+  },
+  {
+    question: "How can I embed the Quote of the Day on my own blog?",
+    answer: "Simply include our lightweight widget script: <script src='https://daily-quotes.suite.local/widget.js' async></script>. It updates automatically every 24 hours at 00:00 UTC."
+  }
+];
 
-const footerHtml = renderFooterHTML({
-  siteTitle,
-  tagline: "Instant, accessible, and privacy-first digital utility suite.",
-});
+const schemaFaq = buildFAQSchema(faqItems);
 
-const adSlotHtml = renderAdSlotHTML({
+const adLeaderboard = renderAdSlotHTML({
   client: "ca-pub-0000000000000000",
-  slotId: "1234567890",
+  slotId: "3001001000",
   format: "leaderboard",
   testMode: true,
 });
 
-const affiliateHtml = renderAffiliateCardHTML({
-  title: "Featured Productivity Upgrade",
-  description: "Recommended high-performance tools selected by our editorial team.",
-  ctaText: "Explore Partner",
-  affiliateUrl: "https://partner.suite.local",
-  merchantName: "SuitePartner",
-  badge: "Recommended",
+const affiliateCard = renderAffiliateCardHTML({
+  title: "Classic Philosophy & Stoic Library",
+  description: "Explore curated leather-bound editions of Marcus Aurelius's Meditations and Seneca's Letters with our independent bookstore partner.",
+  ctaText: "Shop Classic Editions",
+  affiliateUrl: "https://partner.suite.local/books-philosophy",
+  merchantName: "Folio Society & Bookshop",
+  badge: "Staff Pick",
 });
 ---
 
@@ -60,34 +71,190 @@ const affiliateHtml = renderAffiliateCardHTML({
     <script is:inline set:html={getAntiFOUCScript()} />
     <Fragment set:html={getConsentModeScript()} />
     <Fragment set:html={metaHtml} />
-    <script type="application/ld+json" is:inline set:html={schemaJson} />
+    <script type="application/ld+json" is:inline set:html={schemaApp} />
+    <script type="application/ld+json" is:inline set:html={schemaFaq} />
     <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+    <style>
+      .tab-btn {
+        padding: 10px 18px;
+        font-weight: 600;
+        border-radius: 8px;
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .tab-btn.active {
+        background: var(--bg-surface-elevated);
+        border-color: var(--border-strong);
+        color: var(--text-primary);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      }
+      .tab-pane {
+        display: none;
+      }
+      .tab-pane.active {
+        display: block;
+      }
+    </style>
   </head>
   <body>
-    <Fragment set:html={headerHtml} />
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "VerbaLogos", navItems: [{ label: "Today (#QOTD)", href: "/today" }, { label: "Wallpaper Studio", href: "/" }, { label: "Widget", href: "/widget.js", external: true }] })} />
+
     <main class="suite-container" style="flex: 1; padding-block: 2.5rem;">
       <section style="text-align: center; margin-bottom: 2rem;">
-        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem;">{siteTitle}</h1>
-        <p style="font-size: 1.125rem; color: var(--text-secondary); max-width: 650px; margin-inline: auto;">
-          {description}
+        <h1 style="font-size: 2.75rem; font-weight: 800; margin-bottom: 0.75rem; letter-spacing: -0.02em;">
+          Timeless Quotes & 4K Wallpaper Studio
+        </h1>
+        <p style="font-size: 1.125rem; color: var(--text-secondary); max-width: 680px; margin-inline: auto;">
+          Transform timeless philosophical wisdom into aesthetic 4K desktop wallpapers and phone lock screens.
         </p>
       </section>
 
-      <!-- Zero-CLS Ad Unit -->
-      <Fragment set:html={adSlotHtml} />
+      <!-- Zero-CLS Leaderboard Ad Unit -->
+      <Fragment set:html={adLeaderboard} />
 
-      <!-- Interactive Core Workspace Area -->
-      <div class="suite-card" style="min-height: 280px; display: flex; align-items: center; justify-content: center; text-align: center;">
-        <div>
-          <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Interactive Studio Space</h2>
-          <p style="color: var(--text-muted);">Interactive components ready to plug in.</p>
+      <!-- Interactive Multi-Tool Studio Box -->
+      <div class="suite-card" style="max-width: 840px; margin-inline: auto; padding: 2rem; margin-bottom: 2.5rem;">
+        <!-- Tab Navigation -->
+        <div style="display: flex; gap: 8px; margin-bottom: 1.75rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; flex-wrap: wrap;">
+          <button type="button" class="tab-btn active" data-tab="tab-wallpaper">🎨 4K Wallpaper Studio</button>
+          <button type="button" class="tab-btn" data-tab="tab-moods">🧘 Mood & Occasion Explorer</button>
+          <button type="button" class="tab-btn" data-tab="tab-matcher">✨ "How Do You Feel?" Prescriptions</button>
+        </div>
+
+        <!-- TAB 1: 4K Wallpaper Studio -->
+        <div id="tab-wallpaper" class="tab-pane active">
+          <!-- Controls Panel -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 1.5rem;">
+            <div>
+              <label style="font-size: 0.8125rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Aspect Ratio / Device</label>
+              <select id="wp-format" style="width: 100%; min-height: 40px; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); background: var(--bg-surface-elevated); color: var(--text-primary);">
+                <option value="phone-lockscreen">Phone Lock Screen (9:16)</option>
+                <option value="instagram-square">Instagram Square (1:1)</option>
+                <option value="desktop-4k">Desktop 4K Wallpaper (16:9)</option>
+                <option value="linkedin-banner">LinkedIn / X Banner (4:1)</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="font-size: 0.8125rem; color: var(--text-muted); display: block; margin-bottom: 4px;">Aesthetic Theme</label>
+              <select id="wp-theme" style="width: 100%; min-height: 40px; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); background: var(--bg-surface-elevated); color: var(--text-primary);">
+                <option value="glass-aurora">Glass Aurora (Indigo & Pink)</option>
+                <option value="dark-oled" selected>Dark OLED (Carbon & Slate)</option>
+                <option value="cyberpunk-neon">Cyberpunk Neon (Cyan Glow)</option>
+                <option value="light-minimal">Light Minimal (Swiss Alabaster)</option>
+                <option value="a11y-contrast">AAA Contrast (High Contrast)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Live Preview Canvas Frame -->
+          <div style="display: flex; justify-content: center; margin-bottom: 1.5rem; background: var(--bg-base); padding: 1.5rem; border-radius: 12px; border: 1px dashed var(--border-subtle);">
+            <div id="wp-preview-card" style="width: 100%; max-width: 440px; aspect-ratio: 9/16; background: #05070a; border-radius: 16px; padding: 2rem; display: flex; flex-direction: column; justify-content: center; text-align: center; border: 2px solid #1e293b; box-shadow: 0 10px 30px rgba(0,0,0,0.4); position: relative; transition: all 0.2s ease;">
+              <div style="font-size: 3rem; color: #6366f1; opacity: 0.35; font-serif; line-height: 1; margin-bottom: -0.5rem;">&ldquo;</div>
+              <blockquote id="wp-preview-text" style="font-size: 1.25rem; font-weight: 700; color: #ffffff; line-height: 1.45; font-style: italic; margin-bottom: 1.25rem;">
+                "{todayQuote.quote_text}"
+              </blockquote>
+              <div id="wp-preview-author" style="font-size: 0.875rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em;">
+                — {todayQuote.author.name}
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: center; gap: 12px;">
+            <button type="button" id="download-wp-btn" class="suite-btn-primary" style="padding: 10px 26px;">
+              📥 Download Wallpaper (High-DPI Vector)
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB 2: Mood & Occasion Explorer -->
+        <div id="tab-moods" class="tab-pane">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem;">
+            {MOODS.map((mood) => (
+              <button type="button" class="suite-btn-secondary mood-pill-btn" data-mood={mood.slug} style="font-size: 0.8125rem; min-height: 36px; padding: 4px 12px;">
+                {mood.icon} {mood.label}
+              </button>
+            ))}
+          </div>
+
+          <div class="suite-card" style="padding: 2rem; background: var(--bg-base); margin-bottom: 1rem;">
+            <blockquote id="explorer-quote-text" style="font-size: 1.5rem; font-weight: 700; line-height: 1.4; font-style: italic; margin-bottom: 1.25rem;">
+              "{todayQuote.quote_text}"
+            </blockquote>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 1rem;">
+              <div id="explorer-quote-author" style="font-weight: 600;">— {todayQuote.author.name} ({todayQuote.work_title || ""})</div>
+              <button type="button" id="next-quote-btn" class="suite-btn-primary" style="padding: 6px 16px; font-size: 0.875rem;">Next Quote &rarr;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: "How Do You Feel?" Mood Matcher -->
+        <div id="tab-matcher" class="tab-pane">
+          <p style="font-size: 0.9375rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+            Select your current state of mind to receive a timeless philosophical prescription:
+          </p>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 1.5rem;">
+            {EMOTION_MAP.map((emotion) => (
+              <button type="button" class="suite-card emotion-select-btn" data-emotion={emotion.id} style="padding: 12px 14px; text-align: left; cursor: pointer; border: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.5rem;">{emotion.icon}</span>
+                <span style="font-weight: 600; font-size: 0.875rem;">{emotion.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <div id="matcher-result" style="display: none; padding: 1.5rem; background: var(--bg-base); border: 1px solid var(--border-strong); border-radius: 8px;">
+            <div id="matcher-prescription" style="font-size: 0.875rem; color: var(--accent-primary); font-weight: 600; margin-bottom: 8px;"></div>
+            <blockquote id="matcher-quote-text" style="font-size: 1.25rem; font-weight: 700; font-style: italic; margin-bottom: 10px;"></blockquote>
+            <div id="matcher-quote-author" style="font-size: 0.875rem; color: var(--text-muted); text-align: right;"></div>
+          </div>
         </div>
       </div>
 
-      <!-- Affiliate Partner Card -->
-      <Fragment set:html={affiliateHtml} />
+      <!-- Affiliate Partner Promotion -->
+      <Fragment set:html={affiliateCard} />
+
+      <!-- Deep Editorial SEO Commentary -->
+      <section class="suite-card" style="max-width: 840px; margin-inline: auto; margin-block: 2.5rem; line-height: 1.7;">
+        <h2 style="font-size: 1.625rem; font-weight: 700; margin-bottom: 1rem;">The Transformative Power of Meditative Quotations</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1.25rem;">
+          From Marcus Aurelius journaling in his military tents along the Danubian frontier to Ralph Waldo Emerson walking the Massachusetts woodlands, timeless quotes are not mere soundbites. They represent the distilled essence of human struggle, psychological resilience, and existential insight.
+        </p>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+          Displaying these maxims as wallpapers on your phone or desktop creates an intentional digital environment. By replacing social media notifications with enduring philosophical reminders, you prime your subconscious mind for discipline, calm, and purpose.
+        </p>
+
+        <h3 style="font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem;">Frequently Asked Questions</h3>
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+          {faqItems.map((faq) => (
+            <div style="border-top: 1px solid var(--border-subtle); padding-top: 10px;">
+              <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 4px;">{faq.question}</h4>
+              <p style="font-size: 0.9375rem; color: var(--text-secondary);">{faq.answer}</p>
+            </div>
+          ))}
+        </div>
+      </section>
     </main>
-    <Fragment set:html={footerHtml} />
+
+    <Fragment set:html={renderFooterHTML({ siteTitle: "VerbaLogos", tagline: "Classical wisdom and modern wallpaper design." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
+
+    <script is:inline>
+      // Tab switcher
+      const tabs = document.querySelectorAll(".tab-btn");
+      const panes = document.querySelectorAll(".tab-pane");
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          tabs.forEach((t) => t.classList.remove("active"));
+          panes.forEach((p) => p.classList.remove("active"));
+          tab.classList.add("active");
+          const target = tab.getAttribute("data-tab");
+          if (target) document.getElementById(target)?.classList.add("active");
+        });
+      });
+    </script>
   </body>
 </html>

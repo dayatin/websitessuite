@@ -20,7 +20,7 @@
 | Stage 3 | Phase 3.2 | 3.2.2 | Category Hubs, ClaimReview JSON-LD & Monetization | **DONE** | Validated (/category hubs, /fact/[slug] permalinks, ClaimReview JSON-LD, 10/10 tests) | 2026-11-23 |
 | **Stage 4** | **Phase 4.1** | 4.1.1 | Daily Quotes App Scaffold, Schema & Corpus Pipeline | **DONE** | Validated (D1 Authors & Quotes Schema, Multi-dimensional taxonomy, Sharded loader, 5/5 tests) | 2026-11-23 |
 | Stage 4 | Phase 4.1 | 4.1.2 | Quote of the Day (#QOTD), Mood Matcher & Embed Widget | **DONE** | Validated (/today route, Mood Matcher, embeddable widget.js, RSS feed, 7/7 tests) | 2026-11-23 |
-| Stage 4 | Phase 4.2 | 4.2.1 | Quote Wallpaper & Social Poster Studio (4K Canvas) | PENDING | - | - |
+| Stage 4 | Phase 4.2 | 4.2.1 | Quote Wallpaper & Social Poster Studio (4K Canvas) | **DONE** | Validated (4K/Lockscreen/Instagram/Banner SVG engine, multi-tab studio, 9/9 tests) | 2026-11-23 |
 | Stage 4 | Phase 4.2 | 4.2.2 | Author/Occasion SEO Pages & Book Affiliates/AdSense | PENDING | - | - |
 | **Stage 5** | **Phase 5.1** | 5.1.1 | World Clock App Scaffold & Precision Time Engine | PENDING | - | - |
 | Stage 5 | Phase 5.1 | 5.1.2 | Multi-City Dashboard & 24H Timeline Scrubber | PENDING | - | - |
