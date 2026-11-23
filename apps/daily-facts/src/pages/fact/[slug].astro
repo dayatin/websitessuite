@@ -1,0 +1,124 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildClaimReviewSchema, buildBreadcrumbSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { FactCorpusLoader } from "../../lib/corpus/loader.ts";
+import { SEED_FACTS } from "../../lib/corpus/seed-data.ts";
+
+export function getStaticPaths() {
+  return SEED_FACTS.map((fact) => ({
+    params: { slug: fact.slug },
+    props: { fact },
+  }));
+}
+
+interface Props {
+  fact: (typeof SEED_FACTS)[number];
+}
+
+const { fact } = Astro.props;
+const siteTitle = `${fact.fact_text} | FactSphere Verified Facts`;
+const canonicalUrl = Astro.site ? new URL(`fact/${fact.slug}`, Astro.site).href : `https://daily-facts.suite.local/fact/${fact.slug}`;
+const description = `Is it true that ${fact.fact_text.toLowerCase()}? Detailed scientific and historical verification, primary source citations from ${fact.source_name}, and full analysis.`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "FactSphere",
+  type: "article",
+});
+
+const claimSchema = buildClaimReviewSchema({
+  claimReviewed: fact.fact_text,
+  reviewUrl: canonicalUrl,
+  ratingValue: fact.is_myth ? "1" : "5",
+  bestRating: "5",
+  alternateName: fact.is_myth ? "False / Debunked Myth" : "Authentic Verified Fact",
+  authorName: "FactSphere Editorial Board",
+  authorUrl: "https://daily-facts.suite.local/editorial-policy",
+});
+
+const breadcrumbs = buildBreadcrumbSchema([
+  { name: "Home", url: "https://daily-facts.suite.local/" },
+  { name: fact.category.toUpperCase(), url: `https://daily-facts.suite.local/category/${fact.category}` },
+  { name: fact.slug, url: canonicalUrl },
+]);
+
+const adSlot = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "2001001004",
+  format: "rectangle-medium",
+  testMode: true,
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={claimSchema} />
+    <script type="application/ld+json" is:inline set:html={breadcrumbs} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "FactSphere", navItems: [{ label: "Today", href: "/today" }, { label: "Categories", href: "/" }, { label: "RSS Feed", href: "/feed.xml", external: true }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2.5rem; max-width: 800px;">
+      <!-- Breadcrumb navigation -->
+      <nav style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+        <a href="/" style="color: inherit; text-decoration: underline;">Home</a> &gt; 
+        <a href={`/category/${fact.category}`} style="color: inherit; text-decoration: underline; text-transform: capitalize;">{fact.category}</a> &gt; 
+        <span>{fact.slug}</span>
+      </nav>
+
+      <article class="suite-card" style="padding: 2.5rem 2rem; margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--accent-primary);">
+            {fact.category.toUpperCase()} &bull; {fact.subtopic}
+          </span>
+          <span style="font-size: 0.75rem; font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 2px 10px; border-radius: 9999px;">
+            VERIFIED CLAIM
+          </span>
+        </div>
+
+        <h1 style="font-size: 2.25rem; font-weight: 800; line-height: 1.35; margin-bottom: 1.5rem;">
+          "{fact.fact_text}"
+        </h1>
+
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 1.5rem; margin-top: 1.5rem;">
+          <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem;">Scientific & Historical Analysis:</h2>
+          <p style="font-size: 1.0625rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.5rem;">
+            {fact.explanation}
+          </p>
+        </div>
+
+        <!-- Citation Box -->
+        <div style="background: var(--bg-base); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted);">Primary Documented Source</div>
+            <div style="font-size: 1rem; font-weight: 600;">{fact.source_name}</div>
+          </div>
+          <a href={fact.source_url} target="_blank" rel="noopener noreferrer" class="suite-btn-secondary" style="padding: 6px 14px; font-size: 0.8125rem;">
+            Examine Source Document &rarr;
+          </a>
+        </div>
+      </article>
+
+      <!-- Zero-CLS AdSlot -->
+      <Fragment set:html={adSlot} />
+
+      <div style="margin-top: 2rem; display: flex; justify-content: space-between;">
+        <a href={`/category/${fact.category}`} class="suite-btn-secondary">&larr; More {fact.category} Facts</a>
+        <a href="/today" class="suite-btn-primary">Today's Fact &rarr;</a>
+      </div>
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ siteTitle: "FactSphere", tagline: "Fact-checked knowledge base." })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>

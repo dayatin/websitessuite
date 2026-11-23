@@ -1,0 +1,123 @@
+---
+import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import { renderMetaTags, buildBreadcrumbSchema } from "@suite/seo-core";
+import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
+import { FactCorpusLoader } from "../../lib/corpus/loader.ts";
+import { CATEGORIES } from "../../lib/corpus/seed-data.ts";
+
+export function getStaticPaths() {
+  const loader = new FactCorpusLoader();
+  return CATEGORIES.map((cat) => ({
+    params: { category: cat.slug },
+    props: {
+      categoryInfo: cat,
+      facts: loader.getFactsByCategory(cat.slug),
+    },
+  }));
+}
+
+interface Props {
+  categoryInfo: (typeof CATEGORIES)[number];
+  facts: ReturnType<FactCorpusLoader["getFactsByCategory"]>;
+}
+
+const { categoryInfo, facts } = Astro.props;
+const siteTitle = `${categoryInfo.label} Facts & Debunked Myths | FactSphere`;
+const canonicalUrl = Astro.site ? new URL(`category/${categoryInfo.slug}`, Astro.site).href : `https://daily-facts.suite.local/category/${categoryInfo.slug}`;
+const description = `Explore verified, citation-backed facts and debunked misconceptions about ${categoryInfo.label}. Verified by leading institutions and academic journals.`;
+
+const metaHtml = renderMetaTags({
+  title: siteTitle,
+  description,
+  canonicalUrl,
+  siteName: "FactSphere",
+});
+
+const breadcrumbSchema = buildBreadcrumbSchema([
+  { name: "Home", url: "https://daily-facts.suite.local/" },
+  { name: "Categories", url: "https://daily-facts.suite.local/" },
+  { name: categoryInfo.label, url: canonicalUrl },
+]);
+
+const adLeaderboard = renderAdSlotHTML({
+  client: "ca-pub-0000000000000000",
+  slotId: "2001001003",
+  format: "leaderboard",
+  testMode: true,
+});
+
+const affiliateCard = renderAffiliateCardHTML({
+  title: `Deep-Dive into ${categoryInfo.label}`,
+  description: `Stream acclaimed documentary lectures and bestselling science audiobooks with our educational partner discount.`,
+  ctaText: "Listen Free",
+  affiliateUrl: "https://partner.suite.local/audible",
+  merchantName: "Audible Education",
+  badge: "Recommended",
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script is:inline set:html={getAntiFOUCScript()} />
+    <Fragment set:html={getConsentModeScript()} />
+    <Fragment set:html={metaHtml} />
+    <script type="application/ld+json" is:inline set:html={breadcrumbSchema} />
+    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
+  </head>
+  <body>
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "FactSphere", navItems: [{ label: "Today", href: "/today" }, { label: "Categories", href: "/" }, { label: "RSS Feed", href: "/feed.xml", external: true }] })} />
+
+    <main class="suite-container" style="flex: 1; padding-block: 2.5rem; max-width: 860px;">
+      <section style="text-align: center; margin-bottom: 2rem;">
+        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">{categoryInfo.icon}</div>
+        <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem;">{categoryInfo.label}</h1>
+        <p style="font-size: 1.125rem; color: var(--text-secondary); max-width: 680px; margin-inline: auto;">
+          {description}
+        </p>
+      </section>
+
+      <Fragment set:html={adLeaderboard} />
+
+      <!-- Fact Listing Cards -->
+      <div style="display: flex; flex-direction: column; gap: 20px; margin-bottom: 2.5rem;">
+        {facts.map((fact) => (
+          <article class="suite-card" style="padding: 1.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--accent-primary);">
+                {fact.subtopic || fact.category}
+              </span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">
+                ⏱️ {fact.reading_time_seconds}s read
+              </span>
+            </div>
+
+            <h2 style="font-size: 1.375rem; font-weight: 700; margin-bottom: 0.75rem; line-height: 1.4;">
+              <a href={`/fact/${fact.slug}`} style="color: inherit; text-decoration: none;">
+                "{fact.fact_text}"
+              </a>
+            </h2>
+
+            <p style="font-size: 0.9375rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.25rem;">
+              {fact.explanation}
+            </p>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; border-top: 1px solid var(--border-subtle); padding-top: 10px; font-size: 0.8125rem;">
+              <span style="color: var(--text-muted);">Citation: <strong>{fact.source_name}</strong></span>
+              <a href={`/fact/${fact.slug}`} style="color: var(--accent-primary); text-decoration: underline; font-weight: 600;">
+                Full Fact Page &rarr;
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <Fragment set:html={affiliateCard} />
+    </main>
+
+    <Fragment set:html={renderFooterHTML({ siteTitle: "FactSphere", tagline: "Citation-backed knowledge hubs." })} />
+    <Fragment set:html={renderConsentBannerHTML()} />
+  </body>
+</html>

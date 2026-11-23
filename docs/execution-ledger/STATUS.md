@@ -17,7 +17,7 @@
 | **Stage 3** | **Phase 3.1** | 3.1.1 | Daily Facts App Scaffold, Corpus & Seed Pipeline | **DONE** | Validated (Scaffold, D1 Schema, Sharded Corpus Loader, Seed Facts, 5/5 Tests) | 2026-11-23 |
 | Stage 3 | Phase 3.1 | 3.1.2 | Daily Rotation Engine, Cron Worker & Archives | **DONE** | Validated (Cron worker, /today route, /fact-of-the-day archive, RSS feed, 6/6 tests) | 2026-11-23 |
 | Stage 3 | Phase 3.2 | 3.2.1 | Fact Explorer, "Fact or Myth" Daily Quiz & Card Studio | **DONE** | Validated (Keyboard J/K explorer, 5-question daily quiz, 1080x1080 Social card studio, 8/8 tests) | 2026-11-23 |
-| Stage 3 | Phase 3.2 | 3.2.2 | Category Hubs, ClaimReview JSON-LD & Monetization | PENDING | - | - |
+| Stage 3 | Phase 3.2 | 3.2.2 | Category Hubs, ClaimReview JSON-LD & Monetization | **DONE** | Validated (/category hubs, /fact/[slug] permalinks, ClaimReview JSON-LD, 10/10 tests) | 2026-11-23 |
 | **Stage 4** | **Phase 4.1** | 4.1.1 | Daily Quotes App Scaffold, Schema & Corpus Pipeline | PENDING | - | - |
 | Stage 4 | Phase 4.1 | 4.1.2 | Quote of the Day (#QOTD), Mood Matcher & Embed Widget | PENDING | - | - |
 | Stage 4 | Phase 4.2 | 4.2.1 | Quote Wallpaper & Social Poster Studio (4K Canvas) | PENDING | - | - |
