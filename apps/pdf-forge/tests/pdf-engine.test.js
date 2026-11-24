@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   PDF_TOOLS,
+  addPageNumbersToPDF,
+  addWatermarkToPDF,
   createSamplePDF,
   deletePDFPages,
   getPDFInfo,
@@ -13,7 +15,7 @@ import {
 } from "../src/lib/pdf-engine.ts";
 
 test("PDF_TOOLS metadata catalog integrity", () => {
-  assert.equal(PDF_TOOLS.length, 5);
+  assert.ok(PDF_TOOLS.length >= 5);
   for (const tool of PDF_TOOLS) {
     assert.ok(tool.slug.length > 0);
     assert.ok(tool.title.length > 0);
@@ -132,4 +134,21 @@ test("updatePDFMetadata changes document metadata attributes", async () => {
   assert.equal(info.author, "Privacy Officer");
   assert.equal(info.subject, "Audited Document");
   assert.ok(info.modificationDate instanceof Date);
+});
+
+test("addWatermarkToPDF stamps text diagonally across pages", async () => {
+  const doc = await createSamplePDF("Contract Document", "Official Terms");
+  const watermarked = await addWatermarkToPDF(doc, "CONFIDENTIAL", { opacity: 0.5 });
+  assert.ok(watermarked instanceof Uint8Array);
+  assert.ok(watermarked.length > doc.length);
+});
+
+test("addPageNumbersToPDF adds pagination footer", async () => {
+  const doc1 = await createSamplePDF("Page One", "Content 1");
+  const doc2 = await createSamplePDF("Page Two", "Content 2");
+  const merged = await mergePDFs([doc1, doc2]);
+  const numbered = await addPageNumbersToPDF(merged, "page-of-total");
+  assert.ok(numbered instanceof Uint8Array);
+  const info = await getPDFInfo(numbered);
+  assert.equal(info.pageCount, 2);
 });

@@ -44,6 +44,10 @@ const faqs = [
     question: "Are my confidential legal or financial documents safe?",
     answer: "Yes, completely safe. Since no network requests are dispatched with your document content, your confidential data remains solely on your physical device.",
   },
+  {
+    question: "Do I need to install any software or plugins?",
+    answer: "No. Everything runs natively in standard modern web browsers (Chrome, Edge, Firefox, Safari) using HTML5 and WebWorkers with zero software installation required.",
+  },
 ];
 
 const faqSchema = buildFAQSchema(faqs);
@@ -88,11 +92,19 @@ const affiliateOffer = renderAffiliateCardHTML({
     <script type="application/ld+json" is:inline set:html={appSchema} />
     <script type="application/ld+json" is:inline set:html={faqSchema} />
     <script type="application/ld+json" is:inline set:html={breadcrumbSchema} />
+    <script is:inline src="/pdf-lib.min.js"></script>
+    <script is:inline>
+      if (typeof PDFLib === "undefined") {
+        const s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js";
+        document.head.appendChild(s);
+      }
+    </script>
     <style>
       .tool-hero {
         text-align: center;
-        padding: 2.5rem 1rem 1.5rem;
-        max-width: 850px;
+        padding: 2rem 1rem 1.5rem;
+        max-width: 900px;
         margin: 0 auto;
       }
       .tool-icon-large {
@@ -107,66 +119,131 @@ const affiliateOffer = renderAffiliateCardHTML({
       }
       .tool-lead {
         font-size: 1.15rem;
-        color: #64748b;
+        color: var(--text-secondary);
         line-height: 1.6;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
       }
       .tool-workspace {
-        background: #ffffff;
-        border: 2px dashed #94a3b8;
-        border-radius: 1rem;
-        padding: 3rem 1.5rem;
+        background: var(--bg-surface);
+        border: 2px dashed var(--border-subtle);
+        border-radius: var(--radius-md, 12px);
+        padding: 2.5rem 1.5rem;
         text-align: center;
-        max-width: 700px;
-        margin: 0 auto 2.5rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        max-width: 800px;
+        margin: 0 auto 2rem;
+        transition: border-color 0.2s ease, background-color 0.2s ease;
+      }
+      .tool-workspace.drag-over {
+        border-color: var(--accent-primary);
+        background: rgba(99, 102, 241, 0.05);
       }
       .upload-btn {
-        display: inline-block;
-        background: #2563eb;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--accent-primary);
         color: #ffffff;
         font-weight: 700;
-        font-size: 1.05rem;
-        padding: 0.9rem 2rem;
-        border-radius: 0.5rem;
+        font-size: 1rem;
+        padding: 0.85rem 1.75rem;
+        border-radius: var(--radius-sm, 6px);
         cursor: pointer;
         border: none;
-        transition: background 0.15s ease;
+        transition: opacity 0.15s ease, transform 0.15s ease;
       }
       .upload-btn:hover {
-        background: #1d4ed8;
+        opacity: 0.9;
+        transform: translateY(-1px);
+      }
+      .page-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm, 8px);
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        position: relative;
+        transition: all 0.2s ease;
+      }
+      .page-card:hover {
+        border-color: var(--accent-primary);
+      }
+      .page-card.is-deleted {
+        opacity: 0.4;
+        filter: grayscale(1);
+        text-decoration: line-through;
+      }
+      .page-thumbnail {
+        width: 100px;
+        height: 135px;
+        background: var(--bg-surface-hover, #ffffff);
+        border: 1px solid var(--border-subtle);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        color: var(--text-muted);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease;
+      }
+      .action-pill {
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-surface);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .action-pill:hover {
+        border-color: var(--accent-primary);
+        color: var(--text-primary);
       }
       .benefits-list {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         gap: 1.25rem;
-        max-width: 850px;
+        max-width: 900px;
         margin: 2.5rem auto;
         text-align: left;
       }
       .benefit-item {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.75rem;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm, 8px);
         padding: 1.25rem;
       }
       .benefit-item strong {
         display: block;
-        color: #0f172a;
+        color: var(--text-primary);
         margin-bottom: 0.25rem;
         font-size: 0.95rem;
       }
       .benefit-item span {
-        color: #64748b;
+        color: var(--text-secondary);
         font-size: 0.88rem;
         line-height: 1.4;
       }
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ siteTitle: "PDF Forge", navItems: [{ label: "PDF Tools", href: "/#tools" }, { label: "Merge PDF", href: "/tools/merge-pdf" }, { label: "Split PDF", href: "/tools/split-pdf" }, { label: "Rotate PDF", href: "/tools/rotate-pdf" }, { label: "About", href: "/about" }] })} />
+    <Fragment set:html={renderHeaderHTML({
+      siteTitle: "PDF Forge",
+      navItems: [
+        { label: "PDF Tools", href: "/#tools" },
+        { label: "Merge PDF", href: "/tools/merge-pdf" },
+        { label: "Split PDF", href: "/tools/split-pdf" },
+        { label: "Rotate PDF", href: "/tools/rotate-pdf" },
+        { label: "About", href: "/about" },
+      ]
+    })} />
 
-    <main class="container">
+    <main class="container" style="max-width: 1000px; margin: 0 auto; padding-inline: 1rem;">
       <section class="tool-hero">
         <div class="tool-icon-large">{tool.icon}</div>
         <h1 class="tool-title-large">{tool.title}</h1>
@@ -177,14 +254,255 @@ const affiliateOffer = renderAffiliateCardHTML({
           <Fragment set:html={adSlotTop} />
         </div>
 
+        <!-- Uploader Drop Zone -->
         <div class="tool-workspace" id="drop-zone">
-          <input type="file" id="pdf-input" accept="application/pdf" multiple={tool.slug === "merge-pdf"} style="display: none;" />
-          <div style="font-size: 2.5rem; margin-bottom: 1rem;">📁</div>
-          <h2 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem;">Select or Drop PDF File(s)</h2>
-          <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1.5rem;">Processing happens 100% locally in your browser memory</p>
-          <button type="button" class="upload-btn" onclick="document.getElementById('pdf-input').click()">
-            Choose PDF File(s)
-          </button>
+          <input
+            type="file"
+            id="pdf-input"
+            accept="application/pdf,.pdf"
+            multiple={tool.slug === "merge-pdf"}
+            style="display: none;"
+          />
+          <div style="font-size: 3rem; margin-bottom: 0.75rem;">📁</div>
+          <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-primary);">
+            Select or Drop PDF File(s)
+          </h2>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.25rem;">
+            Processed 100% locally in your browser memory. Files never leave your device.
+          </p>
+
+          <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button type="button" class="upload-btn" id="choose-file-btn">
+              <span>📄 Choose PDF File(s)</span>
+            </button>
+            <button type="button" class="suite-btn-secondary" id="sample-pdf-btn" style="padding: 0.85rem 1.25rem; font-size: 0.9375rem;">
+              <span>✨ Try Sample PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Processing Status / Spinner -->
+        <div id="status-spinner" style="display: none; text-align: center; margin-block: 1.5rem;">
+          <div style="font-size: 1.5rem; animation: spin 1s linear infinite; display: inline-block;">⚙️</div>
+          <p id="status-text" style="font-weight: 600; color: var(--accent-primary); margin-top: 6px;">
+            Parsing PDF structure...
+          </p>
+        </div>
+
+        <!-- Interactive Processing Workspace (Hidden until file is loaded) -->
+        <div id="active-workspace" style="display: none; text-align: left; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md, 12px); padding: 1.75rem; margin-bottom: 2rem;">
+          <!-- Document Header -->
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.5rem;">📑</span>
+                <strong id="doc-name" style="font-size: 1.125rem; color: var(--text-primary);">Document.pdf</strong>
+              </div>
+              <div id="doc-meta" style="font-size: 0.8125rem; color: var(--text-muted); margin-top: 4px;">
+                0 pages &bull; 0 KB
+              </div>
+            </div>
+            <button id="reset-doc-btn" type="button" class="suite-btn-secondary" style="font-size: 0.8125rem; padding: 6px 12px;">
+              🔄 Choose Another PDF
+            </button>
+          </div>
+
+          <!-- TOOL-SPECIFIC WORKSPACE PANELS -->
+          
+          <!-- 1. Rotate PDF Panel -->
+          <div id="panel-rotate" class="tool-panel" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 1.25rem;">
+              <div>
+                <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0;">Rotate Pages</h3>
+                <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 2px 0 0 0;">
+                  Click individual page buttons or use batch actions to adjust orientation.
+                </p>
+              </div>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <button type="button" class="action-pill" id="rotate-all-right">⟳ Rotate All +90°</button>
+                <button type="button" class="action-pill" id="rotate-all-left">⟲ Rotate All -90°</button>
+                <button type="button" class="action-pill" id="rotate-all-180">Flip 180°</button>
+                <button type="button" class="action-pill" id="rotate-reset">Reset</button>
+              </div>
+            </div>
+            <div id="rotate-pages-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid var(--border-subtle); border-radius: 8px;">
+              <!-- Dynamically populated page cards -->
+            </div>
+            <button id="execute-rotate-btn" type="button" class="suite-btn-primary" style="padding: 10px 24px; font-weight: 700; font-size: 1rem; width: 100%;">
+              💾 Save & Download Rotated PDF
+            </button>
+          </div>
+
+          <!-- 2. Split PDF Panel -->
+          <div id="panel-split" class="tool-panel" style="display: none;">
+            <div style="margin-bottom: 1.25rem;">
+              <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 4px 0;">Split & Extract Pages</h3>
+              <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 0;">
+                Specify page numbers or ranges to extract into a standalone document.
+              </p>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+              <label for="split-range-input" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 6px; color: var(--text-primary);">
+                Page Range(s) to Extract:
+              </label>
+              <input id="split-range-input" type="text" class="suite-input" value="1" placeholder="e.g. 1-3, 5, 8-10" style="width: 100%; padding: 8px 12px; font-size: 0.9375rem;" />
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                Use commas to separate single pages or hyphens for ranges. Example: <code>1-3, 5</code>.
+              </div>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+              <label style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">
+                Or Click Pages to Toggle:
+              </label>
+              <div id="split-chips-container" style="display: flex; gap: 6px; flex-wrap: wrap; max-height: 150px; overflow-y: auto; padding: 8px; border: 1px solid var(--border-subtle); border-radius: 6px;">
+                <!-- Dynamically populated page chips -->
+              </div>
+            </div>
+            <button id="execute-split-btn" type="button" class="suite-btn-primary" style="padding: 10px 24px; font-weight: 700; font-size: 1rem; width: 100%;">
+              ✂️ Extract & Download Split PDF
+            </button>
+          </div>
+
+          <!-- 3. Merge PDF Panel -->
+          <div id="panel-merge" class="tool-panel" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 2px 0;">Combine Multiple PDF Files</h3>
+                <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 0;">
+                  Arrange documents in the desired order. Reorder using the arrow buttons.
+                </p>
+              </div>
+              <button id="add-more-pdf-btn" type="button" class="suite-btn-secondary" style="font-size: 0.8125rem; padding: 6px 12px;">
+                ➕ Add Another PDF
+              </button>
+            </div>
+            <div id="merge-files-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem;">
+              <!-- Dynamically populated file cards -->
+            </div>
+            <button id="execute-merge-btn" type="button" class="suite-btn-primary" style="padding: 10px 24px; font-weight: 700; font-size: 1rem; width: 100%;">
+              📑 Merge & Download Combined PDF
+            </button>
+          </div>
+
+          <!-- 4. Reorder & Remove Pages Panel -->
+          <div id="panel-reorder" class="tool-panel" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 1.25rem;">
+              <div>
+                <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 2px 0;">Reorder & Remove Pages</h3>
+                <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 0;">
+                  Move pages left/right or remove unwanted blanks before downloading.
+                </p>
+              </div>
+              <button type="button" class="action-pill" id="reorder-reverse-btn">🔄 Reverse Page Order</button>
+            </div>
+            <div id="reorder-pages-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; max-height: 420px; overflow-y: auto; padding: 10px; border: 1px solid var(--border-subtle); border-radius: 8px;">
+              <!-- Dynamically populated reorder cards -->
+            </div>
+            <button id="execute-reorder-btn" type="button" class="suite-btn-primary" style="padding: 10px 24px; font-weight: 700; font-size: 1rem; width: 100%;">
+              🔀 Save Reordered PDF
+            </button>
+          </div>
+
+          <!-- 5. Metadata Editor Panel -->
+          <div id="panel-metadata" class="tool-panel" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 1.25rem;">
+              <div>
+                <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 2px 0;">PDF Metadata Editor</h3>
+                <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 0;">
+                  Inspect and edit document properties or scrub all identifiers for privacy.
+                </p>
+              </div>
+              <button type="button" class="action-pill" id="meta-scrub-btn" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.4);">
+                🧹 Scrub All Metadata (Privacy Mode)
+              </button>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 1.5rem;">
+              <div>
+                <label for="meta-title" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Document Title</label>
+                <input id="meta-title" type="text" class="suite-input" style="width: 100%; padding: 8px 12px; font-size: 0.875rem;" />
+              </div>
+              <div>
+                <label for="meta-author" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Author / Organization</label>
+                <input id="meta-author" type="text" class="suite-input" style="width: 100%; padding: 8px 12px; font-size: 0.875rem;" />
+              </div>
+              <div>
+                <label for="meta-subject" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Subject / Description</label>
+                <input id="meta-subject" type="text" class="suite-input" style="width: 100%; padding: 8px 12px; font-size: 0.875rem;" />
+              </div>
+            </div>
+            <button id="execute-meta-btn" type="button" class="suite-btn-primary" style="padding: 10px 24px; font-weight: 700; font-size: 1rem; width: 100%;">
+              💾 Save & Download Updated PDF
+            </button>
+          </div>
+
+          <!-- 6. Watermark PDF Panel -->
+          <div id="panel-watermark" class="tool-panel" style="display: none;">
+            <div style="margin-bottom: 1.25rem;">
+              <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 4px 0;">Add Security Watermark</h3>
+              <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 0;">
+                Stamps custom diagonal text across all pages in the PDF document.
+              </p>
+            </div>
+            <div style="margin-bottom: 1.25rem;">
+              <label for="watermark-text-input" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">
+                Watermark Text:
+              </label>
+              <input id="watermark-text-input" type="text" class="suite-input" value="CONFIDENTIAL" style="width: 100%; padding: 8px 12px; font-size: 1rem; font-weight: 700;" />
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 1.25rem;">
+              <span style="font-size: 0.75rem; color: var(--text-muted);">Quick Presets:</span>
+              <button type="button" class="action-pill wm-preset" data-text="CONFIDENTIAL">CONFIDENTIAL</button>
+              <button type="button" class="action-pill wm-preset" data-text="DRAFT">DRAFT</button>
+              <button type="button" class="action-pill wm-preset" data-text="DO NOT COPY">DO NOT COPY</button>
+              <button type="button" class="action-pill wm-preset" data-text="SAMPLE">SAMPLE</button>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem;">
+              <div>
+                <label for="wm-opacity-input" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Opacity (35%)</label>
+                <input id="wm-opacity-input" type="range" min="0.1" max="0.8" step="0.05" value="0.35" style="width: 100%; accent-color: var(--accent-primary);" />
+              </div>
+              <div>
+                <label for="wm-size-input" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Font Size (42pt)</label>
+                <input id="wm-size-input" type="range" min="20" max="72" step="2" value="42" style="width: 100%; accent-color: var(--accent-primary);" />
+              </div>
+            </div>
+            <button id="execute-watermark-btn" type="button" class="suite-btn-primary" style="padding: 10px 24px; font-weight: 700; font-size: 1rem; width: 100%;">
+              🛡️ Stamp Watermark & Download
+            </button>
+          </div>
+
+          <!-- 7. Page Numbers Panel -->
+          <div id="panel-page-numbers" class="tool-panel" style="display: none;">
+            <div style="margin-bottom: 1.25rem;">
+              <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0 0 4px 0;">Add Standardized Page Numbers</h3>
+              <p style="font-size: 0.8125rem; color: var(--text-secondary); margin: 0;">
+                Inserts clean page numbering at the bottom-center of every page.
+              </p>
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+              <label for="page-num-format" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">Numbering Format:</label>
+              <select id="page-num-format" class="suite-select" style="width: 100%; padding: 8px 12px; font-size: 0.875rem;">
+                <option value="page-of-total">"Page X of Y" (e.g. Page 1 of 10)</option>
+                <option value="simple">Simple Digits (e.g. 1, 2, 3)</option>
+              </select>
+            </div>
+            <button id="execute-numbers-btn" type="button" class="suite-btn-primary" style="padding: 10px 24px; font-weight: 700; font-size: 1rem; width: 100%;">
+              🔢 Insert Numbers & Download
+            </button>
+          </div>
+
+          <!-- In-Browser Document Preview Frame -->
+          <div id="preview-container" style="display: none; margin-top: 1.75rem; border-top: 1px solid var(--border-subtle); padding-top: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 0.875rem; font-weight: 700; color: var(--text-primary);">
+                📄 Live Document Preview:
+              </span>
+              <a id="preview-download-link" href="#" download="document.pdf" class="suite-btn-primary" style="font-size: 0.75rem; padding: 4px 10px; text-decoration: none;">
+                📥 Re-download File
+              </a>
+            </div>
+            <iframe id="pdf-preview-frame" style="width: 100%; height: 440px; border: 1px solid var(--border-subtle); border-radius: 8px; background: #525659;" title="PDF Preview"></iframe>
+          </div>
         </div>
       </section>
 
@@ -207,9 +525,9 @@ const affiliateOffer = renderAffiliateCardHTML({
       <section style="max-width: 800px; margin: 2.5rem auto;">
         <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.25rem;">Frequently Asked Questions</h2>
         {faqs.map((faq) => (
-          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1rem;">
-            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; color: #0f172a;">{faq.question}</h3>
-            <p style="font-size: 0.92rem; color: #475569; margin: 0; line-height: 1.5;">{faq.answer}</p>
+          <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-primary);">{faq.question}</h3>
+            <p style="font-size: 0.92rem; color: var(--text-secondary); margin: 0; line-height: 1.5;">{faq.answer}</p>
           </div>
         ))}
       </section>
@@ -220,7 +538,780 @@ const affiliateOffer = renderAffiliateCardHTML({
       </div>
     </main>
 
-    <Fragment set:html={renderFooterHTML({ siteTitle: "PDF Forge", tagline: "Client-side PDF manipulation with zero cloud data transmission." })} />
+    <Fragment set:html={renderFooterHTML({
+      siteTitle: "PDF Forge",
+      currentYear: 2026,
+      privacyUrl: "/privacy-policy",
+      termsUrl: "/terms-of-service",
+      editorialUrl: "/editorial-policy",
+      contactUrl: "/contact",
+    })} />
     <Fragment set:html={renderConsentBannerHTML()} />
+
+    <!-- Pure Client-Side Interactive Logic Script -->
+    <script is:inline define:vars={{ currentToolSlug: tool.slug }}>
+      (() => {
+        let currentPdfBytes = null;
+        let currentPdfDoc = null;
+        let currentFileName = "document.pdf";
+        let pageRotations = []; // degrees per page (0, 90, 180, 270)
+        let pageOrder = []; // array of 0-based page indices
+        let pageDeleted = []; // boolean array
+        let mergeFiles = []; // array of { name: string, bytes: Uint8Array, pageCount: number }
+
+        const dropZone = document.getElementById("drop-zone");
+        const pdfInput = document.getElementById("pdf-input");
+        const chooseFileBtn = document.getElementById("choose-file-btn");
+        const samplePdfBtn = document.getElementById("sample-pdf-btn");
+        const statusSpinner = document.getElementById("status-spinner");
+        const statusText = document.getElementById("status-text");
+        const activeWorkspace = document.getElementById("active-workspace");
+        const docNameEl = document.getElementById("doc-name");
+        const docMetaEl = document.getElementById("doc-meta");
+        const resetDocBtn = document.getElementById("reset-doc-btn");
+
+        // Tool panels
+        const panelRotate = document.getElementById("panel-rotate");
+        const panelSplit = document.getElementById("panel-split");
+        const panelMerge = document.getElementById("panel-merge");
+        const panelReorder = document.getElementById("panel-reorder");
+        const panelMetadata = document.getElementById("panel-metadata");
+        const panelWatermark = document.getElementById("panel-watermark");
+        const panelNumbers = document.getElementById("panel-page-numbers");
+
+        // Preview
+        const previewContainer = document.getElementById("preview-container");
+        const previewFrame = document.getElementById("pdf-preview-frame");
+        const previewDownloadLink = document.getElementById("preview-download-link");
+
+        function showSpinner(msg) {
+          if (statusSpinner) statusSpinner.style.display = "block";
+          if (statusText) statusText.textContent = msg;
+        }
+
+        function hideSpinner() {
+          if (statusSpinner) statusSpinner.style.display = "none";
+        }
+
+        // 1. File browsing trigger
+        if (chooseFileBtn && pdfInput) {
+          chooseFileBtn.addEventListener("click", () => {
+            pdfInput.click();
+          });
+        }
+
+        if (pdfInput) {
+          pdfInput.addEventListener("change", async (e) => {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+            if (currentToolSlug === "merge-pdf") {
+              await handleMultipleFiles(Array.from(files));
+            } else {
+              await loadSingleFile(files[0]);
+            }
+            pdfInput.value = "";
+          });
+        }
+
+        // Drag and Drop
+        if (dropZone) {
+          ["dragenter", "dragover"].forEach((eventName) => {
+            dropZone.addEventListener(eventName, (e) => {
+              e.preventDefault();
+              dropZone.classList.add("drag-over");
+            });
+          });
+          ["dragleave", "drop"].forEach((eventName) => {
+            dropZone.addEventListener(eventName, (e) => {
+              e.preventDefault();
+              dropZone.classList.remove("drag-over");
+            });
+          });
+          dropZone.addEventListener("drop", async (e) => {
+            const files = e.dataTransfer.files;
+            if (!files || files.length === 0) return;
+            if (currentToolSlug === "merge-pdf") {
+              await handleMultipleFiles(Array.from(files));
+            } else {
+              await loadSingleFile(files[0]);
+            }
+          });
+        }
+
+        // Sample PDF Generator for Instant 1-Click Testing
+        if (samplePdfBtn) {
+          samplePdfBtn.addEventListener("click", async () => {
+            showSpinner("Generating interactive sample PDF...");
+            try {
+              if (typeof PDFLib === "undefined") {
+                throw new Error("PDFLib library is loading, please try in 1 second.");
+              }
+              const { PDFDocument, StandardFonts, rgb } = PDFLib;
+              const sampleDoc = await PDFDocument.create();
+              const font = await sampleDoc.embedFont(StandardFonts.Helvetica);
+              const boldFont = await sampleDoc.embedFont(StandardFonts.HelveticaBold);
+
+              // Create 3 sample pages
+              for (let i = 1; i <= 3; i++) {
+                const page = sampleDoc.addPage([595, 842]);
+                page.drawText(`PDFForge Sample Document — Page ${i}`, {
+                  x: 50,
+                  y: 780,
+                  size: 20,
+                  font: boldFont,
+                  color: rgb(0.1, 0.1, 0.15),
+                });
+                page.drawText(
+                  `This is page ${i} generated client-side for testing PDF manipulation.\nYou can rotate this page, extract it, reorder it, or stamp watermarks.\nAll processing runs in-browser memory with zero data transmission.`,
+                  {
+                    x: 50,
+                    y: 720,
+                    size: 11,
+                    font,
+                    color: rgb(0.3, 0.3, 0.35),
+                    lineHeight: 18,
+                  },
+                );
+              }
+              sampleDoc.setTitle("PDFForge Sample Multi-Page");
+              sampleDoc.setAuthor("PDFForge Studio");
+              sampleDoc.setSubject("Sample Document");
+
+              const bytes = await sampleDoc.save();
+              await parseAndInitializePdf(bytes, "sample-document.pdf");
+            } catch (err) {
+              alert("Error generating sample: " + err.message);
+            } finally {
+              hideSpinner();
+            }
+          });
+        }
+
+        async function loadSingleFile(file) {
+          if (!file || !file.name.toLowerCase().endsWith(".pdf")) {
+            alert("Please select a valid .pdf document.");
+            return;
+          }
+          showSpinner(`Reading ${file.name}...`);
+          try {
+            const arrayBuffer = await file.arrayBuffer();
+            const bytes = new Uint8Array(arrayBuffer);
+            await parseAndInitializePdf(bytes, file.name);
+          } catch (err) {
+            alert("Error parsing PDF file: " + err.message);
+          } finally {
+            hideSpinner();
+          }
+        }
+
+        async function handleMultipleFiles(files) {
+          const pdfs = files.filter((f) => f.name.toLowerCase().endsWith(".pdf"));
+          if (pdfs.length === 0) {
+            alert("Please select PDF files.");
+            return;
+          }
+          showSpinner("Loading documents for merging...");
+          try {
+            if (typeof PDFLib === "undefined") {
+              throw new Error("PDF library not ready.");
+            }
+            for (const f of pdfs) {
+              const buf = await f.arrayBuffer();
+              const bytes = new Uint8Array(buf);
+              const doc = await PDFLib.PDFDocument.load(bytes);
+              mergeFiles.push({
+                name: f.name,
+                bytes: bytes,
+                pageCount: doc.getPageCount(),
+              });
+            }
+            renderMergePanel();
+            if (activeWorkspace) activeWorkspace.style.display = "block";
+            if (panelMerge) panelMerge.style.display = "block";
+          } catch (err) {
+            alert("Error loading PDF: " + err.message);
+          } finally {
+            hideSpinner();
+          }
+        }
+
+        async function parseAndInitializePdf(bytes, fileName) {
+          if (typeof PDFLib === "undefined") {
+            throw new Error("PDF library is still initializing. Please try again.");
+          }
+          currentPdfBytes = bytes;
+          currentFileName = fileName;
+          currentPdfDoc = await PDFLib.PDFDocument.load(bytes);
+
+          const totalPages = currentPdfDoc.getPageCount();
+          pageRotations = Array.from({ length: totalPages }, () => 0);
+          pageOrder = Array.from({ length: totalPages }, (_, i) => i);
+          pageDeleted = Array.from({ length: totalPages }, () => false);
+
+          if (docNameEl) docNameEl.textContent = fileName;
+          if (docMetaEl) {
+            const kb = (bytes.length / 1024).toFixed(1);
+            docMetaEl.textContent = `${totalPages} ${totalPages === 1 ? "page" : "pages"} &bull; ${kb} KB`;
+          }
+
+          // Show workspace
+          if (activeWorkspace) activeWorkspace.style.display = "block";
+          hideAllPanels();
+
+          // Initialize specific tool panel
+          if (currentToolSlug === "rotate-pdf") {
+            renderRotatePanel();
+            if (panelRotate) panelRotate.style.display = "block";
+          } else if (currentToolSlug === "split-pdf") {
+            renderSplitPanel();
+            if (panelSplit) panelSplit.style.display = "block";
+          } else if (currentToolSlug === "merge-pdf") {
+            mergeFiles = [{ name: fileName, bytes, pageCount: totalPages }];
+            renderMergePanel();
+            if (panelMerge) panelMerge.style.display = "block";
+          } else if (currentToolSlug === "reorder-pdf") {
+            renderReorderPanel();
+            if (panelReorder) panelReorder.style.display = "block";
+          } else if (currentToolSlug === "pdf-metadata") {
+            renderMetadataPanel();
+            if (panelMetadata) panelMetadata.style.display = "block";
+          } else if (currentToolSlug === "watermark-pdf") {
+            if (panelWatermark) panelWatermark.style.display = "block";
+          } else if (currentToolSlug === "page-numbers-pdf") {
+            if (panelNumbers) panelNumbers.style.display = "block";
+          }
+
+          // Set preview
+          updatePreview(bytes);
+        }
+
+        function hideAllPanels() {
+          [panelRotate, panelSplit, panelMerge, panelReorder, panelMetadata, panelWatermark, panelNumbers].forEach(
+            (p) => {
+              if (p) p.style.display = "none";
+            },
+          );
+        }
+
+        function updatePreview(bytes) {
+          if (!previewContainer || !previewFrame || !previewDownloadLink) return;
+          const blob = new Blob([bytes], { type: "application/pdf" });
+          const url = URL.createObjectURL(blob);
+          previewFrame.src = url;
+          previewDownloadLink.href = url;
+          previewDownloadLink.download = `edited-${currentFileName}`;
+          previewContainer.style.display = "block";
+        }
+
+        function triggerDownload(bytes, defaultName) {
+          const blob = new Blob([bytes], { type: "application/pdf" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = defaultName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          updatePreview(bytes);
+        }
+
+        // ==========================================
+        // 1. ROTATE PDF LOGIC
+        // ==========================================
+        function renderRotatePanel() {
+          const grid = document.getElementById("rotate-pages-grid");
+          if (!grid || !currentPdfDoc) return;
+          grid.innerHTML = "";
+
+          const count = currentPdfDoc.getPageCount();
+          for (let i = 0; i < count; i++) {
+            const rot = pageRotations[i] || 0;
+            const card = document.createElement("div");
+            card.className = "page-card";
+            card.innerHTML = `
+              <div class="page-thumbnail" style="transform: rotate(${rot}deg);" id="page-thumb-${i}">
+                Page ${i + 1}
+              </div>
+              <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+                Page ${i + 1} &bull; <span id="rot-badge-${i}">${rot}&deg;</span>
+              </div>
+              <div style="display: flex; gap: 4px; margin-top: 4px;">
+                <button type="button" class="action-pill rotate-single-left" data-page="${i}" title="Rotate -90 deg">⟲ -90&deg;</button>
+                <button type="button" class="action-pill rotate-single-right" data-page="${i}" title="Rotate +90 deg">⟳ +90&deg;</button>
+              </div>
+            `;
+            grid.appendChild(card);
+          }
+
+          grid.querySelectorAll(".rotate-single-left").forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+              const p = Number.parseInt(e.currentTarget.getAttribute("data-page"), 10);
+              pageRotations[p] = (pageRotations[p] - 90 + 360) % 360;
+              updateRotateView(p);
+            });
+          });
+
+          grid.querySelectorAll(".rotate-single-right").forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+              const p = Number.parseInt(e.currentTarget.getAttribute("data-page"), 10);
+              pageRotations[p] = (pageRotations[p] + 90) % 360;
+              updateRotateView(p);
+            });
+          });
+        }
+
+        function updateRotateView(p) {
+          const thumb = document.getElementById(`page-thumb-${p}`);
+          const badge = document.getElementById(`rot-badge-${p}`);
+          if (thumb) thumb.style.transform = `rotate(${pageRotations[p]}deg)`;
+          if (badge) badge.textContent = `${pageRotations[p]}°`;
+        }
+
+        document.getElementById("rotate-all-right")?.addEventListener("click", () => {
+          pageRotations = pageRotations.map((r) => (r + 90) % 360);
+          renderRotatePanel();
+        });
+        document.getElementById("rotate-all-left")?.addEventListener("click", () => {
+          pageRotations = pageRotations.map((r) => (r - 90 + 360) % 360);
+          renderRotatePanel();
+        });
+        document.getElementById("rotate-all-180")?.addEventListener("click", () => {
+          pageRotations = pageRotations.map((r) => (r + 180) % 360);
+          renderRotatePanel();
+        });
+        document.getElementById("rotate-reset")?.addEventListener("click", () => {
+          pageRotations = pageRotations.map(() => 0);
+          renderRotatePanel();
+        });
+
+        document.getElementById("execute-rotate-btn")?.addEventListener("click", async () => {
+          showSpinner("Applying permanent page rotations...");
+          try {
+            const doc = await PDFLib.PDFDocument.load(currentPdfBytes);
+            const pages = doc.getPages();
+            pages.forEach((page, idx) => {
+              const addedRot = pageRotations[idx] || 0;
+              if (addedRot !== 0) {
+                const currentAngle = page.getRotation().angle;
+                page.setRotation(PDFLib.degrees((currentAngle + addedRot) % 360));
+              }
+            });
+            const rotatedBytes = await doc.save();
+            triggerDownload(rotatedBytes, `rotated-${currentFileName}`);
+          } catch (err) {
+            alert("Error rotating PDF: " + err.message);
+          } finally {
+            hideSpinner();
+          }
+        });
+
+        // ==========================================
+        // 2. SPLIT PDF LOGIC
+        // ==========================================
+        function renderSplitPanel() {
+          const chipsContainer = document.getElementById("split-chips-container");
+          const rangeInput = document.getElementById("split-range-input");
+          if (!chipsContainer || !currentPdfDoc) return;
+          chipsContainer.innerHTML = "";
+
+          const count = currentPdfDoc.getPageCount();
+          if (rangeInput && !rangeInput.value) {
+            rangeInput.value = count > 1 ? `1-${Math.min(2, count)}` : "1";
+          }
+
+          for (let i = 1; i <= count; i++) {
+            const chip = document.createElement("button");
+            chip.type = "button";
+            chip.className = "action-pill split-page-chip";
+            chip.textContent = `Page ${i}`;
+            chip.setAttribute("data-page", i.toString());
+            chip.addEventListener("click", () => {
+              const currentRanges = (rangeInput?.value || "").split(",").map((s) => s.trim()).filter(Boolean);
+              if (currentRanges.includes(i.toString())) {
+                rangeInput.value = currentRanges.filter((r) => r !== i.toString()).join(", ");
+              } else {
+                rangeInput.value = currentRanges.length > 0 ? `${rangeInput.value}, ${i}` : `${i}`;
+              }
+            });
+            chipsContainer.appendChild(chip);
+          }
+        }
+
+        document.getElementById("execute-split-btn")?.addEventListener("click", async () => {
+          const rangeStr = document.getElementById("split-range-input")?.value || "";
+          if (!rangeStr.trim()) {
+            alert("Please specify page numbers or ranges to extract (e.g. 1-2, 4).");
+            return;
+          }
+          showSpinner("Extracting target pages...");
+          try {
+            const count = currentPdfDoc.getPageCount();
+            const indices = new Set();
+
+            const parts = rangeStr.split(",").map((s) => s.trim()).filter(Boolean);
+            for (const part of parts) {
+              if (part.includes("-")) {
+                const [startStr, endStr] = part.split("-");
+                const start = Math.max(1, Number.parseInt(startStr, 10));
+                const end = Math.min(count, Number.parseInt(endStr, 10));
+                for (let p = start; p <= end; p++) indices.add(p - 1);
+              } else {
+                const p = Number.parseInt(part, 10);
+                if (p >= 1 && p <= count) indices.add(p - 1);
+              }
+            }
+
+            if (indices.size === 0) {
+              throw new Error("No valid pages found in the requested range.");
+            }
+
+            const newDoc = await PDFLib.PDFDocument.create();
+            const sortedIndices = Array.from(indices).sort((a, b) => a - b);
+            const copiedPages = await newDoc.copyPages(currentPdfDoc, sortedIndices);
+            copiedPages.forEach((page) => newDoc.addPage(page));
+
+            const splitBytes = await newDoc.save();
+            triggerDownload(splitBytes, `extracted-${currentFileName}`);
+          } catch (err) {
+            alert("Error splitting PDF: " + err.message);
+          } finally {
+            hideSpinner();
+          }
+        });
+
+        // ==========================================
+        // 3. MERGE PDF LOGIC
+        // ==========================================
+        function renderMergePanel() {
+          const list = document.getElementById("merge-files-list");
+          if (!list) return;
+          list.innerHTML = "";
+
+          if (mergeFiles.length === 0) {
+            list.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 1rem;">No PDF files added yet.</div>`;
+            return;
+          }
+
+          mergeFiles.forEach((item, index) => {
+            const card = document.createElement("div");
+            card.style.cssText =
+              "background: var(--bg-surface-hover, rgba(255,255,255,0.03)); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px;";
+            card.innerHTML = `
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-weight: 800; font-size: 0.8125rem; color: var(--accent-primary); width: 20px;">#${index + 1}</span>
+                <div>
+                  <strong style="font-size: 0.9375rem; color: var(--text-primary);">${item.name}</strong>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">${item.pageCount} pages &bull; ${(item.bytes.length / 1024).toFixed(0)} KB</div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 4px;">
+                <button type="button" class="action-pill move-merge-up" data-idx="${index}" ${index === 0 ? "disabled" : ""}>▲</button>
+                <button type="button" class="action-pill move-merge-down" data-idx="${index}" ${index === mergeFiles.length - 1 ? "disabled" : ""}>▼</button>
+                <button type="button" class="action-pill remove-merge" data-idx="${index}" style="color: #ef4444;">✕</button>
+              </div>
+            `;
+            list.appendChild(card);
+          });
+
+          list.querySelectorAll(".move-merge-up").forEach((b) => {
+            b.addEventListener("click", (e) => {
+              const i = Number.parseInt(e.currentTarget.getAttribute("data-idx"), 10);
+              if (i > 0) {
+                const tmp = mergeFiles[i];
+                mergeFiles[i] = mergeFiles[i - 1];
+                mergeFiles[i - 1] = tmp;
+                renderMergePanel();
+              }
+            });
+          });
+
+          list.querySelectorAll(".move-merge-down").forEach((b) => {
+            b.addEventListener("click", (e) => {
+              const i = Number.parseInt(e.currentTarget.getAttribute("data-idx"), 10);
+              if (i < mergeFiles.length - 1) {
+                const tmp = mergeFiles[i];
+                mergeFiles[i] = mergeFiles[i + 1];
+                mergeFiles[i + 1] = tmp;
+                renderMergePanel();
+              }
+            });
+          });
+
+          list.querySelectorAll(".remove-merge").forEach((b) => {
+            b.addEventListener("click", (e) => {
+              const i = Number.parseInt(e.currentTarget.getAttribute("data-idx"), 10);
+              mergeFiles.splice(i, 1);
+              renderMergePanel();
+            });
+          });
+        }
+
+        document.getElementById("add-more-pdf-btn")?.addEventListener("click", () => {
+          pdfInput?.click();
+        });
+
+        document.getElementById("execute-merge-btn")?.addEventListener("click", async () => {
+          if (mergeFiles.length < 2) {
+            alert("Please add at least 2 PDF documents to merge.");
+            return;
+          }
+          showSpinner("Merging documents into single sequential PDF...");
+          try {
+            const mergedDoc = await PDFLib.PDFDocument.create();
+            for (const file of mergeFiles) {
+              const srcDoc = await PDFLib.PDFDocument.load(file.bytes);
+              const copiedPages = await mergedDoc.copyPages(srcDoc, srcDoc.getPageIndices());
+              copiedPages.forEach((p) => mergedDoc.addPage(p));
+            }
+            const mergedBytes = await mergedDoc.save();
+            triggerDownload(mergedBytes, "combined-document.pdf");
+          } catch (err) {
+            alert("Error merging documents: " + err.message);
+          } finally {
+            hideSpinner();
+          }
+        });
+
+        // ==========================================
+        // 4. REORDER & REMOVE PAGES LOGIC
+        // ==========================================
+        function renderReorderPanel() {
+          const grid = document.getElementById("reorder-pages-grid");
+          if (!grid || !currentPdfDoc) return;
+          grid.innerHTML = "";
+
+          pageOrder.forEach((origIdx, pos) => {
+            const isDel = pageDeleted[pos];
+            const card = document.createElement("div");
+            card.className = `page-card ${isDel ? "is-deleted" : ""}`;
+            card.innerHTML = `
+              <div class="page-thumbnail">Page ${origIdx + 1}</div>
+              <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">
+                #${pos + 1} (Orig: ${origIdx + 1})
+              </div>
+              <div style="display: flex; gap: 4px; margin-top: 4px;">
+                <button type="button" class="action-pill move-reorder-left" data-pos="${pos}" ${pos === 0 ? "disabled" : ""}>◀</button>
+                <button type="button" class="action-pill move-reorder-right" data-pos="${pos}" ${pos === pageOrder.length - 1 ? "disabled" : ""}>▶</button>
+                <button type="button" class="action-pill toggle-delete" data-pos="${pos}" style="color: ${isDel ? "#10b981" : "#ef4444"};">
+                  ${isDel ? "↩" : "🗑️"}
+                </button>
+              </div>
+            `;
+            grid.appendChild(card);
+          });
+
+          grid.querySelectorAll(".move-reorder-left").forEach((b) => {
+            b.addEventListener("click", (e) => {
+              const pos = Number.parseInt(e.currentTarget.getAttribute("data-pos"), 10);
+              if (pos > 0) {
+                const tmp = pageOrder[pos];
+                pageOrder[pos] = pageOrder[pos - 1];
+                pageOrder[pos - 1] = tmp;
+                const tmpD = pageDeleted[pos];
+                pageDeleted[pos] = pageDeleted[pos - 1];
+                pageDeleted[pos - 1] = tmpD;
+                renderReorderPanel();
+              }
+            });
+          });
+
+          grid.querySelectorAll(".move-reorder-right").forEach((b) => {
+            b.addEventListener("click", (e) => {
+              const pos = Number.parseInt(e.currentTarget.getAttribute("data-pos"), 10);
+              if (pos < pageOrder.length - 1) {
+                const tmp = pageOrder[pos];
+                pageOrder[pos] = pageOrder[pos + 1];
+                pageOrder[pos + 1] = tmp;
+                const tmpD = pageDeleted[pos];
+                pageDeleted[pos] = pageDeleted[pos + 1];
+                pageDeleted[pos + 1] = tmpD;
+                renderReorderPanel();
+              }
+            });
+          });
+
+          grid.querySelectorAll(".toggle-delete").forEach((b) => {
+            b.addEventListener("click", (e) => {
+              const pos = Number.parseInt(e.currentTarget.getAttribute("data-pos"), 10);
+              pageDeleted[pos] = !pageDeleted[pos];
+              renderReorderPanel();
+            });
+          });
+        }
+
+        document.getElementById("reorder-reverse-btn")?.addEventListener("click", () => {
+          pageOrder.reverse();
+          pageDeleted.reverse();
+          renderReorderPanel();
+        });
+
+        document.getElementById("execute-reorder-btn")?.addEventListener("click", async () => {
+          const activeIndices = [];
+          for (let i = 0; i < pageOrder.length; i++) {
+            if (!pageDeleted[i]) activeIndices.push(pageOrder[i]);
+          }
+          if (activeIndices.length === 0) {
+            alert("Cannot delete all pages. At least one page must remain.");
+            return;
+          }
+          showSpinner("Re-sequencing pages...");
+          try {
+            const newDoc = await PDFLib.PDFDocument.create();
+            const copiedPages = await newDoc.copyPages(currentPdfDoc, activeIndices);
+            copiedPages.forEach((p) => newDoc.addPage(p));
+            const reorderedBytes = await newDoc.save();
+            triggerDownload(reorderedBytes, `reordered-${currentFileName}`);
+          } catch (err) {
+            alert("Error reordering PDF: " + err.message);
+          } finally {
+            hideSpinner();
+          }
+        });
+
+        // ==========================================
+        // 5. METADATA EDITOR LOGIC
+        // ==========================================
+        function renderMetadataPanel() {
+          if (!currentPdfDoc) return;
+          const titleInput = document.getElementById("meta-title");
+          const authorInput = document.getElementById("meta-author");
+          const subjectInput = document.getElementById("meta-subject");
+
+          if (titleInput) titleInput.value = currentPdfDoc.getTitle() || "";
+          if (authorInput) authorInput.value = currentPdfDoc.getAuthor() || "";
+          if (subjectInput) subjectInput.value = currentPdfDoc.getSubject() || "";
+        }
+
+        document.getElementById("meta-scrub-btn")?.addEventListener("click", () => {
+          const titleInput = document.getElementById("meta-title");
+          const authorInput = document.getElementById("meta-author");
+          const subjectInput = document.getElementById("meta-subject");
+          if (titleInput) titleInput.value = "";
+          if (authorInput) authorInput.value = "";
+          if (subjectInput) subjectInput.value = "";
+          alert("All metadata fields cleared. Click 'Save & Download' to generate clean PDF.");
+        });
+
+        document.getElementById("execute-meta-btn")?.addEventListener("click", async () => {
+          showSpinner("Updating document metadata properties...");
+          try {
+            const doc = await PDFLib.PDFDocument.load(currentPdfBytes);
+            const titleInput = document.getElementById("meta-title");
+            const authorInput = document.getElementById("meta-author");
+            const subjectInput = document.getElementById("meta-subject");
+
+            doc.setTitle(titleInput?.value || "");
+            doc.setAuthor(authorInput?.value || "");
+            doc.setSubject(subjectInput?.value || "");
+            doc.setCreator("PDFForge Clean Engine");
+            doc.setProducer("PDFForge Local");
+            doc.setModificationDate(new Date());
+
+            const updatedBytes = await doc.save();
+            triggerDownload(updatedBytes, `metadata-updated-${currentFileName}`);
+          } catch (err) {
+            alert("Error updating metadata: " + err.message);
+          } finally {
+            hideSpinner();
+          }
+        });
+
+        // ==========================================
+        // 6. WATERMARK PDF LOGIC
+        // ==========================================
+        document.querySelectorAll(".wm-preset").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            const text = e.currentTarget.getAttribute("data-text");
+            const input = document.getElementById("watermark-text-input");
+            if (input && text) input.value = text;
+          });
+        });
+
+        document.getElementById("execute-watermark-btn")?.addEventListener("click", async () => {
+          const textInput = document.getElementById("watermark-text-input");
+          const opacityInput = document.getElementById("wm-opacity-input");
+          const sizeInput = document.getElementById("wm-size-input");
+          const text = textInput?.value || "CONFIDENTIAL";
+          const opacity = Number.parseFloat(opacityInput?.value || "0.35");
+          const size = Number.parseInt(sizeInput?.value || "42", 10);
+
+          showSpinner("Stamping vector watermark across all pages...");
+          try {
+            const doc = await PDFLib.PDFDocument.load(currentPdfBytes);
+            const font = await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+            const pages = doc.getPages();
+
+            pages.forEach((page) => {
+              const { width, height } = page.getSize();
+              const textWidth = font.widthOfTextAtSize(text, size);
+              page.drawText(text, {
+                x: width / 2 - textWidth / 2,
+                y: height / 2,
+                size,
+                font,
+                color: PDFLib.rgb(0.8, 0.15, 0.15),
+                opacity,
+                rotate: PDFLib.degrees(45),
+              });
+            });
+
+            const watermarkedBytes = await doc.save();
+            triggerDownload(watermarkedBytes, `watermarked-${currentFileName}`);
+          } catch (err) {
+            alert("Error adding watermark: " + err.message);
+          } finally {
+            hideSpinner();
+          }
+        });
+
+        // ==========================================
+        // 7. PAGE NUMBERS LOGIC
+        // ==========================================
+        document.getElementById("execute-numbers-btn")?.addEventListener("click", async () => {
+          const formatSelect = document.getElementById("page-num-format");
+          const format = formatSelect?.value || "page-of-total";
+
+          showSpinner("Numbering document pages...");
+          try {
+            const doc = await PDFLib.PDFDocument.load(currentPdfBytes);
+            const font = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+            const pages = doc.getPages();
+            const total = pages.length;
+
+            pages.forEach((page, i) => {
+              const { width } = page.getSize();
+              const text = format === "page-of-total" ? `Page ${i + 1} of ${total}` : `${i + 1}`;
+              const textWidth = font.widthOfTextAtSize(text, 10);
+              page.drawText(text, {
+                x: width / 2 - textWidth / 2,
+                y: 20,
+                size: 10,
+                font,
+                color: PDFLib.rgb(0.35, 0.35, 0.35),
+              });
+            });
+
+            const numberedBytes = await doc.save();
+            triggerDownload(numberedBytes, `numbered-${currentFileName}`);
+          } catch (err) {
+            alert("Error adding page numbers: " + err.message);
+          } finally {
+            hideSpinner();
+          }
+        });
+
+        // Reset workspace button
+        if (resetDocBtn) {
+          resetDocBtn.addEventListener("click", () => {
+            currentPdfBytes = null;
+            currentPdfDoc = null;
+            mergeFiles = [];
+            if (activeWorkspace) activeWorkspace.style.display = "none";
+            if (previewContainer) previewContainer.style.display = "none";
+            if (pdfInput) pdfInput.value = "";
+          });
+        }
+      })();
+    </script>
   </body>
 </html>

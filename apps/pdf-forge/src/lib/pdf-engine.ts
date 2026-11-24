@@ -81,6 +81,32 @@ export const PDF_TOOLS: PDFToolMeta[] = [
       "Inspect document creation and modification timestamps",
     ],
   },
+  {
+    slug: "watermark-pdf",
+    title: "Watermark PDF Pages",
+    badge: "Document Security",
+    icon: "🛡️",
+    description:
+      "Stamp custom diagonal security watermarks across all pages with adjustable opacity and styling.",
+    benefits: [
+      "Add confidential, draft, or branded protection stamps",
+      "Adjustable transparency and custom text sizing",
+      "100% vector-sharp rendering across all PDF viewers",
+    ],
+  },
+  {
+    slug: "page-numbers-pdf",
+    title: "Add Page Numbers",
+    badge: "Page Formatting",
+    icon: "🔢",
+    description:
+      "Insert clean standardized page numbering (e.g. Page 1 of N) directly onto every page.",
+    benefits: [
+      "Numbering styles: 'Page X of Y' or simple digits",
+      "Exact centered bottom margins for clean print output",
+      "Maintains existing vector typography and layout",
+    ],
+  },
 ];
 
 export interface DocumentInfo {
@@ -309,6 +335,66 @@ export async function updatePDFMetadata(
   }
 
   doc.setModificationDate(new Date());
+
+  return await doc.save();
+}
+
+/**
+ * Stamps a diagonal custom text watermark across all pages.
+ */
+export async function addWatermarkToPDF(
+  pdfBytes: Uint8Array,
+  watermarkText: string,
+  options: { opacity?: number; size?: number } = {},
+): Promise<Uint8Array> {
+  const doc = await PDFDocument.load(pdfBytes);
+  const font = await doc.embedFont(StandardFonts.HelveticaBold);
+  const pages = doc.getPages();
+  const opacity = options.opacity ?? 0.35;
+  const size = options.size ?? 42;
+
+  for (const page of pages) {
+    const { width, height } = page.getSize();
+    const textWidth = font.widthOfTextAtSize(watermarkText, size);
+    page.drawText(watermarkText, {
+      x: width / 2 - textWidth / 2,
+      y: height / 2,
+      size,
+      font,
+      color: rgb(0.8, 0.1, 0.1),
+      opacity,
+      rotate: degrees(45),
+    });
+  }
+
+  return await doc.save();
+}
+
+/**
+ * Inserts standardized page numbers on every page.
+ */
+export async function addPageNumbersToPDF(
+  pdfBytes: Uint8Array,
+  format: "page-of-total" | "simple" = "page-of-total",
+): Promise<Uint8Array> {
+  const doc = await PDFDocument.load(pdfBytes);
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const pages = doc.getPages();
+  const total = pages.length;
+
+  for (let i = 0; i < total; i++) {
+    const page = pages[i];
+    const { width } = page.getSize();
+    const text = format === "page-of-total" ? `Page ${i + 1} of ${total}` : `${i + 1}`;
+    const textWidth = font.widthOfTextAtSize(text, 10);
+    page.drawText(text, {
+      x: width / 2 - textWidth / 2,
+      y: 20,
+      size: 10,
+      font,
+      color: rgb(0.4, 0.4, 0.4),
+    });
+  }
 
   return await doc.save();
 }

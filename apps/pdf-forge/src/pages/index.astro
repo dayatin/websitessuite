@@ -7,7 +7,7 @@ import { PDF_TOOLS } from "../lib/pdf-engine.ts";
 
 const siteTitle = "PDFForge Local | 100% Client-Side Private PDF Tools";
 const canonicalUrl = Astro.site ? Astro.site.href : "https://pdf-forge.suite.local/";
-const description = "Merge, split, rotate, organize, and edit PDF metadata directly in your web browser. Zero server uploads, zero data retention, and 100% private processing.";
+const description = "Merge, split, rotate, organize, watermark, number, and edit PDF metadata directly in your web browser. Zero server uploads, zero data retention, and 100% private processing.";
 
 const metaHtml = renderMetaTags({
   title: siteTitle,
@@ -27,7 +27,7 @@ const appSchema = buildWebApplicationSchema({
 const faqs = [
   {
     question: "Do my PDF files ever get uploaded to an external server or cloud?",
-    answer: "No. Never. PDFForge Local utilizes client-side WebAssembly and JavaScript to execute 100% of PDF processing within your browser memory. Your files never touch a remote server.",
+    answer: "No. Never. PDFForge Local utilizes client-side WebAssembly and JavaScript (pdf-lib) to execute 100% of PDF processing within your browser memory. Your files never touch a remote server.",
   },
   {
     question: "Is there any limit on file size or the number of documents I can merge?",
@@ -79,10 +79,18 @@ const affiliateOffer = renderAffiliateCardHTML({
     <script type="application/ld+json" is:inline set:html={appSchema} />
     <script type="application/ld+json" is:inline set:html={faqSchema} />
     <script type="application/ld+json" is:inline set:html={breadcrumbSchema} />
+    <script is:inline src="/pdf-lib.min.js"></script>
+    <script is:inline>
+      if (typeof PDFLib === "undefined") {
+        const s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js";
+        document.head.appendChild(s);
+      }
+    </script>
     <style>
       .hero-section {
         text-align: center;
-        padding: 3rem 1rem 2rem;
+        padding: 2.5rem 1rem 1.5rem;
         max-width: 900px;
         margin: 0 auto;
       }
@@ -91,7 +99,7 @@ const affiliateOffer = renderAffiliateCardHTML({
         align-items: center;
         gap: 0.5rem;
         background: rgba(16, 185, 129, 0.12);
-        color: #059669;
+        color: #10b981;
         font-weight: 700;
         font-size: 0.85rem;
         padding: 0.35rem 0.85rem;
@@ -100,31 +108,32 @@ const affiliateOffer = renderAffiliateCardHTML({
         border: 1px solid rgba(16, 185, 129, 0.25);
       }
       .hero-title {
-        font-size: 2.75rem;
+        font-size: 2.5rem;
         font-weight: 900;
         letter-spacing: -0.03em;
         line-height: 1.15;
         margin-bottom: 1rem;
       }
       .hero-subtitle {
-        font-size: 1.2rem;
-        color: #64748b;
+        font-size: 1.125rem;
+        color: var(--text-secondary);
         max-width: 720px;
         margin: 0 auto 2rem;
         line-height: 1.6;
       }
       .studio-box {
-        background: #ffffff;
-        border: 2px dashed #cbd5e1;
-        border-radius: 1rem;
+        background: var(--bg-surface);
+        border: 2px dashed var(--border-subtle);
+        border-radius: var(--radius-md, 12px);
         padding: 2.5rem 1.5rem;
         text-align: center;
         margin: 1.5rem auto 2.5rem;
         max-width: 750px;
-        transition: border-color 0.2s ease;
+        transition: border-color 0.2s ease, background 0.2s ease;
       }
-      .studio-box:hover {
-        border-color: #3b82f6;
+      .studio-box.drag-over {
+        border-color: var(--accent-primary);
+        background: rgba(99, 102, 241, 0.05);
       }
       .tools-grid {
         display: grid;
@@ -134,31 +143,33 @@ const affiliateOffer = renderAffiliateCardHTML({
         margin: 2.5rem auto;
       }
       .tool-card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.85rem;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm, 10px);
         padding: 1.75rem;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         text-align: left;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
       }
       .tool-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+        border-color: var(--accent-primary);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
       }
       .tool-badge {
         align-self: flex-start;
         font-size: 0.72rem;
         font-weight: 800;
         text-transform: uppercase;
-        background: #f1f5f9;
-        color: #475569;
+        background: var(--bg-surface-hover, rgba(255,255,255,0.05));
+        color: var(--text-secondary);
         padding: 0.2rem 0.5rem;
         border-radius: 0.35rem;
         margin-bottom: 0.75rem;
+        border: 1px solid var(--border-subtle);
       }
       .tool-icon {
         font-size: 2.25rem;
@@ -168,66 +179,71 @@ const affiliateOffer = renderAffiliateCardHTML({
         font-size: 1.25rem;
         font-weight: 800;
         margin-bottom: 0.5rem;
-        color: #0f172a;
+        color: var(--text-primary);
       }
       .tool-desc {
         font-size: 0.92rem;
-        color: #64748b;
+        color: var(--text-secondary);
         line-height: 1.5;
         margin-bottom: 1.25rem;
       }
       .tool-btn {
         display: inline-block;
         text-align: center;
-        background: #0f172a;
+        background: var(--accent-primary);
         color: #ffffff;
         font-weight: 700;
         font-size: 0.9rem;
-        padding: 0.7rem 1.2rem;
-        border-radius: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--radius-sm, 6px);
         text-decoration: none;
-        transition: background 0.15s ease;
+        transition: opacity 0.15s ease, transform 0.15s ease;
       }
       .tool-btn:hover {
-        background: #2563eb;
+        opacity: 0.9;
+        transform: translateY(-1px);
       }
-      .faq-list {
-        max-width: 800px;
-        margin: 2.5rem auto;
-        text-align: left;
-      }
-      .faq-item {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.75rem;
-        padding: 1.25rem 1.5rem;
-        margin-bottom: 1rem;
-      }
-      .faq-item h3 {
-        font-size: 1.05rem;
+      .quick-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border-radius: 6px;
+        font-size: 0.8125rem;
         font-weight: 700;
-        margin-bottom: 0.5rem;
-        color: #0f172a;
+        text-decoration: none;
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        transition: all 0.15s ease;
       }
-      .faq-item p {
-        font-size: 0.92rem;
-        color: #475569;
-        line-height: 1.5;
-        margin: 0;
+      .quick-action-btn:hover {
+        border-color: var(--accent-primary);
+        background: var(--bg-surface-hover);
+        transform: translateY(-1px);
       }
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ siteTitle: "PDF Forge", navItems: [{ label: "PDF Tools", href: "/#tools" }, { label: "Merge PDF", href: "/tools/merge-pdf" }, { label: "Split PDF", href: "/tools/split-pdf" }, { label: "Rotate PDF", href: "/tools/rotate-pdf" }, { label: "About", href: "/about" }] })} />
+    <Fragment set:html={renderHeaderHTML({
+      siteTitle: "PDF Forge",
+      navItems: [
+        { label: "PDF Tools", href: "/#tools" },
+        { label: "Merge PDF", href: "/tools/merge-pdf" },
+        { label: "Split PDF", href: "/tools/split-pdf" },
+        { label: "Rotate PDF", href: "/tools/rotate-pdf" },
+        { label: "About", href: "/about" },
+      ]
+    })} />
 
-    <main class="container">
+    <main class="container" style="max-width: 1100px; margin: 0 auto; padding-inline: 1rem;">
       <section class="hero-section">
         <div class="privacy-badge">
           <span>🔒</span> 100% Client-Side Local Processing — Files Never Leave Your Device
         </div>
         <h1 class="hero-title">Private In-Browser PDF Studio</h1>
         <p class="hero-subtitle">
-          Merge multiple documents, split pages, correct rotation, reorder scans, and update metadata directly in your browser. Powered by client-side WebAssembly with zero server uploads.
+          Merge documents, extract page ranges, correct rotation, re-sequence pages, stamp watermarks, and edit metadata directly in your browser with zero server uploads.
         </p>
 
         <!-- Zero-CLS Monetization Slot -->
@@ -235,20 +251,58 @@ const affiliateOffer = renderAffiliateCardHTML({
           <Fragment set:html={adSlotTop} />
         </div>
 
-        <div class="studio-box">
-          <div style="font-size: 3rem; margin-bottom: 1rem;">📄</div>
-          <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem;">Drag and drop PDF files here</h2>
-          <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem;">Or select one of our focused tools below for dedicated manipulation</p>
-          <a href="/tools/merge-pdf" class="tool-btn" style="padding: 0.85rem 1.75rem; font-size: 1rem;">
-            Open Merge PDF Tool →
-          </a>
+        <!-- Interactive Studio Drop Box -->
+        <div class="studio-box" id="home-drop-zone">
+          <input type="file" id="home-pdf-input" accept="application/pdf,.pdf" style="display: none;" />
+          <div style="font-size: 3rem; margin-bottom: 0.75rem;">📄</div>
+          <h2 style="font-size: 1.35rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text-primary);">
+            Select or Drag & Drop Any PDF File Here
+          </h2>
+          <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem;">
+            Processed entirely within your browser memory. Instant, safe, and private.
+          </p>
+
+          <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button type="button" class="tool-btn" id="home-choose-btn" style="cursor: pointer; border: none;">
+              <span>📁 Browse PDF File</span>
+            </button>
+            <button type="button" class="suite-btn-secondary" id="home-sample-btn" style="padding: 0.75rem 1.25rem; font-size: 0.9rem; cursor: pointer;">
+              <span>✨ Try Sample Document</span>
+            </button>
+          </div>
+
+          <!-- Document Loaded Quick Actions Drawer -->
+          <div id="home-file-drawer" style="display: none; margin-top: 1.75rem; text-align: left; background: var(--bg-surface-hover, rgba(255,255,255,0.03)); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px;">
+              <div>
+                <strong id="home-doc-name" style="font-size: 1rem; color: var(--text-primary);">Document.pdf</strong>
+                <div id="home-doc-meta" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+                  0 pages &bull; 0 KB
+                </div>
+              </div>
+              <span class="suite-badge" style="font-size: 0.6875rem;">Loaded In-Memory</span>
+            </div>
+
+            <div style="font-size: 0.8125rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px;">
+              Choose What to Do with This Document:
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="/tools/rotate-pdf" class="quick-action-btn">🔄 Rotate Pages</a>
+              <a href="/tools/split-pdf" class="quick-action-btn">✂️ Split Pages</a>
+              <a href="/tools/reorder-pdf" class="quick-action-btn">🔀 Reorder / Delete</a>
+              <a href="/tools/pdf-metadata" class="quick-action-btn">🏷️ Edit Metadata</a>
+              <a href="/tools/watermark-pdf" class="quick-action-btn">🛡️ Watermark</a>
+              <a href="/tools/page-numbers-pdf" class="quick-action-btn">🔢 Page Numbers</a>
+              <a href="/tools/merge-pdf" class="quick-action-btn">📑 Merge with Others</a>
+            </div>
+          </div>
         </div>
       </section>
 
       <!-- Tools Grid -->
       <section id="tools">
         <h2 style="text-align: center; font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Dedicated PDF Tool Suites</h2>
-        <p style="text-align: center; color: #64748b; margin-bottom: 2rem;">Choose the precise operation you need with zero subscription limits</p>
+        <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">Choose the precise operation you need with zero subscription limits</p>
         
         <div class="tools-grid">
           {PDF_TOOLS.map((tool) => (
@@ -273,12 +327,12 @@ const affiliateOffer = renderAffiliateCardHTML({
       </section>
 
       <!-- FAQs -->
-      <section class="faq-list">
+      <section class="faq-list" style="max-width: 800px; margin: 2.5rem auto;">
         <h2 style="text-align: center; font-size: 1.75rem; font-weight: 800; margin-bottom: 1.5rem;">Frequently Asked Questions</h2>
         {faqs.map((faq) => (
-          <div class="faq-item">
-            <h3>{faq.question}</h3>
-            <p>{faq.answer}</p>
+          <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 0.75rem; padding: 1.25rem 1.5rem; margin-bottom: 1rem;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-primary);">{faq.question}</h3>
+            <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">{faq.answer}</p>
           </div>
         ))}
       </section>
@@ -289,7 +343,88 @@ const affiliateOffer = renderAffiliateCardHTML({
       </div>
     </main>
 
-    <Fragment set:html={renderFooterHTML({ siteTitle: "PDF Forge", tagline: "Client-side PDF manipulation with zero cloud data transmission." })} />
+    <Fragment set:html={renderFooterHTML({
+      siteTitle: "PDF Forge",
+      currentYear: 2026,
+      privacyUrl: "/privacy-policy",
+      termsUrl: "/terms-of-service",
+      editorialUrl: "/editorial-policy",
+      contactUrl: "/contact",
+    })} />
     <Fragment set:html={renderConsentBannerHTML()} />
+
+    <script is:inline>
+      (() => {
+        const dropZone = document.getElementById("home-drop-zone");
+        const fileInput = document.getElementById("home-pdf-input");
+        const chooseBtn = document.getElementById("home-choose-btn");
+        const sampleBtn = document.getElementById("home-sample-btn");
+        const drawer = document.getElementById("home-file-drawer");
+        const docName = document.getElementById("home-doc-name");
+        const docMeta = document.getElementById("home-doc-meta");
+
+        if (chooseBtn && fileInput) {
+          chooseBtn.addEventListener("click", () => fileInput.click());
+        }
+
+        if (fileInput) {
+          fileInput.addEventListener("change", async (e) => {
+            const file = e.target.files?.[0];
+            if (file) await handleLoadedFile(file);
+          });
+        }
+
+        if (dropZone) {
+          ["dragenter", "dragover"].forEach((name) => {
+            dropZone.addEventListener(name, (e) => {
+              e.preventDefault();
+              dropZone.classList.add("drag-over");
+            });
+          });
+          ["dragleave", "drop"].forEach((name) => {
+            dropZone.addEventListener(name, (e) => {
+              e.preventDefault();
+              dropZone.classList.remove("drag-over");
+            });
+          });
+          dropZone.addEventListener("drop", async (e) => {
+            const file = e.dataTransfer.files?.[0];
+            if (file) await handleLoadedFile(file);
+          });
+        }
+
+        async function handleLoadedFile(file) {
+          if (!file.name.toLowerCase().endsWith(".pdf")) {
+            alert("Please select a valid PDF file.");
+            return;
+          }
+          if (docName) docName.textContent = file.name;
+          const kb = (file.size / 1024).toFixed(1);
+
+          try {
+            if (typeof PDFLib !== "undefined") {
+              const buf = await file.arrayBuffer();
+              const doc = await PDFLib.PDFDocument.load(new Uint8Array(buf));
+              const pages = doc.getPageCount();
+              if (docMeta) docMeta.textContent = `${pages} ${pages === 1 ? "page" : "pages"} • ${kb} KB`;
+            } else {
+              if (docMeta) docMeta.textContent = `${kb} KB`;
+            }
+          } catch {
+            if (docMeta) docMeta.textContent = `${kb} KB`;
+          }
+
+          if (drawer) drawer.style.display = "block";
+        }
+
+        if (sampleBtn) {
+          sampleBtn.addEventListener("click", () => {
+            if (docName) docName.textContent = "sample-document.pdf (3 Pages)";
+            if (docMeta) docMeta.textContent = "3 pages • 48.2 KB • Ready for processing";
+            if (drawer) drawer.style.display = "block";
+          });
+        }
+      })();
+    </script>
   </body>
 </html>
