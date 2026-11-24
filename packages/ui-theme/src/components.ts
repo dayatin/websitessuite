@@ -17,6 +17,12 @@ export interface FooterConfig {
   siteTitle?: string;
   tagline?: string;
   copyrightYear?: number;
+  authorName?: string;
+  currentYear?: number;
+  privacyUrl?: string;
+  termsUrl?: string;
+  editorialUrl?: string;
+  contactUrl?: string;
 }
 
 /**

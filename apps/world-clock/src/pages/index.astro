@@ -3,8 +3,7 @@ import "@suite/ui-theme/base.css";
 import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
 import { renderMetaTags, buildWebApplicationSchema } from "@suite/seo-core";
 import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
-import { TimeEngine, WORLD_CITIES } from "../lib/time-engine.ts";
-import { build24HourTimeline } from "../lib/timeline-math.ts";
+import { WORLD_CITIES } from "../lib/time-engine.ts";
 
 const siteTitle = "ChronoSpatial: World Clock, Precision Timezone Converter & Meeting Planner";
 const canonicalUrl = Astro.site ? new URL("", Astro.site).href : "https://world-clock.suite.local/";

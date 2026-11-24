@@ -16,8 +16,9 @@ export const GET: APIRoute = async ({ params, locals, redirect }) => {
     }
   )?.runtime?.env;
 
+  const cache = env?.CACHE;
   const result = await resolveLink(slug, {
-    kvGet: env?.CACHE ? (k) => env.CACHE.get(k) : undefined,
+    kvGet: cache ? (k) => cache.get(k) : undefined,
     dbQuery: async (_s) => null, // Wired to Cloudflare D1 runtime in production
   });
 

@@ -395,7 +395,7 @@ export function generateUUIDs(
   const safeCount = Math.max(1, Math.min(100, count));
 
   for (let i = 0; i < safeCount; i++) {
-    let uuid = crypto.randomUUID();
+    let uuid: string = crypto.randomUUID();
     if (options?.uppercase) {
       uuid = uuid.toUpperCase();
     }
