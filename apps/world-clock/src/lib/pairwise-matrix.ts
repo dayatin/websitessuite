@@ -1,5 +1,5 @@
 import { TimeEngine } from "./time-engine.ts";
-import { classifyHour, getStatusStyle } from "./timeline-math.ts";
+import { classifyHour } from "./timeline-math.ts";
 
 export interface PairwiseRouteConfig {
   fromSlug: string;

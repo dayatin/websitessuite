@@ -3,9 +3,8 @@ import "@suite/ui-theme/base.css";
 import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
 import { renderMetaTags, buildBreadcrumbSchema } from "@suite/seo-core";
 import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
-import { TimeEngine, WORLD_CITIES } from "../../lib/time-engine.ts";
+import { TimeEngine } from "../../lib/time-engine.ts";
 import { MarketHoursEngine } from "../../lib/market-hours.ts";
-import { build24HourTimeline } from "../../lib/timeline-math.ts";
 
 export function getStaticPaths() {
   const engine = new TimeEngine();
@@ -25,7 +24,6 @@ const timeInfo = engine.getTimeForZone(today, cityRecord.timezone);
 const solarTimes = engine.calculateSolarTimes(today, cityRecord.lat, cityRecord.lng, cityRecord.timezone);
 const exchange = marketEngine.getExchangeForCity(cityRecord.id);
 const marketStatus = exchange ? marketEngine.getMarketStatus(exchange, today) : null;
-const timelineSlots = build24HourTimeline(cityRecord.timezone, today);
 
 const siteTitle = `Current Local Time in ${cityRecord.name}, ${cityRecord.country} | ChronoSpatial`;
 const canonicalUrl = Astro.site

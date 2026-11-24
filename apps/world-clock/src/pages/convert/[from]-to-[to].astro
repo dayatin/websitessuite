@@ -95,7 +95,7 @@ const affiliateOffer = renderAffiliateCardHTML({
         </p>
 
         <!-- Summary Offset Box -->
-        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm, 6px); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm, 6px); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 1.5rem;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 1.25rem;">⏱️</span>
             <strong style="color: var(--text-primary);">{offsetSummary}</strong>
@@ -107,6 +107,46 @@ const affiliateOffer = renderAffiliateCardHTML({
           >
             📅 Plan Meeting in These Zones
           </a>
+        </div>
+
+        <!-- Live Interactive Pairwise Converter Tool -->
+        <div style="background: var(--bg-surface-hover, rgba(255,255,255,0.02)); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm, 6px); padding: 1.25rem;">
+          <div style="font-size: 0.875rem; font-weight: 700; margin-bottom: 12px; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between;">
+            <span>⚡ Live Custom Time Converter</span>
+            <span id="pw-status-badge" class="suite-badge" style="font-size: 0.6875rem;">Interactive</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end; margin-bottom: 1rem;">
+            <div>
+              <label for="pw-time-input" style="display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">
+                Time in {route.fromName}
+              </label>
+              <input id="pw-time-input" type="time" class="suite-input" value="12:00" style="width: 100%; padding: 8px 12px; font-size: 0.875rem;" />
+            </div>
+
+            <div>
+              <label for="pw-date-input" style="display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">
+                Date
+              </label>
+              <input id="pw-date-input" type="date" class="suite-input" style="width: 100%; padding: 8px 12px; font-size: 0.875rem;" />
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+              <button id="pw-now-btn" type="button" class="suite-btn-secondary" style="font-size: 0.8125rem; padding: 8px 12px; flex: 1;">
+                Current Time
+              </button>
+            </div>
+          </div>
+
+          <!-- Live Conversion Output Result -->
+          <div id="pw-result-banner" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 4px; padding: 12px; text-align: center;">
+            <div id="pw-result-text" style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">
+              12:00 PM in {route.fromName} = ...
+            </div>
+            <div id="pw-result-sub" style="font-size: 0.8125rem; color: var(--text-secondary); margin-top: 4px;">
+              Calculating instant conversion...
+            </div>
+          </div>
         </div>
       </header>
 
@@ -195,5 +235,107 @@ const affiliateOffer = renderAffiliateCardHTML({
 
     <Fragment set:html={renderFooterHTML({ authorName: "ChronoSpatial Team", currentYear: 2026, privacyUrl: "/privacy-policy", termsUrl: "/terms-of-service", editorialUrl: "/editorial-policy", contactUrl: "/contact" })} />
     <Fragment set:html={renderConsentBannerHTML()} />
+
+    <script is:inline define:vars={{ fromTz: route.fromTz, toTz: route.toTz, fromName: route.fromName, toName: route.toName }}>
+      (() => {
+        const timeInput = document.getElementById("pw-time-input");
+        const dateInput = document.getElementById("pw-date-input");
+        const nowBtn = document.getElementById("pw-now-btn");
+        const resultText = document.getElementById("pw-result-text");
+        const resultSub = document.getElementById("pw-result-sub");
+
+        if (dateInput) {
+          dateInput.value = new Date().toISOString().split("T")[0];
+        }
+
+        function calculate() {
+          if (!timeInput || !dateInput || !resultText || !resultSub) return;
+          const [hStr, mStr] = timeInput.value.split(":");
+          const h = Number.parseInt(hStr || "12", 10);
+          const m = Number.parseInt(mStr || "0", 10);
+
+          const [y, mo, d] = dateInput.value.split("-").map((v) => Number.parseInt(v, 10));
+          const fakeUtc = new Date(Date.UTC(y, mo - 1, d, h, m, 0));
+
+          // Get offset for fromTz
+          const dtfFrom = new Intl.DateTimeFormat("en-US", {
+            timeZone: fromTz,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+            timeZoneName: "short",
+          });
+          const partsFrom = dtfFrom.formatToParts(fakeUtc);
+          const getP = (parts, t) => parts.find((p) => p.type === t)?.value || "0";
+          const yF = Number.parseInt(getP(partsFrom, "year"), 10);
+          const moF = Number.parseInt(getP(partsFrom, "month"), 10);
+          const dF = Number.parseInt(getP(partsFrom, "day"), 10);
+          const hF = Number.parseInt(getP(partsFrom, "hour"), 10) % 24;
+          const mF = Number.parseInt(getP(partsFrom, "minute"), 10);
+
+          const localDateAsUtc = new Date(Date.UTC(yF, moF - 1, dF, hF, mF, 0));
+          const offsetMinutes = Math.round((localDateAsUtc.getTime() - fakeUtc.getTime()) / 60000);
+          const trueUtcEpoch = fakeUtc.getTime() - offsetMinutes * 60000;
+          const trueDate = new Date(trueUtcEpoch);
+
+          // Format target time in toTz
+          const dtfTo = new Intl.DateTimeFormat("en-US", {
+            timeZone: toTz,
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+            timeZoneName: "short",
+          });
+          const toFormatted = dtfTo.format(trueDate);
+
+          const dtfFromFormatted = new Intl.DateTimeFormat("en-US", {
+            timeZone: fromTz,
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+            timeZoneName: "short",
+          });
+          const fromFormatted = dtfFromFormatted.format(trueDate);
+
+          const dtfDateTo = new Intl.DateTimeFormat("en-US", {
+            timeZone: toTz,
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+          });
+          const toDateFormatted = dtfDateTo.format(trueDate);
+
+          resultText.textContent = `${fromFormatted} (${fromName}) = ${toFormatted} (${toName})`;
+          resultSub.textContent = `Target local date: ${toDateFormatted} in ${toName}. Instant precision calculated.`;
+        }
+
+        timeInput?.addEventListener("input", calculate);
+        dateInput?.addEventListener("input", calculate);
+
+        if (nowBtn) {
+          nowBtn.addEventListener("click", () => {
+            const now = new Date();
+            const dtfNow = new Intl.DateTimeFormat("en-US", {
+              timeZone: fromTz,
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            });
+            const parts = dtfNow.formatToParts(now);
+            const getP = (t) => parts.find((p) => p.type === t)?.value || "00";
+            const h = getP("hour");
+            const m = getP("minute");
+            if (timeInput) timeInput.value = `${h}:${m}`;
+            calculate();
+          });
+        }
+
+        calculate();
+      })();
+    </script>
   </body>
 </html>
