@@ -97,6 +97,14 @@ jobs:
       - name: Build Application
         run: pnpm turbo run build --filter=@apps/${{ matrix.app }}...
 
+      - name: Ensure Cloudflare Pages Project Exists
+        if: ${{ (inputs.action_type || 'deploy') == 'deploy' }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages project create suite-${{ matrix.app }} --production-branch=main || true
+
       - name: Deploy to Cloudflare Pages
         if: ${{ (inputs.action_type || 'deploy') == 'deploy' }}
         uses: cloudflare/wrangler-action@v3
