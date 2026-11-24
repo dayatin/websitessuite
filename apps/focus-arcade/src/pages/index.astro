@@ -220,10 +220,13 @@ const affiliateOffer = renderAffiliateCardHTML({
           <div style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; font-weight: 700;">
             Ultradian Deep Work Timer
           </div>
-          <div class="timer-display">25:00</div>
-          <div style="display: flex; gap: 0.75rem; justify-content: center; margin-top: 1rem;">
-            <button type="button" style="background: #7c3aed; color: #ffffff; border: none; padding: 0.65rem 1.5rem; border-radius: 0.5rem; font-weight: 700; cursor: pointer;" onclick="alert('Pomodoro focus cycle started!')">
+          <div id="pomodoro-timer-display" class="timer-display">25:00</div>
+          <div style="display: flex; gap: 0.75rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap;">
+            <button type="button" id="toggle-pomodoro-btn" style="background: #7c3aed; color: #ffffff; border: none; padding: 0.65rem 1.5rem; border-radius: 0.5rem; font-weight: 700; cursor: pointer;">
               ▶ Start Focus Session
+            </button>
+            <button type="button" id="reset-pomodoro-btn" style="background: rgba(255, 255, 255, 0.15); color: #ffffff; border: none; padding: 0.65rem 1.2rem; border-radius: 0.5rem; font-weight: 700; cursor: pointer;">
+              🔄 Reset
             </button>
             <a href="/play/deep-focus" style="background: rgba(255, 255, 255, 0.1); color: #ffffff; padding: 0.65rem 1.2rem; border-radius: 0.5rem; text-decoration: none; font-weight: 700;">
               🎧 Soundscapes
@@ -278,5 +281,61 @@ const affiliateOffer = renderAffiliateCardHTML({
 
     <Fragment set:html={renderFooterHTML({ siteTitle: "FocusArcade", tagline: "Cognitive endurance and spatial focus games for high performers." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
+
+    <script is:inline>
+      (() => {
+        let totalSeconds = 25 * 60;
+        let isRunning = false;
+        let intervalId = null;
+
+        const display = document.getElementById("pomodoro-timer-display");
+        const toggleBtn = document.getElementById("toggle-pomodoro-btn");
+        const resetBtn = document.getElementById("reset-pomodoro-btn");
+
+        function updateDisplay() {
+          if (!display) return;
+          const mins = Math.floor(totalSeconds / 60);
+          const secs = totalSeconds % 60;
+          display.textContent = `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+        }
+
+        toggleBtn?.addEventListener("click", () => {
+          if (isRunning) {
+            clearInterval(intervalId);
+            isRunning = false;
+            toggleBtn.textContent = "▶ Resume Focus";
+            toggleBtn.style.background = "#7c3aed";
+          } else {
+            isRunning = true;
+            toggleBtn.textContent = "⏸ Pause Timer";
+            toggleBtn.style.background = "#ea580c";
+            intervalId = setInterval(() => {
+              if (totalSeconds > 0) {
+                totalSeconds--;
+                updateDisplay();
+              } else {
+                clearInterval(intervalId);
+                isRunning = false;
+                toggleBtn.textContent = "🎉 Session Complete!";
+                toggleBtn.style.background = "#059669";
+              }
+            }, 1000);
+          }
+        });
+
+        resetBtn?.addEventListener("click", () => {
+          clearInterval(intervalId);
+          isRunning = false;
+          totalSeconds = 25 * 60;
+          updateDisplay();
+          if (toggleBtn) {
+            toggleBtn.textContent = "▶ Start Focus Session";
+            toggleBtn.style.background = "#7c3aed";
+          }
+        });
+
+        updateDisplay();
+      })();
+    </script>
   </body>
 </html>

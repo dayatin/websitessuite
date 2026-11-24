@@ -176,16 +176,37 @@ const affiliateOffer = renderAffiliateCardHTML({
         </div>
 
         <div class="chroma-studio">
-          <div class="color-preview-box">
-            <span>oklch(65% 0.22 240)</span>
+          <div id="color-preview-box" class="color-preview-box">
+            <span id="color-label">oklch(65% 0.22 240)</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+            <div>
+              <label for="slider-lightness" style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 4px;">
+                Lightness (L): <span id="val-lightness">65%</span>
+              </label>
+              <input type="range" id="slider-lightness" min="10" max="95" value="65" style="width: 100%; cursor: pointer;" />
+            </div>
+            <div>
+              <label for="slider-chroma" style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 4px;">
+                Chroma (C): <span id="val-chroma">0.22</span>
+              </label>
+              <input type="range" id="slider-chroma" min="0" max="0.35" step="0.01" value="0.22" style="width: 100%; cursor: pointer;" />
+            </div>
+            <div>
+              <label for="slider-hue" style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 4px;">
+                Hue Angle (H): <span id="val-hue">240°</span>
+              </label>
+              <input type="range" id="slider-hue" min="0" max="360" value="240" style="width: 100%; cursor: pointer;" />
+            </div>
           </div>
 
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.9rem; color: #334155; margin-bottom: 1.25rem;">
-            <code>--color-primary: oklch(65% 0.22 240);</code>
+            <code id="css-code-display">--color-primary: oklch(65% 0.22 240);</code>
           </div>
 
-          <button type="button" style="background: #0284c7; color: #ffffff; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 700; cursor: pointer;" onclick="alert('CSS copied to clipboard!')">
-            Copy Modern CSS Tokens
+          <button type="button" id="copy-css-btn" style="background: #0284c7; color: #ffffff; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 700; cursor: pointer;">
+            📋 Copy Modern CSS Tokens
           </button>
         </div>
       </section>
@@ -224,5 +245,50 @@ const affiliateOffer = renderAffiliateCardHTML({
 
     <Fragment set:html={renderFooterHTML({ siteTitle: "ChromaType Lab", tagline: "Modern color science and fluid responsive typography." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
+
+    <script is:inline>
+      (() => {
+        const preview = document.getElementById("color-preview-box");
+        const label = document.getElementById("color-label");
+        const codeDisplay = document.getElementById("css-code-display");
+        const copyBtn = document.getElementById("copy-css-btn");
+
+        const sL = document.getElementById("slider-lightness");
+        const sC = document.getElementById("slider-chroma");
+        const sH = document.getElementById("slider-hue");
+
+        const vL = document.getElementById("val-lightness");
+        const vC = document.getElementById("val-chroma");
+        const vH = document.getElementById("val-hue");
+
+        function updateColor() {
+          if (!preview || !sL || !sC || !sH) return;
+          const l = sL.value;
+          const c = sC.value;
+          const h = sH.value;
+
+          if (vL) vL.textContent = `${l}%`;
+          if (vC) vC.textContent = c;
+          if (vH) vH.textContent = `${h}°`;
+
+          const oklchStr = `oklch(${l}% ${c} ${h})`;
+          preview.style.background = oklchStr;
+          if (label) label.textContent = oklchStr;
+          if (codeDisplay) codeDisplay.textContent = `--color-primary: ${oklchStr};`;
+        }
+
+        [sL, sC, sH].forEach(s => s?.addEventListener("input", updateColor));
+
+        copyBtn?.addEventListener("click", () => {
+          if (!codeDisplay) return;
+          navigator.clipboard.writeText(codeDisplay.textContent);
+          const orig = copyBtn.textContent;
+          copyBtn.textContent = "✓ CSS Tokens Copied!";
+          setTimeout(() => { copyBtn.textContent = orig; }, 1500);
+        });
+
+        updateColor();
+      })();
+    </script>
   </body>
 </html>

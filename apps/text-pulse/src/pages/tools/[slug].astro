@@ -203,13 +203,39 @@ const affiliateOffer = renderAffiliateCardHTML({
         </div>
 
         <div class="workbench-studio">
-          <label class="studio-label" for="tool-input">Enter Text for Analysis</label>
+          <label class="studio-label" for="tool-input">Enter Text for Analysis & Transformation</label>
           <textarea id="tool-input" class="studio-textarea" placeholder="Type or paste your content here..."></textarea>
           
-          <div style="display: flex; gap: 0.75rem; align-items: center; justify-content: flex-end;">
-            <button type="button" class="action-btn" onclick="alert('Analyzed 100% locally in browser memory')">
-              Analyze with {tool.title}
-            </button>
+          <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end; margin-top: 0.5rem; flex-wrap: wrap;">
+            <button type="button" id="btn-uppercase" class="action-btn" style="background: #e2e8f0; color: #334155;">UPPERCASE</button>
+            <button type="button" id="btn-lowercase" class="action-btn" style="background: #e2e8f0; color: #334155;">lowercase</button>
+            <button type="button" id="btn-titlecase" class="action-btn" style="background: #e2e8f0; color: #334155;">Title Case</button>
+            <button type="button" id="btn-slugify" class="action-btn" style="background: #e2e8f0; color: #334155;">Slugify</button>
+            <button type="button" id="btn-copy" class="action-btn">📋 Copy Text</button>
+          </div>
+
+          <!-- Real-Time Metrics Grid -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; margin-top: 1.5rem;">
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.75rem; text-align: center;">
+              <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Words</span>
+              <div id="stat-words" style="font-size: 1.5rem; font-weight: 900; color: #0284c7;">0</div>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.75rem; text-align: center;">
+              <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Characters</span>
+              <div id="stat-chars" style="font-size: 1.5rem; font-weight: 900; color: #0f172a;">0</div>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.75rem; text-align: center;">
+              <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">AI Tokens (Est)</span>
+              <div id="stat-tokens" style="font-size: 1.5rem; font-weight: 900; color: #8b5cf6;">0</div>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.75rem; text-align: center;">
+              <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Read Time</span>
+              <div id="stat-time" style="font-size: 1.5rem; font-weight: 900; color: #059669;">0s</div>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 0.75rem; text-align: center;">
+              <span style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Sentences</span>
+              <div id="stat-sentences" style="font-size: 1.5rem; font-weight: 900; color: #334155;">0</div>
+            </div>
           </div>
         </div>
       </section>
@@ -248,5 +274,71 @@ const affiliateOffer = renderAffiliateCardHTML({
 
     <Fragment set:html={renderFooterHTML({ siteTitle: "TextPulse", tagline: "Linguistic text analysis and AI token estimation." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
+
+    <script is:inline>
+      (() => {
+        const input = document.getElementById("tool-input");
+        const statWords = document.getElementById("stat-words");
+        const statChars = document.getElementById("stat-chars");
+        const statTokens = document.getElementById("stat-tokens");
+        const statTime = document.getElementById("stat-time");
+        const statSentences = document.getElementById("stat-sentences");
+
+        function analyze() {
+          if (!input) return;
+          const text = input.value;
+          const trimmed = text.trim();
+
+          const words = trimmed ? trimmed.split(/\s+/).length : 0;
+          const chars = text.length;
+          const tokens = Math.ceil(words * 1.33);
+          const readingSecs = Math.ceil((words / 225) * 60);
+          const sentences = trimmed ? (trimmed.match(/[^.!?]+[.!?]+/g) || [trimmed]).length : 0;
+
+          if (statWords) statWords.textContent = words.toLocaleString();
+          if (statChars) statChars.textContent = chars.toLocaleString();
+          if (statTokens) statTokens.textContent = tokens.toLocaleString();
+          if (statTime) statTime.textContent = readingSecs >= 60 ? `${Math.ceil(readingSecs / 60)}m` : `${readingSecs}s`;
+          if (statSentences) statSentences.textContent = sentences.toLocaleString();
+        }
+
+        input?.addEventListener("input", analyze);
+
+        document.getElementById("btn-uppercase")?.addEventListener("click", () => {
+          if (!input) return;
+          input.value = input.value.toUpperCase();
+          analyze();
+        });
+
+        document.getElementById("btn-lowercase")?.addEventListener("click", () => {
+          if (!input) return;
+          input.value = input.value.toLowerCase();
+          analyze();
+        });
+
+        document.getElementById("btn-titlecase")?.addEventListener("click", () => {
+          if (!input) return;
+          input.value = input.value.replace(/\b\w+/g, txt => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase());
+          analyze();
+        });
+
+        document.getElementById("btn-slugify")?.addEventListener("click", () => {
+          if (!input) return;
+          input.value = input.value.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-").replace(/^-+|-+$/g, "");
+          analyze();
+        });
+
+        document.getElementById("btn-copy")?.addEventListener("click", () => {
+          if (!input) return;
+          navigator.clipboard.writeText(input.value);
+          const btn = document.getElementById("btn-copy");
+          if (btn) {
+            const orig = btn.textContent;
+            btn.textContent = "✓ Copied!";
+            setTimeout(() => { btn.textContent = orig; }, 1500);
+          }
+        });
+      })();
+    </script>
   </body>
 </html>

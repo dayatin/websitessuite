@@ -140,6 +140,7 @@ const dimensionList = Object.values(DIMENSIONS);
         font-weight: 700;
         font-size: 0.85rem;
         text-decoration: none;
+        cursor: pointer;
         transition: all 0.15s ease;
       }
       .dim-tab:hover, .dim-tab.active {
@@ -211,35 +212,63 @@ const dimensionList = Object.values(DIMENSIONS);
         <div class="converter-box">
           <div class="dimensions-nav">
             {dimensionList.map((dim, idx) => (
-              <span class={`dim-tab ${idx === 0 ? "active" : ""}`}>
+              <button
+                type="button"
+                class={`dim-tab ${idx === 0 ? "active" : ""}`}
+                data-dimension={dim.key}
+              >
                 {dim.icon} {dim.name}
-              </span>
+              </button>
             ))}
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; align-items: flex-end;">
             <div>
-              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">From Unit</label>
-              <select style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.95rem;">
-                <option>Meters (m)</option>
-                <option>Kilometers (km)</option>
-                <option>Feet (ft)</option>
-                <option>Inches (in)</option>
+              <label for="convert-input-value" style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">
+                Amount / Value
+              </label>
+              <input
+                type="number"
+                id="convert-input-value"
+                value="1"
+                step="any"
+                style="width: 100%; padding: 0.65rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 1.1rem; font-weight: 700; background: #ffffff; box-sizing: border-box;"
+              />
+            </div>
+            <div>
+              <label for="from-unit-select" style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">From Unit</label>
+              <select id="from-unit-select" style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.95rem; box-sizing: border-box;">
+                {DIMENSIONS.length.units.map((u) => (
+                  <option value={u.key} selected={u.key === "m"}>
+                    {u.name} ({u.symbol})
+                  </option>
+                ))}
               </select>
             </div>
             <div>
-              <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 0.35rem;">To Unit</label>
-              <select style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.95rem;">
-                <option>Feet (ft)</option>
-                <option>Meters (m)</option>
-                <option>Yards (yd)</option>
-                <option>Miles (mi)</option>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                <label for="to-unit-select" style="font-size: 0.85rem; font-weight: 700; color: #475569;">To Unit</label>
+                <button type="button" id="swap-units-btn" style="background: none; border: none; color: #4f46e5; font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 0;">
+                  ⇄ Swap
+                </button>
+              </div>
+              <select id="to-unit-select" style="width: 100%; padding: 0.65rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; font-size: 0.95rem; box-sizing: border-box;">
+                {DIMENSIONS.length.units.map((u) => (
+                  <option value={u.key} selected={u.key === "ft"}>
+                    {u.name} ({u.symbol})
+                  </option>
+                ))}
               </select>
             </div>
           </div>
 
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1.25rem; font-size: 1.5rem; font-weight: 900; color: #4f46e5;">
-            1 Meter = 3.28084 Feet
+          <div id="conversion-result-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div id="conversion-result-text" style="font-size: 1.5rem; font-weight: 900; color: #4f46e5;">
+              1 Meter = 3.28084 Feet
+            </div>
+            <div id="conversion-formula-badge" style="font-size: 0.85rem; font-weight: 600; color: #64748b; background: #e2e8f0; padding: 4px 8px; border-radius: 4px;">
+              Multiply by 3.28084
+            </div>
           </div>
         </div>
       </section>
@@ -286,5 +315,106 @@ const dimensionList = Object.values(DIMENSIONS);
 
     <Fragment set:html={renderFooterHTML({ siteTitle: "UnitAtlas", tagline: "Precision unit conversion matrices across international engineering systems." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
+
+    <script is:inline define:vars={{ DIMENSIONS }}>
+      (() => {
+        let currentDimension = "length";
+
+        const valueInput = document.getElementById("convert-input-value");
+        const fromSelect = document.getElementById("from-unit-select");
+        const toSelect = document.getElementById("to-unit-select");
+        const resultText = document.getElementById("conversion-result-text");
+        const formulaBadge = document.getElementById("conversion-formula-badge");
+        const swapBtn = document.getElementById("swap-units-btn");
+        const dimButtons = document.querySelectorAll(".dim-tab");
+
+        function populateUnits(dimKey, defaultFrom, defaultTo) {
+          const dim = DIMENSIONS[dimKey];
+          if (!dim) return;
+
+          fromSelect.innerHTML = dim.units
+            .map((u, i) => `<option value="${u.key}" ${defaultFrom ? (u.key === defaultFrom ? "selected" : "") : (i === 0 ? "selected" : "")}>${u.name} (${u.symbol})</option>`)
+            .join("");
+
+          toSelect.innerHTML = dim.units
+            .map((u, i) => `<option value="${u.key}" ${defaultTo ? (u.key === defaultTo ? "selected" : "") : (i === 1 ? "selected" : "")}>${u.name} (${u.symbol})</option>`)
+            .join("");
+        }
+
+        function calculate() {
+          if (!valueInput || !fromSelect || !toSelect || !resultText) return;
+          const val = parseFloat(valueInput.value) || 0;
+          const fromKey = fromSelect.value;
+          const toKey = toSelect.value;
+          const dim = DIMENSIONS[currentDimension];
+          if (!dim) return;
+
+          const fromUnit = dim.units.find(u => u.key === fromKey);
+          const toUnit = dim.units.find(u => u.key === toKey);
+          if (!fromUnit || !toUnit) return;
+
+          let result = 0;
+          let formula = "";
+
+          if (currentDimension === "temperature") {
+            let celsius = 0;
+            if (fromKey === "c") celsius = val;
+            else if (fromKey === "f") celsius = ((val - 32) * 5) / 9;
+            else if (fromKey === "k") celsius = val - 273.15;
+            else if (fromKey === "r") celsius = ((val - 491.67) * 5) / 9;
+
+            if (toKey === "c") result = celsius;
+            else if (toKey === "f") result = (celsius * 9) / 5 + 32;
+            else if (toKey === "k") result = celsius + 273.15;
+            else if (toKey === "r") result = ((celsius + 273.15) * 9) / 5;
+
+            formula = fromKey === "c" && toKey === "f" ? "(°C × 9/5) + 32 = °F" :
+                      fromKey === "f" && toKey === "c" ? "(°F - 32) × 5/9 = °C" :
+                      `${fromUnit.symbol} → ${toUnit.symbol}`;
+          } else {
+            const ratioFrom = fromUnit.ratioToBase ?? 1;
+            const ratioTo = toUnit.ratioToBase ?? 1;
+            const baseVal = val * ratioFrom;
+            result = baseVal / ratioTo;
+            const factor = ratioFrom / ratioTo;
+            const factorFormatted = factor >= 0.0001 && factor <= 10000
+              ? (Math.round(factor * 1e8) / 1e8).toString()
+              : factor.toExponential(4);
+            formula = `Multiply by ${factorFormatted}`;
+          }
+
+          const roundedResult = Math.round(result * 1e8) / 1e8;
+          const formattedResult = Math.abs(roundedResult) < 0.0001 && roundedResult !== 0
+            ? roundedResult.toExponential(4)
+            : Number(roundedResult.toFixed(6)).toLocaleString("en-US", { maximumFractionDigits: 6 });
+
+          resultText.textContent = `${val} ${fromUnit.name} = ${formattedResult} ${toUnit.name}`;
+          if (formulaBadge) formulaBadge.textContent = formula;
+        }
+
+        dimButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            dimButtons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            currentDimension = btn.getAttribute("data-dimension") || "length";
+            populateUnits(currentDimension);
+            calculate();
+          });
+        });
+
+        valueInput?.addEventListener("input", calculate);
+        fromSelect?.addEventListener("change", calculate);
+        toSelect?.addEventListener("change", calculate);
+
+        swapBtn?.addEventListener("click", () => {
+          const prevFrom = fromSelect.value;
+          fromSelect.value = toSelect.value;
+          toSelect.value = prevFrom;
+          calculate();
+        });
+
+        calculate();
+      })();
+    </script>
   </body>
 </html>

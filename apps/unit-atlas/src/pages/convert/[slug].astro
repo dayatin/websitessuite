@@ -168,9 +168,21 @@ const affiliateOffer = renderAffiliateCardHTML({
         </div>
 
         <div class="calc-display">
-          <div style="font-size: 0.9rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 0.5rem;">Standard Conversion Value</div>
-          <div style="font-size: 2rem; font-weight: 900; color: #4f46e5; margin-bottom: 0.75rem;">
-            1 {sampleConversion.fromUnit.symbol} = {sampleConversion.formattedResult} {sampleConversion.toUnit.symbol}
+          <div style="font-size: 0.9rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 0.75rem;">
+            Instant {sampleConversion.fromUnit.name} to {sampleConversion.toUnit.name} Calculator
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: center; align-items: center; margin-bottom: 1rem; flex-wrap: wrap;">
+            <input
+              type="number"
+              id="calc-custom-input"
+              value="1"
+              step="any"
+              style="padding: 8px 12px; font-size: 1.25rem; font-weight: 700; width: 140px; border: 1px solid #cbd5e1; border-radius: 6px; text-align: center;"
+            />
+            <span style="font-size: 1.1rem; font-weight: 800; color: #334155;">{sampleConversion.fromUnit.symbol}</span>
+            <span style="font-size: 1.25rem; font-weight: 800; color: #64748b;">=</span>
+            <span id="calc-custom-output" style="font-size: 1.5rem; font-weight: 900; color: #4f46e5;">{sampleConversion.formattedResult}</span>
+            <span style="font-size: 1.1rem; font-weight: 800; color: #334155;">{sampleConversion.toUnit.symbol}</span>
           </div>
           <div class="formula-box">
             Formula: {sampleConversion.formula}
@@ -225,5 +237,39 @@ const affiliateOffer = renderAffiliateCardHTML({
 
     <Fragment set:html={renderFooterHTML({ siteTitle: "UnitAtlas", tagline: "Precision unit conversion matrices across international engineering systems." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
+
+    <script is:inline define:vars={{ sampleConversion, pair }}>
+      (() => {
+        const inp = document.getElementById("calc-custom-input");
+        const out = document.getElementById("calc-custom-output");
+        if (!inp || !out) return;
+
+        inp.addEventListener("input", () => {
+          const val = parseFloat(inp.value) || 0;
+          let result = 0;
+          if (pair.dimension === "temperature") {
+            let celsius = 0;
+            if (pair.fromKey === "c") celsius = val;
+            else if (pair.fromKey === "f") celsius = ((val - 32) * 5) / 9;
+            else if (pair.fromKey === "k") celsius = val - 273.15;
+            else if (pair.fromKey === "r") celsius = ((val - 491.67) * 5) / 9;
+
+            if (pair.toKey === "c") result = celsius;
+            else if (pair.toKey === "f") result = (celsius * 9) / 5 + 32;
+            else if (pair.toKey === "k") result = celsius + 273.15;
+            else if (pair.toKey === "r") result = ((celsius + 273.15) * 9) / 5;
+          } else {
+            const ratioFrom = sampleConversion.fromUnit.ratioToBase ?? 1;
+            const ratioTo = sampleConversion.toUnit.ratioToBase ?? 1;
+            result = (val * ratioFrom) / ratioTo;
+          }
+          const rounded = Math.round(result * 1e8) / 1e8;
+          const formatted = Math.abs(rounded) < 0.0001 && rounded !== 0
+            ? rounded.toExponential(4)
+            : Number(rounded.toFixed(6)).toLocaleString("en-US", { maximumFractionDigits: 6 });
+          out.textContent = formatted;
+        });
+      })();
+    </script>
   </body>
 </html>

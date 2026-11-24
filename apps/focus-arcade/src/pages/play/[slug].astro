@@ -178,13 +178,22 @@ const affiliateOffer = renderAffiliateCardHTML({
 
         <div class="play-box">
           <div style="font-size: 2.5rem; margin-bottom: 1rem;">🎵</div>
-          <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem;">{mode.title} Workspace</h2>
+          <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem;">{mode.title} Audio Synthesizer</h2>
           <p style="color: #94a3b8; font-size: 0.95rem; margin-bottom: 1.5rem;">
-            Synthesized live in Web Audio with zero network streaming latency
+            Synthesized live via native Web Audio API oscillators with zero network streaming latency
           </p>
-          <button type="button" class="action-btn" onclick="alert('Module initialized in Web Audio context!')">
-            ▶ Activate {mode.title}
-          </button>
+          <div style="display: flex; gap: 1rem; justify-content: center; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap;">
+            <button type="button" id="audio-toggle-btn" class="action-btn" style="min-width: 160px;">
+              ▶ Play {mode.title}
+            </button>
+            <div style="display: flex; align-items: center; gap: 8px; color: #94a3b8; font-size: 0.85rem;">
+              <span>Volume</span>
+              <input type="range" id="audio-volume" min="0" max="1" step="0.05" value="0.3" style="width: 100px; cursor: pointer;" />
+            </div>
+          </div>
+          <div id="audio-status-pill" style="display: inline-block; padding: 4px 12px; border-radius: 9999px; background: rgba(255, 255, 255, 0.08); font-size: 0.8rem; color: #94a3b8; font-weight: 600;">
+            Idle (AudioContext Ready)
+          </div>
         </div>
       </section>
 
@@ -222,5 +231,90 @@ const affiliateOffer = renderAffiliateCardHTML({
 
     <Fragment set:html={renderFooterHTML({ siteTitle: "FocusArcade", tagline: "Cognitive endurance and spatial focus games for high performers." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
+
+    <script is:inline define:vars={{ slug: mode.slug }}>
+      (() => {
+        let audioCtx = null;
+        let osc1 = null;
+        let osc2 = null;
+        let gainNode = null;
+        let isPlaying = false;
+
+        const toggleBtn = document.getElementById("audio-toggle-btn");
+        const volumeSlider = document.getElementById("audio-volume");
+        const statusPill = document.getElementById("audio-status-pill");
+
+        function stopAudio() {
+          if (osc1) { try { osc1.stop(); osc1.disconnect(); } catch (e) {} osc1 = null; }
+          if (osc2) { try { osc2.stop(); osc2.disconnect(); } catch (e) {} osc2 = null; }
+          isPlaying = false;
+          if (toggleBtn) {
+            toggleBtn.textContent = "▶ Resume Soundscape";
+            toggleBtn.style.background = "#7c3aed";
+          }
+          if (statusPill) {
+            statusPill.textContent = "Paused";
+            statusPill.style.color = "#94a3b8";
+          }
+        }
+
+        function startAudio() {
+          if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          }
+          if (audioCtx.state === "suspended") {
+            audioCtx.resume();
+          }
+
+          gainNode = audioCtx.createGain();
+          const vol = parseFloat(volumeSlider?.value || "0.3");
+          gainNode.gain.setValueAtTime(vol * 0.15, audioCtx.currentTime);
+          gainNode.connect(audioCtx.destination);
+
+          // Configure frequency based on mode
+          let baseFreq = 432;
+          let beatDiff = 10; // 10Hz alpha wave binaural beat
+          if (slug === "binaural-beats") { baseFreq = 216; beatDiff = 7; } // Theta
+          else if (slug === "deep-focus") { baseFreq = 432; beatDiff = 14; } // Beta
+
+          osc1 = audioCtx.createOscillator();
+          osc1.type = "sine";
+          osc1.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+          osc1.connect(gainNode);
+          osc1.start();
+
+          osc2 = audioCtx.createOscillator();
+          osc2.type = "sine";
+          osc2.frequency.setValueAtTime(baseFreq + beatDiff, audioCtx.currentTime);
+          osc2.connect(gainNode);
+          osc2.start();
+
+          isPlaying = true;
+          if (toggleBtn) {
+            toggleBtn.textContent = "⏸ Pause Soundscape";
+            toggleBtn.style.background = "#ea580c";
+          }
+          if (statusPill) {
+            statusPill.textContent = `Active Synthesizer: ${baseFreq}Hz + ${baseFreq + beatDiff}Hz`;
+            statusPill.style.color = "#4ade80";
+          }
+        }
+
+        toggleBtn?.addEventListener("click", () => {
+          if (isPlaying) {
+            stopAudio();
+          } else {
+            startAudio();
+          }
+        });
+
+        volumeSlider?.addEventListener("input", () => {
+          if (gainNode && audioCtx) {
+            const vol = parseFloat(volumeSlider.value || "0.3");
+            gainNode.gain.setValueAtTime(vol * 0.15, audioCtx.currentTime);
+          }
+        });
+      })();
+    </script>
   </body>
 </html>
