@@ -86,11 +86,11 @@ const affiliateOffer = renderAffiliateCardHTML({
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <Fragment set:html={metaHtml} />
-    <Fragment set:html={getAntiFOUCScript()} />
+    <script is:inline set:html={getAntiFOUCScript()} />
     <Fragment set:html={getConsentModeScript()} />
-    <Fragment set:html={appSchema} />
-    <Fragment set:html={faqSchema} />
-    <Fragment set:html={breadcrumbSchema} />
+    <script type="application/ld+json" is:inline set:html={appSchema} />
+    <script type="application/ld+json" is:inline set:html={faqSchema} />
+    <script type="application/ld+json" is:inline set:html={breadcrumbSchema} />
     <style>
       .converter-hero {
         text-align: center;

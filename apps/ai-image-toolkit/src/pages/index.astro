@@ -218,6 +218,41 @@ const affiliateOffer = renderAffiliateCardHTML({
               </div>
             </div>
 
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div>
+                <label for="bg-color-select" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+                  Photo Background Color:
+                </label>
+                <select id="bg-color-select" class="suite-select" style="width: 100%; padding: 8px; font-size: 0.8125rem;">
+                  <option value="#ffffff" selected>Pure White (Standard)</option>
+                  <option value="#f8fafc">Off-White (#F8FAFC)</option>
+                  <option value="#dbeafe">Passport Light Blue (#DBEAFE)</option>
+                  <option value="#e2e8f0">Studio Neutral Gray (#E2E8F0)</option>
+                  <option value="#1d4ed8">Royal Blue (#1D4ED8)</option>
+                  <option value="#dc2626">Crimson Red (#DC2626)</option>
+                  <option value="transparent">Transparent / Original</option>
+                  <option value="custom">Custom Color...</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="replace-bg-mode" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+                  Background Mode:
+                </label>
+                <select id="replace-bg-mode" class="suite-select" style="width: 100%; padding: 8px; font-size: 0.8125rem;">
+                  <option value="fill" selected>Fill Behind Photo</option>
+                  <option value="replace">Color Key & Replace</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="custom-color-container" style="display: none;">
+              <label for="custom-color-input" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 4px;">
+                Custom Color Picker:
+              </label>
+              <input type="color" id="custom-color-input" value="#ffffff" style="width: 100%; height: 38px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm, 6px); background: var(--bg-surface); cursor: pointer; padding: 2px;" />
+            </div>
+
             <!-- Tiling Stats Badge -->
             <div id="tiling-summary" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm, 6px); padding: 10px 14px; font-size: 0.8125rem; color: var(--text-primary);">
               ✨ Sheet accommodates <strong>6 photos</strong> (2 columns &times; 3 rows) on 4x6" card.
@@ -457,12 +492,27 @@ const affiliateOffer = renderAffiliateCardHTML({
           const photoHPx = mmToPx(photoHMm, dpi);
           const tickPx = mmToPx(2, dpi);
 
+          const bgColorSelect = document.getElementById("bg-color-select");
+          const customColorInput = document.getElementById("custom-color-input");
+          const replaceBgMode = document.getElementById("replace-bg-mode");
+
+          let activeBgColor = bgColorSelect ? bgColorSelect.value : "#ffffff";
+          if (activeBgColor === "custom" && customColorInput) {
+            activeBgColor = customColorInput.value;
+          }
+          const isChromaKey = replaceBgMode && replaceBgMode.value === "replace" && activeBgColor !== "transparent";
+
           for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
               const xMm = startXmm + c * (photoWMm + spacingMm);
               const yMm = startYmm + r * (photoHMm + spacingMm);
               const xPx = mmToPx(xMm, dpi);
               const yPx = mmToPx(yMm, dpi);
+
+              if (activeBgColor !== "transparent") {
+                ctx.fillStyle = activeBgColor;
+                ctx.fillRect(xPx, yPx, photoWPx, photoHPx);
+              }
 
               if (loadedImage) {
                 // Center-crop loaded image to photo aspect ratio
@@ -478,7 +528,43 @@ const affiliateOffer = renderAffiliateCardHTML({
                   sy = Math.round((loadedImage.height - sh) / 2);
                 }
 
-                ctx.drawImage(loadedImage, sx, sy, sw, sh, xPx, yPx, photoWPx, photoHPx);
+                if (isChromaKey) {
+                  const tmpCanvas = document.createElement("canvas");
+                  tmpCanvas.width = photoWPx;
+                  tmpCanvas.height = photoHPx;
+                  const tctx = tmpCanvas.getContext("2d");
+                  tctx.drawImage(loadedImage, sx, sy, sw, sh, 0, 0, photoWPx, photoHPx);
+                  const imgData = tctx.getImageData(0, 0, photoWPx, photoHPx);
+                  const d = imgData.data;
+
+                  const keyR = (d[0] + d[(photoWPx - 1) * 4]) / 2;
+                  const keyG = (d[1] + d[(photoWPx - 1) * 4 + 1]) / 2;
+                  const keyB = (d[2] + d[(photoWPx - 1) * 4 + 2]) / 2;
+
+                  let tr = 255, tg = 255, tb = 255;
+                  if (activeBgColor.startsWith("#")) {
+                    const hex = activeBgColor.replace("#", "");
+                    tr = parseInt(hex.substring(0, 2), 16);
+                    tg = parseInt(hex.substring(2, 4), 16);
+                    tb = parseInt(hex.substring(4, 6), 16);
+                  }
+
+                  for (let i = 0; i < d.length; i += 4) {
+                    const dr = d[i] - keyR;
+                    const dg = d[i + 1] - keyG;
+                    const db = d[i + 2] - keyB;
+                    const dist = Math.sqrt(dr * dr + dg * dg + db * db);
+                    if (dist < 55) {
+                      d[i] = tr;
+                      d[i + 1] = tg;
+                      d[i + 2] = tb;
+                    }
+                  }
+                  tctx.putImageData(imgData, 0, 0);
+                  ctx.drawImage(tmpCanvas, xPx, yPx);
+                } else {
+                  ctx.drawImage(loadedImage, sx, sy, sw, sh, xPx, yPx, photoWPx, photoHPx);
+                }
               } else {
                 // Placeholder preview outline
                 ctx.fillStyle = "#f1f5f9";
@@ -523,6 +609,22 @@ const affiliateOffer = renderAffiliateCardHTML({
         [paperSelect, photoSizePreset, dpiSelect, orientationSelect, guidesToggle].forEach(el => {
           if (el) el.addEventListener("change", renderTilingCanvas);
         });
+
+        const bgSelect = document.getElementById("bg-color-select");
+        const customColInp = document.getElementById("custom-color-input");
+        const replMode = document.getElementById("replace-bg-mode");
+        const customColWrap = document.getElementById("custom-color-container");
+
+        if (bgSelect) {
+          bgSelect.addEventListener("change", () => {
+            if (customColWrap) {
+              customColWrap.style.display = bgSelect.value === "custom" ? "block" : "none";
+            }
+            renderTilingCanvas();
+          });
+        }
+        if (customColInp) customColInp.addEventListener("input", renderTilingCanvas);
+        if (replMode) replMode.addEventListener("change", renderTilingCanvas);
 
         // Download Sheet Action
         if (downloadPrintBtn) {
