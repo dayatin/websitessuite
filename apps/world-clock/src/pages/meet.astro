@@ -201,10 +201,11 @@ const affiliateOffer = renderAffiliateCardHTML({
               {chatTags.discordFull}
             </code>
             <button
+              id="copy-discord-btn"
               type="button"
               class="suite-btn-secondary"
               style="width: 100%; font-size: 0.75rem; padding: 6px;"
-              onclick={`navigator.clipboard.writeText("${chatTags.discordFull}"); alert("Copied Discord tag!");`}
+              data-text={chatTags.discordFull}
             >
               📋 Copy Discord Tag
             </button>
@@ -219,10 +220,11 @@ const affiliateOffer = renderAffiliateCardHTML({
               {chatTags.slackDate}
             </code>
             <button
+              id="copy-slack-btn"
               type="button"
               class="suite-btn-secondary"
               style="width: 100%; font-size: 0.75rem; padding: 6px;"
-              onclick={`navigator.clipboard.writeText('${chatTags.slackDate.replace(/'/g, "\\'")}'); alert("Copied Slack date token!");`}
+              data-text={chatTags.slackDate}
             >
               📋 Copy Slack Token
             </button>
@@ -240,10 +242,10 @@ const affiliateOffer = renderAffiliateCardHTML({
               style="width: 100%; background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 6px 8px; border-radius: 4px; font-size: 0.75rem; margin-bottom: 8px;"
             />
             <button
+              id="copy-link-btn"
               type="button"
               class="suite-btn-secondary"
               style="width: 100%; font-size: 0.75rem; padding: 6px;"
-              onclick={`navigator.clipboard.writeText(window.location.href); alert("Copied link to clipboard!");`}
             >
               🔗 Copy Shareable Link
             </button>
@@ -293,6 +295,26 @@ const affiliateOffer = renderAffiliateCardHTML({
 
         updateCountdown();
         setInterval(updateCountdown, 1000);
+
+        function handleCopy(btnId, getText) {
+          const btn = document.getElementById(btnId);
+          if (!btn) return;
+          btn.addEventListener("click", () => {
+            const text = typeof getText === "function" ? getText() : btn.getAttribute("data-text");
+            if (!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+              const orig = btn.textContent;
+              btn.textContent = "✅ Copied!";
+              setTimeout(() => {
+                btn.textContent = orig;
+              }, 2000);
+            });
+          });
+        }
+
+        handleCopy("copy-discord-btn");
+        handleCopy("copy-slack-btn");
+        handleCopy("copy-link-btn", () => window.location.href);
       })();
     </script>
   </body>

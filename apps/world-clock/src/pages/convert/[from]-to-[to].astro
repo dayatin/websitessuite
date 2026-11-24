@@ -101,7 +101,7 @@ const affiliateOffer = renderAffiliateCardHTML({
             <strong style="color: var(--text-primary);">{offsetSummary}</strong>
           </div>
           <a
-            href={`/meet?title=${encodeURIComponent(`Meeting: ${route.fromSlug.toUpperCase()} and ${route.toSlug.toUpperCase()}`)}`}
+            href={`/meet?title=${encodeURIComponent(`Meeting: ${route.fromSlug.toUpperCase()} and ${route.toSlug.toUpperCase()}`)}&host=${route.fromSlug}&cities=${route.toSlug}`}
             class="suite-btn-primary"
             style="font-size: 0.8125rem; padding: 6px 14px; text-decoration: none;"
           >

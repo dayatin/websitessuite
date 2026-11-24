@@ -7,7 +7,7 @@ import { WORLD_CITIES } from "../lib/time-engine.ts";
 
 const siteTitle = "ChronoSpatial: World Clock, Precision Timezone Converter & Meeting Planner";
 const canonicalUrl = Astro.site ? new URL("", Astro.site).href : "https://world-clock.suite.local/";
-const description = "Compare timezones across world cities with an interactive world clock grid, direct timezone converter, and synchronized 24-hour meeting overlap planner.";
+const description = "Real-time world clocks with visual time-of-day sky atmospheres, precision timezone converter, and 24-hour meeting overlap planner across global timezones.";
 
 const metaHtml = renderMetaTags({
   title: siteTitle,
@@ -74,7 +74,7 @@ const popularPills = [
     <script type="application/ld+json" is:inline set:html={appSchema} />
     <style>
       .app-tab-btn {
-        padding: 10px 20px;
+        padding: 12px 22px;
         font-weight: 600;
         font-size: 0.9375rem;
         border: none;
@@ -85,7 +85,7 @@ const popularPills = [
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        transition: all 0.15s ease;
+        transition: all 0.2s ease;
       }
       .app-tab-btn:hover {
         color: var(--text-primary);
@@ -98,25 +98,99 @@ const popularPills = [
       }
       .world-clock-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
         gap: 1.25rem;
         margin-bottom: 2rem;
       }
       .clock-card {
         background: var(--bg-surface);
         border: 1px solid var(--border-subtle);
-        border-radius: var(--radius-md, 8px);
-        padding: 1.25rem;
+        border-radius: var(--radius-md, 10px);
+        overflow: hidden;
         position: relative;
-        transition: border-color 0.15s ease, transform 0.15s ease;
+        transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        flex-direction: column;
       }
       .clock-card:hover {
         border-color: var(--accent-primary);
         transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
       }
       .clock-card.is-base-city {
         border-color: var(--accent-primary);
-        box-shadow: 0 0 0 1px var(--accent-primary);
+        box-shadow: 0 0 0 2px var(--accent-primary);
+      }
+      .clock-card.highlight-pulse {
+        animation: cardPulse 1.2s ease-in-out;
+      }
+      @keyframes cardPulse {
+        0%, 100% { outline: none; }
+        50% { outline: 3px solid #10b981; outline-offset: 2px; }
+      }
+      .sky-window {
+        height: 64px;
+        position: relative;
+        padding: 8px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #ffffff;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+        transition: background 0.8s ease;
+      }
+      .solar-track-bar {
+        height: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 9999px;
+        position: relative;
+        margin-top: 6px;
+      }
+      .solar-track-needle {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #ffffff;
+        position: absolute;
+        top: -3px;
+        transform: translateX(-50%);
+        box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+      }
+      .analog-dial {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 2px solid var(--border-subtle);
+        background: var(--bg-surface);
+        position: relative;
+        flex-shrink: 0;
+      }
+      .analog-hand {
+        position: absolute;
+        bottom: 50%;
+        left: 50%;
+        transform-origin: bottom center;
+        border-radius: 2px;
+      }
+      .analog-hour {
+        width: 3px;
+        height: 12px;
+        background: var(--text-primary);
+      }
+      .analog-minute {
+        width: 2px;
+        height: 16px;
+        background: var(--accent-primary);
+      }
+      .analog-center {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--text-primary);
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
       }
       .matrix-table-wrapper {
         overflow-x: auto;
@@ -128,10 +202,10 @@ const popularPills = [
         width: 100%;
         border-collapse: collapse;
         font-size: 0.8125rem;
-        min-width: 900px;
+        min-width: 950px;
       }
       .matrix-table th, .matrix-table td {
-        padding: 6px 4px;
+        padding: 8px 4px;
         text-align: center;
         border-right: 1px solid var(--border-subtle);
         border-bottom: 1px solid var(--border-subtle);
@@ -142,29 +216,32 @@ const popularPills = [
         background: var(--bg-surface);
         z-index: 5;
         text-align: left;
-        padding-left: 12px;
-        min-width: 190px;
+        padding-left: 14px;
+        min-width: 200px;
         font-weight: 600;
+        box-shadow: 2px 0 6px rgba(0,0,0,0.15);
       }
       .matrix-cell {
-        height: 32px;
+        height: 34px;
         font-weight: 700;
         font-size: 0.75rem;
         cursor: pointer;
         user-select: none;
-        transition: filter 0.1s ease;
+        transition: filter 0.1s ease, transform 0.1s ease;
       }
       .matrix-cell:hover {
         filter: brightness(1.3);
+        transform: scale(1.05);
       }
       .matrix-cell.is-selected {
         outline: 2px solid var(--accent-primary);
         outline-offset: -2px;
+        font-weight: 900;
         z-index: 2;
       }
       .hub-pill {
         font-size: 0.8125rem;
-        padding: 4px 10px;
+        padding: 5px 12px;
         border-radius: 9999px;
         border: 1px solid var(--border-subtle);
         background: var(--bg-surface);
@@ -172,13 +249,28 @@ const popularPills = [
         cursor: pointer;
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
         transition: all 0.15s ease;
       }
       .hub-pill:hover {
         border-color: var(--accent-primary);
         color: var(--text-primary);
         transform: translateY(-1px);
+      }
+      .preset-chip {
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-surface);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .preset-chip:hover {
+        border-color: var(--accent-primary);
+        color: var(--text-primary);
       }
       .legend-dot {
         width: 10px;
@@ -189,17 +281,26 @@ const popularPills = [
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ siteTitle: "ChronoSpatial", navItems: [{ label: "World Clock", href: "/" }, { label: "Meeting Planner", href: "/meet" }, { label: "Time in London", href: "/time-in/london" }, { label: "About", href: "/about" }] })} />
+    <Fragment set:html={renderHeaderHTML({
+      siteTitle: "ChronoSpatial",
+      navItems: [
+        { label: "World Clock", href: "/#clocks" },
+        { label: "Timezone Converter", href: "/#converter" },
+        { label: "Meeting Planner", href: "/#matrix" },
+        { label: "Schedule Sync", href: "/meet" },
+        { label: "About", href: "/about" },
+      ]
+    })} />
 
     <main class="suite-container" style="flex: 1; padding-block: 2rem; max-width: 1200px;">
       <!-- Hero Header -->
       <section style="text-align: center; margin-bottom: 1.5rem;">
-        <span class="suite-badge" style="margin-bottom: 8px;">🌐 Precision IANA Time & Solar Engine</span>
+        <span class="suite-badge" style="margin-bottom: 8px;">🌐 Precision IANA Time & Solar Visuals</span>
         <h1 style="font-size: 2.25rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px;">
-          ChronoSpatial World Clock & Timezone Converter
+          ChronoSpatial World Clock & Timezone Suite
         </h1>
-        <p style="font-size: 1rem; color: var(--text-secondary); max-width: 700px; margin-inline: auto;">
-          Synchronize global teams with real-time world clocks, pairwise and multi-city timezone conversions, and an interactive 24-hour meeting overlap planner.
+        <p style="font-size: 1rem; color: var(--text-secondary); max-width: 720px; margin-inline: auto;">
+          Real-time world clocks with visual time-of-day skies, interactive instant timezone conversions, and an intelligent 24-hour meeting overlap matrix.
         </p>
       </section>
 
@@ -221,11 +322,11 @@ const popularPills = [
         </button>
       </nav>
 
-      <!-- Quick Add Popular Cities & Control Bar -->
+      <!-- Global Controls & City Adder Bar -->
       <section class="suite-card" style="padding: 1.25rem; margin-bottom: 1.75rem;">
         <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: space-between; margin-bottom: 10px;">
           <!-- City Dropdown Adder -->
-          <div style="display: flex; gap: 8px; flex: 1; min-width: 280px;">
+          <div style="display: flex; gap: 8px; flex: 1; min-width: 290px;">
             <select id="city-selector" class="suite-select" style="flex: 1; padding: 8px 12px; font-size: 0.875rem;">
               <option value="">➕ Select a city to add...</option>
               {WORLD_CITIES.map((c) => (
@@ -248,7 +349,7 @@ const popularPills = [
               🔄 Reset Cities
             </button>
             <button id="reset-time-btn" type="button" class="suite-btn-secondary" style="font-size: 0.8125rem; padding: 6px 12px;">
-              ⚡ Live Time
+              ⚡ Live Sync
             </button>
           </div>
         </div>
@@ -265,13 +366,13 @@ const popularPills = [
         </div>
       </section>
 
-      <!-- TAB 1: World Clock Grid View -->
+      <!-- TAB 1: World Clock Grid View with Sky Atmospheres -->
       <section id="panel-clocks" class="tab-panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 8px;">
           <div>
-            <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0;">Pinned World Clocks</h2>
+            <h2 style="font-size: 1.35rem; font-weight: 700; margin: 0;">Pinned World Clocks</h2>
             <p style="font-size: 0.8125rem; color: var(--text-secondary); margin-top: 2px;">
-              Live time across your pinned locations. Click <strong>"Set as Reference"</strong> on any city to calculate relative differences.
+              Live visual skies, analog dials, and digital times across your cities. Click <strong>"Set as Reference"</strong> on any card to compare offsets.
             </p>
           </div>
           <span id="clocks-count-badge" class="suite-badge" style="font-size: 0.75rem;">
@@ -289,15 +390,15 @@ const popularPills = [
         <div class="suite-card" style="padding: 1.75rem; margin-bottom: 2rem; border-top: 4px solid var(--accent-primary);">
           <div style="margin-bottom: 1.25rem;">
             <h2 style="font-size: 1.375rem; font-weight: 800; margin: 0 0 6px 0;">
-              Precision Timezone Converter
+              Interactive Timezone Converter
             </h2>
             <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0;">
-              Select any origin time and city to calculate exact local times, date shifts, and working windows across all destinations.
+              Pick an origin time and destination to calculate exact corresponding local times, date shifts, and working overlap hours.
             </p>
           </div>
 
           <!-- Interactive Input Form -->
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; background: var(--bg-surface-hover, rgba(255,255,255,0.02)); padding: 1.25rem; border-radius: var(--radius-sm, 6px); border: 1px solid var(--border-subtle);">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; background: var(--bg-surface-hover, rgba(255,255,255,0.02)); padding: 1.25rem; border-radius: var(--radius-sm, 6px); border: 1px solid var(--border-subtle);">
             <div>
               <label for="conv-date-input" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">
                 📅 Date
@@ -326,9 +427,14 @@ const popularPills = [
             </div>
 
             <div>
-              <label for="conv-to-city" style="display: block; font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">
-                🎯 Target Location
-              </label>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label for="conv-to-city" style="font-size: 0.8125rem; font-weight: 600; color: var(--text-secondary);">
+                  🎯 Target Location
+                </label>
+                <button id="conv-swap-btn" type="button" class="preset-chip" style="padding: 2px 8px; font-size: 0.6875rem;" title="Swap Origin and Target cities">
+                  ⇄ Swap
+                </button>
+              </div>
               <select id="conv-to-city" class="suite-select" style="width: 100%; padding: 8px 12px; font-size: 0.875rem;">
                 <option value="ALL">🌐 All Pinned Cities</option>
                 {WORLD_CITIES.map((c) => (
@@ -340,22 +446,37 @@ const popularPills = [
             </div>
           </div>
 
-          <!-- Live Conversion Hero Banner -->
-          <div id="conv-hero-banner" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-sm, 6px); padding: 1.25rem; margin-bottom: 1.5rem;">
-            <div style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #10b981; margin-bottom: 4px;">
-              Conversion Result
+          <!-- Time Presets Bar -->
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem;">
+            <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted);">Quick Time:</span>
+            <button type="button" class="preset-chip conv-preset-btn" data-time="now">⚡ Current Time</button>
+            <button type="button" class="preset-chip conv-preset-btn" data-time="09:00">🌅 9:00 AM (Start of Work)</button>
+            <button type="button" class="preset-chip conv-preset-btn" data-time="12:00">☀️ 12:00 PM (Noon)</button>
+            <button type="button" class="preset-chip conv-preset-btn" data-time="15:00">☕ 3:00 PM (Afternoon)</button>
+            <button type="button" class="preset-chip conv-preset-btn" data-time="18:00">🌇 6:00 PM (End of Work)</button>
+          </div>
+
+          <!-- Live Conversion Visual Hero Card -->
+          <div id="conv-hero-banner" style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md, 8px); padding: 1.5rem; margin-bottom: 1.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 6px;">
+              <span style="font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #10b981;">
+                Instant Conversion
+              </span>
+              <span id="conv-diff-badge" class="suite-badge" style="font-size: 0.75rem;">
+                Calculated
+              </span>
             </div>
-            <div id="conv-hero-text" style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">
+            <div id="conv-hero-text" style="font-size: 1.75rem; font-weight: 800; color: var(--text-primary); margin-bottom: 6px; line-height: 1.25;">
               <!-- Dynamically populated -->
             </div>
-            <div id="conv-hero-sub" style="font-size: 0.875rem; color: var(--text-secondary);">
+            <div id="conv-hero-sub" style="font-size: 0.9375rem; color: var(--text-secondary);">
               <!-- Dynamically populated -->
             </div>
           </div>
 
           <!-- Multi-City Converted Table -->
           <div style="margin-bottom: 1.5rem;">
-            <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem;">
+            <h3 style="font-size: 1.0625rem; font-weight: 700; margin-bottom: 0.75rem;">
               Corresponding Times Across Pinned Cities
             </h3>
             <div style="overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm, 6px);">
@@ -397,7 +518,7 @@ const popularPills = [
                 24-Hour Global Meeting Overlap Matrix
               </h2>
               <p style="font-size: 0.8125rem; color: var(--text-secondary); margin-top: 2px;">
-                Synchronized hour-by-hour comparison grid. Click any hour column or drag the slider to preview working overlaps.
+                Click any hour column or drag the slider to preview working overlaps across all locations.
               </p>
             </div>
 
@@ -499,7 +620,14 @@ const popularPills = [
       </section>
     </main>
 
-    <Fragment set:html={renderFooterHTML({ authorName: "ChronoSpatial Team", currentYear: 2026, privacyUrl: "/privacy-policy", termsUrl: "/terms-of-service", editorialUrl: "/editorial-policy", contactUrl: "/contact" })} />
+    <Fragment set:html={renderFooterHTML({
+      authorName: "ChronoSpatial Team",
+      currentYear: 2026,
+      privacyUrl: "/privacy-policy",
+      termsUrl: "/terms-of-service",
+      editorialUrl: "/editorial-policy",
+      contactUrl: "/contact",
+    })} />
     <Fragment set:html={renderConsentBannerHTML()} />
 
     <!-- Client-Side Real-Time Engine Script -->
@@ -514,7 +642,6 @@ const popularPills = [
 
         const citiesMap = new Map(WORLD_CITIES.map((c) => [c.id, c]));
 
-        // Ensure base city exists in map
         if (!citiesMap.has(baseCityId)) {
           baseCityId = pinnedCityIds[0] || "london";
         }
@@ -550,16 +677,20 @@ const popularPills = [
         const convTimeInput = document.getElementById("conv-time-input");
         const convFromCity = document.getElementById("conv-from-city");
         const convToCity = document.getElementById("conv-to-city");
+        const convSwapBtn = document.getElementById("conv-swap-btn");
         const convHeroText = document.getElementById("conv-hero-text");
         const convHeroSub = document.getElementById("conv-hero-sub");
+        const convDiffBadge = document.getElementById("conv-diff-badge");
         const convTableBody = document.getElementById("conv-table-body");
         const convCopyBtn = document.getElementById("conv-copy-btn");
         const convShareBtn = document.getElementById("conv-share-btn");
 
-        // Set default date to today
+        // Set default date & target city
         if (convDateInput) {
-          const nowIso = new Date().toISOString().split("T")[0];
-          convDateInput.value = nowIso;
+          convDateInput.value = new Date().toISOString().split("T")[0];
+        }
+        if (convToCity && convToCity.value === "ALL" && pinnedCityIds.length > 1) {
+          convToCity.value = pinnedCityIds[1] || "london";
         }
 
         function saveState() {
@@ -632,20 +763,97 @@ const popularPills = [
         }
 
         function getStatusColor(status) {
-          if (status === "work") return { bg: "rgba(16, 185, 129, 0.25)", fg: "#10b981", label: "Work Hours" };
-          if (status === "awake") return { bg: "rgba(245, 158, 11, 0.2)", fg: "#f59e0b", label: "Awake / Extended" };
-          return { bg: "rgba(100, 116, 139, 0.15)", fg: "#94a3b8", label: "Sleep / Off-Hours" };
+          if (status === "work") return { bg: "rgba(16, 185, 129, 0.25)", fg: "#10b981", label: "Work Hours (9-18)" };
+          if (status === "awake") return { bg: "rgba(245, 158, 11, 0.2)", fg: "#f59e0b", label: "Awake (8-9, 18-22)" };
+          return { bg: "rgba(100, 116, 139, 0.15)", fg: "#94a3b8", label: "Sleep (22-8)" };
+        }
+
+        /**
+         * Returns atmospheric visual sky data (colors, icon, label, celestial position)
+         */
+        function getSkyAtmosphere(h, m) {
+          const frac = h + m / 60;
+          const progressPercent = Math.min(100, Math.max(0, (frac / 24) * 100));
+
+          if (frac >= 22.5 || frac < 4.5) {
+            return {
+              bg: "linear-gradient(135deg, #070b19 0%, #11172e 60%, #1b2446 100%)",
+              icon: "🌙",
+              label: "Deep Night",
+              atmosphere: "Starry Night • Rest Period",
+              progressPercent,
+              isDay: false,
+            };
+          }
+          if (frac >= 4.5 && frac < 7.0) {
+            return {
+              bg: "linear-gradient(135deg, #2c1654 0%, #6d214f 35%, #b33939 65%, #f39c12 100%)",
+              icon: "🌅",
+              label: "Dawn & Sunrise",
+              atmosphere: "Morning Twilight • Sun Rising",
+              progressPercent,
+              isDay: true,
+            };
+          }
+          if (frac >= 7.0 && frac < 11.0) {
+            return {
+              bg: "linear-gradient(135deg, #1b62a5 0%, #3498db 50%, #74b9ff 100%)",
+              icon: "🌤️",
+              label: "Morning Daylight",
+              atmosphere: "Fresh Morning • Active Hours",
+              progressPercent,
+              isDay: true,
+            };
+          }
+          if (frac >= 11.0 && frac < 16.0) {
+            return {
+              bg: "linear-gradient(135deg, #0984e3 0%, #00cec9 100%)",
+              icon: "☀️",
+              label: "Midday Sun",
+              atmosphere: "Peak Sun • Zenith Daylight",
+              progressPercent,
+              isDay: true,
+            };
+          }
+          if (frac >= 16.0 && frac < 18.5) {
+            return {
+              bg: "linear-gradient(135deg, #d35400 0%, #e67e22 45%, #f1c40f 100%)",
+              icon: "🌤️",
+              label: "Golden Hour",
+              atmosphere: "Warm Afternoon Glow",
+              progressPercent,
+              isDay: true,
+            };
+          }
+          if (frac >= 18.5 && frac < 20.5) {
+            return {
+              bg: "linear-gradient(135deg, #1e0034 0%, #8e44ad 40%, #e74c3c 75%, #f39c12 100%)",
+              icon: "🌆",
+              label: "Sunset Twilight",
+              atmosphere: "Dusk • Sun Below Horizon",
+              progressPercent,
+              isDay: false,
+            };
+          }
+          return {
+            bg: "linear-gradient(135deg, #0b132b 0%, #1c2541 60%, #3a506b 100%)",
+            icon: "🌃",
+            label: "Evening Dusk",
+            atmosphere: "Nightfall • Evening Leisure",
+            progressPercent,
+            isDay: false,
+          };
         }
 
         function switchTab(tab) {
           activeTab = tab;
-          tabClocksBtn.classList.toggle("is-active", tab === "clocks");
-          tabConverterBtn.classList.toggle("is-active", tab === "converter");
-          tabMatrixBtn.classList.toggle("is-active", tab === "matrix");
+          tabClocksBtn?.classList.toggle("is-active", tab === "clocks");
+          tabConverterBtn?.classList.toggle("is-active", tab === "converter");
+          tabMatrixBtn?.classList.toggle("is-active", tab === "matrix");
 
-          panelClocks.style.display = tab === "clocks" ? "block" : "none";
-          panelConverter.style.display = tab === "converter" ? "block" : "none";
-          panelMatrix.style.display = tab === "matrix" ? "block" : "none";
+          if (panelClocks) panelClocks.style.display = tab === "clocks" ? "block" : "none";
+          if (panelConverter) panelConverter.style.display = tab === "converter" ? "block" : "none";
+          if (panelMatrix) panelMatrix.style.display = tab === "matrix" ? "block" : "none";
 
           if (tab === "clocks") renderWorldClocks();
           else if (tab === "converter") renderConverter();
@@ -681,9 +889,10 @@ const popularPills = [
             const info = getCityTimeInfo(targetDate, city.timezone);
             const status = classifyHour(info.hours);
             const statusStyle = getStatusColor(status);
+            const sky = getSkyAtmosphere(info.hours, info.minutes);
             const isBase = city.id === baseCity.id;
 
-            // Calculate diff from base city
+            // Diff calculation
             const diffMinutes = info.utcOffsetMinutes - baseInfo.utcOffsetMinutes;
             const diffHours = diffMinutes / 60;
             let diffLabel = "";
@@ -697,58 +906,100 @@ const popularPills = [
               diffLabel = `${sign}${hrsFormatted} hrs vs ${baseCity.name}`;
             }
 
-            const isDay = info.hours >= 6 && info.hours < 18;
-            const dayIcon = isDay ? "☀️ Daytime" : "🌙 Night";
+            // Analog angles
+            const hourAngle = ((info.hours % 12) + info.minutes / 60) * 30;
+            const minuteAngle = (info.minutes + info.seconds / 60) * 6;
 
             const card = document.createElement("article");
             card.className = `clock-card ${isBase ? "is-base-city" : ""}`;
+            card.id = `clock-card-${city.id}`;
 
             card.innerHTML = `
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+              <!-- Visual Sky Atmosphere Window -->
+              <div class="sky-window" style="background: ${sky.bg};">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 1.75rem;">${sky.icon}</span>
+                  <div>
+                    <div style="font-weight: 800; font-size: 0.875rem; letter-spacing: -0.01em;">${sky.label}</div>
+                    <div style="font-size: 0.6875rem; opacity: 0.9;">${sky.atmosphere}</div>
+                  </div>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-size: 0.75rem; font-weight: 700; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">
+                    ${city.flag} ${city.name}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Solar 24H Daylight Arc Tracker -->
+              <div style="padding: 0 14px; background: rgba(0,0,0,0.1);">
+                <div class="solar-track-bar" title="Solar 24H Cycle: ${sky.progressPercent.toFixed(0)}% through the day">
+                  <div class="solar-track-needle" style="left: ${sky.progressPercent}%;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.625rem; color: var(--text-muted); padding-block: 4px;">
+                  <span>00:00 (Night)</span>
+                  <span>06:00 (Dawn)</span>
+                  <span>12:00 (Noon)</span>
+                  <span>18:00 (Sunset)</span>
+                  <span>24:00</span>
+                </div>
+              </div>
+
+              <!-- Card Body -->
+              <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
-                  <div style="display: flex; align-items: center; gap: 6px;">
-                    <span style="font-size: 1.35rem;">${city.flag}</span>
-                    <h3 style="font-size: 1.125rem; font-weight: 700; margin: 0;">${city.name}</h3>
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 6px;">
+                        <h3 style="font-size: 1.25rem; font-weight: 700; margin: 0;">${city.name}</h3>
+                        <span style="font-size: 0.8125rem; color: var(--text-muted);">${city.country}</span>
+                      </div>
+                      <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+                        ${info.abbr} &bull; ${info.formattedUtcOffset}
+                      </div>
+                    </div>
+                    <button class="suite-btn-secondary remove-city-btn" data-id="${city.id}" style="font-size: 0.6875rem; padding: 2px 8px;" title="Remove ${city.name}">
+                      ✕
+                    </button>
                   </div>
-                  <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
-                    ${city.country} &bull; ${info.abbr} (${info.formattedUtcOffset})
+
+                  <!-- Center Visual Time Display (Analog Dial + Digital Time) -->
+                  <div style="display: flex; align-items: center; gap: 14px; margin-block: 10px;">
+                    <div class="analog-dial" title="Analog position for ${city.name}">
+                      <div class="analog-hand analog-hour" style="transform: rotate(${hourAngle}deg);"></div>
+                      <div class="analog-hand analog-minute" style="transform: rotate(${minuteAngle}deg);"></div>
+                      <div class="analog-center"></div>
+                    </div>
+                    <div>
+                      <div class="clock-digital-time" style="font-size: 1.875rem; font-weight: 800; font-family: monospace; letter-spacing: -0.02em; color: var(--text-primary); line-height: 1;">
+                        ${is24Hour ? info.formattedTime24 : info.formattedTime12}
+                      </div>
+                      <div class="clock-date-str" style="font-size: 0.8125rem; color: var(--text-secondary); margin-top: 4px;">
+                        📅 ${info.formattedDate}
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <button class="suite-btn-secondary remove-city-btn" data-id="${city.id}" style="font-size: 0.6875rem; padding: 2px 6px;" title="Remove ${city.name}">
-                  ✕
-                </button>
-              </div>
 
-              <!-- Time display -->
-              <div style="margin-block: 10px;">
-                <div style="font-size: 1.875rem; font-weight: 800; font-family: monospace; letter-spacing: -0.02em; color: var(--text-primary); line-height: 1;">
-                  ${is24Hour ? info.formattedTime24 : info.formattedTime12}
+                <!-- Footer Badges and Actions -->
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; padding-top: 10px; border-top: 1px solid var(--border-subtle); font-size: 0.75rem;">
+                    <span style="color: ${statusStyle.fg}; font-weight: 700;">
+                      ● ${statusStyle.label}
+                    </span>
+                    <span class="suite-badge" style="font-size: 0.6875rem;">
+                      ${diffLabel}
+                    </span>
+                  </div>
+
+                  <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 10px;">
+                    ${
+                      isBase
+                        ? '<span style="color: var(--accent-primary); font-weight: 700; font-size: 0.75rem;">★ Active Reference</span>'
+                        : `<button class="set-base-btn suite-btn-secondary" data-id="${city.id}" style="font-size: 0.6875rem; padding: 4px 10px;">Set as Reference</button>`
+                    }
+                  </div>
                 </div>
-                <div style="font-size: 0.8125rem; color: var(--text-secondary); margin-top: 6px;">
-                  📅 ${info.formattedDate}
-                </div>
-              </div>
-
-              <!-- Badges & Indicators -->
-              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; padding-top: 10px; border-top: 1px solid var(--border-subtle); font-size: 0.75rem;">
-                <span style="color: ${statusStyle.fg}; font-weight: 600;">
-                  ● ${statusStyle.label}
-                </span>
-                <span style="color: var(--text-muted);">
-                  ${dayIcon}
-                </span>
-              </div>
-
-              <!-- Relative Diff & Set as Base -->
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.75rem;">
-                <span class="suite-badge" style="font-size: 0.6875rem;">
-                  ${diffLabel}
-                </span>
-                ${
-                  isBase
-                    ? '<span style="color: var(--accent-primary); font-weight: 700;">★ Active Reference</span>'
-                    : `<button class="set-base-btn suite-btn-secondary" data-id="${city.id}" style="font-size: 0.6875rem; padding: 2px 8px;">Set as Reference</button>`
-                }
               </div>
             `;
 
@@ -777,6 +1028,47 @@ const popularPills = [
           });
         }
 
+        /**
+         * Smooth 1-second in-place update WITHOUT wiping innerHTML or destroying DOM listeners
+         */
+        function updateClockTimesInPlace() {
+          if (!worldClocksContainer || activeTab !== "clocks") return;
+
+          const now = new Date();
+          const targetDate = isLive
+            ? now
+            : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), scrubbedUtcHour, 0, 0));
+
+          pinnedCityIds.forEach((id) => {
+            const city = citiesMap.get(id);
+            if (!city) return;
+
+            const card = document.getElementById(`clock-card-${city.id}`);
+            if (!card) return;
+
+            const info = getCityTimeInfo(targetDate, city.timezone);
+            const digitalEl = card.querySelector(".clock-digital-time");
+            const dateEl = card.querySelector(".clock-date-str");
+
+            if (digitalEl) {
+              digitalEl.textContent = is24Hour ? info.formattedTime24 : info.formattedTime12;
+            }
+            if (dateEl) {
+              dateEl.textContent = `📅 ${info.formattedDate}`;
+            }
+
+            // Update analog dial
+            const hourHand = card.querySelector(".analog-hour");
+            const minuteHand = card.querySelector(".analog-minute");
+            if (hourHand && minuteHand) {
+              const hourAngle = ((info.hours % 12) + info.minutes / 60) * 30;
+              const minuteAngle = (info.minutes + info.seconds / 60) * 6;
+              hourHand.style.transform = `rotate(${hourAngle}deg)`;
+              minuteHand.style.transform = `rotate(${minuteAngle}deg)`;
+            }
+          });
+        }
+
         // ==========================================
         // TAB 2: TIMEZONE CONVERTER LOGIC
         // ==========================================
@@ -790,20 +1082,23 @@ const popularPills = [
           const parsedMins = Number.parseInt(minsStr || "0", 10);
 
           const fromCity = citiesMap.get(convFromCity.value) || citiesMap.get("new-york") || WORLD_CITIES[0];
-          const toCityId = convToCity.value;
+          let toCityId = convToCity.value;
+
+          // If toCityId is fromCity, pick another sensible city
+          if (toCityId === fromCity.id) {
+            toCityId = pinnedCityIds.find((cid) => cid !== fromCity.id) || "london";
+            convToCity.value = toCityId;
+          }
 
           // Compute absolute origin date in fromCity timezone
-          // Parse as date string
           const [y, mo, d] = dateVal.split("-").map((v) => Number.parseInt(v, 10));
-
-          // Estimate UTC epoch by constructing local ISO and adjusting for timezone offset
           const fakeUtc = new Date(Date.UTC(y, mo - 1, d, parsedHours, parsedMins, 0));
           const probeInfo = getCityTimeInfo(fakeUtc, fromCity.timezone);
           const originUtcEpoch = fakeUtc.getTime() - probeInfo.utcOffsetMinutes * 60000;
           const originDate = new Date(originUtcEpoch);
 
-          // Hero Result
           const fromInfo = getCityTimeInfo(originDate, fromCity.timezone);
+          const fTime = is24Hour ? fromInfo.formattedTime24 : fromInfo.formattedTime12;
 
           if (toCityId !== "ALL" && citiesMap.has(toCityId)) {
             const targetCity = citiesMap.get(toCityId);
@@ -812,23 +1107,30 @@ const popularPills = [
             const diffHours = diffMin / 60;
             const sign = diffHours >= 0 ? "+" : "";
             const diffStr = diffMin === 0 ? "same time" : `${sign}${diffHours} hrs`;
-
-            const fTime = is24Hour ? fromInfo.formattedTime24 : fromInfo.formattedTime12;
             const tTime = is24Hour ? targetInfo.formattedTime24 : targetInfo.formattedTime12;
 
             if (convHeroText) {
-              convHeroText.textContent = `${fTime} in ${fromCity.name} = ${tTime} in ${targetCity.name}`;
+              convHeroText.innerHTML = `
+                <span>${fTime}</span> in <strong style="color: var(--accent-primary);">${fromCity.flag} ${fromCity.name}</strong>
+                <span style="margin-inline: 8px; color: var(--text-muted);">&rarr;</span>
+                <span>${tTime}</span> in <strong style="color: #10b981;">${targetCity.flag} ${targetCity.name}</strong>
+              `;
             }
             if (convHeroSub) {
-              convHeroSub.textContent = `Time difference: ${targetCity.name} is ${diffStr} compared to ${fromCity.name}. (Dates: ${fromInfo.formattedDate} ➔ ${targetInfo.formattedDate})`;
+              convHeroSub.textContent = `${targetCity.name} is ${diffStr} relative to ${fromCity.name}. Origin date: ${fromInfo.formattedDate} ➔ Destination date: ${targetInfo.formattedDate}.`;
+            }
+            if (convDiffBadge) {
+              convDiffBadge.textContent = diffMin === 0 ? "Simultaneous" : `${sign}${diffHours} Hours Shift`;
             }
           } else {
-            const fTime = is24Hour ? fromInfo.formattedTime24 : fromInfo.formattedTime12;
             if (convHeroText) {
-              convHeroText.textContent = `${fTime} in ${fromCity.name} (${fromInfo.abbr})`;
+              convHeroText.innerHTML = `<span>${fTime}</span> in <strong style="color: var(--accent-primary);">${fromCity.flag} ${fromCity.name}</strong> (${fromInfo.abbr})`;
             }
             if (convHeroSub) {
-              convHeroSub.textContent = `Showing synchronized conversion across all ${pinnedCityIds.length} pinned locations for ${fromInfo.formattedDate}.`;
+              convHeroSub.textContent = `Displaying synchronized local times across all ${pinnedCityIds.length} pinned locations for ${fromInfo.formattedDate}.`;
+            }
+            if (convDiffBadge) {
+              convDiffBadge.textContent = "All Cities Overview";
             }
           }
 
@@ -848,7 +1150,7 @@ const popularPills = [
               const sign = diffHours > 0 ? "+" : "";
               const diffLabel =
                 city.id === fromCity.id
-                  ? "Origin City"
+                  ? "📍 Origin Location"
                   : diffMin === 0
                     ? "Same time"
                     : `${sign}${diffHours} hrs vs Origin`;
@@ -857,6 +1159,8 @@ const popularPills = [
               row.style.borderBottom = "1px solid var(--border-subtle)";
               if (city.id === fromCity.id) {
                 row.style.background = "rgba(16, 185, 129, 0.08)";
+              } else if (city.id === toCityId) {
+                row.style.background = "rgba(99, 102, 241, 0.08)";
               }
 
               row.innerHTML = `
@@ -864,7 +1168,7 @@ const popularPills = [
                   ${city.flag} ${city.name}
                   <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 4px;">(${cInfo.abbr})</span>
                 </td>
-                <td style="padding: 10px 14px; font-weight: 700; font-family: monospace; font-size: 1rem;">
+                <td style="padding: 10px 14px; font-weight: 700; font-family: monospace; font-size: 1.0625rem;">
                   ${is24Hour ? cInfo.formattedTime24 : cInfo.formattedTime12}
                 </td>
                 <td style="padding: 10px 14px; color: var(--text-secondary);">
@@ -874,7 +1178,7 @@ const popularPills = [
                   <span class="suite-badge" style="font-size: 0.75rem;">${diffLabel}</span>
                 </td>
                 <td style="padding: 10px 14px;">
-                  <span style="color: ${cStyle.fg}; font-weight: 600; font-size: 0.75rem;">
+                  <span style="color: ${cStyle.fg}; font-weight: 700; font-size: 0.75rem;">
                     ● ${cStyle.label}
                   </span>
                 </td>
@@ -921,7 +1225,7 @@ const popularPills = [
                 <td
                   class="matrix-cell ${isSelected ? "is-selected" : ""}"
                   style="background: ${slotStyle.bg}; color: ${slotStyle.fg};"
-                  title="UTC ${hUtc}:00 -> ${city.name}: ${slotInfo.hours}:00 (${slotStatus})"
+                  title="UTC ${hUtc}:00 &bull; ${city.name}: ${slotInfo.hours}:00 (${slotStatus})"
                   data-utc="${hUtc}"
                 >
                   ${hourDisplay}
@@ -957,12 +1261,16 @@ const popularPills = [
             });
           });
 
-          // Update meeting planner href
+          // Update meeting planner href with fully compliant schema parameters
           if (planMeetingLink) {
+            const meetingDate = new Date(
+              Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), scrubbedUtcHour, 0, 0),
+            );
             const params = new URLSearchParams();
             params.set("host", pinnedCityIds[0] || "london");
-            params.set("participants", pinnedCityIds.join(","));
-            params.set("utcHour", scrubbedUtcHour.toString());
+            params.set("cities", pinnedCityIds.join(","));
+            params.set("start", meetingDate.toISOString());
+            params.set("title", "Global Team Sync");
             planMeetingLink.href = `/meet?${params.toString()}`;
           }
         }
@@ -1054,7 +1362,7 @@ const popularPills = [
         }
 
         // ==========================================
-        // EVENT HANDLERS
+        // EVENT HANDLERS & LISTENERS
         // ==========================================
         tabClocksBtn?.addEventListener("click", () => switchTab("clocks"));
         tabConverterBtn?.addEventListener("click", () => switchTab("converter"));
@@ -1102,11 +1410,21 @@ const popularPills = [
         }
 
         function addCity(id) {
-          if (id && !pinnedCityIds.includes(id)) {
+          if (!id) return;
+          if (!pinnedCityIds.includes(id)) {
             pinnedCityIds.push(id);
             saveState();
             renderAll();
           }
+          // Highlight card
+          setTimeout(() => {
+            const card = document.getElementById(`clock-card-${id}`);
+            if (card) {
+              card.scrollIntoView({ behavior: "smooth", block: "center" });
+              card.classList.add("highlight-pulse");
+              setTimeout(() => card.classList.remove("highlight-pulse"), 1500);
+            }
+          }, 100);
         }
 
         if (addCityBtn && citySelector) {
@@ -1129,12 +1447,41 @@ const popularPills = [
           el?.addEventListener("input", renderConverter);
         });
 
+        // Preset Time buttons
+        document.querySelectorAll(".conv-preset-btn").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            const presetTime = e.currentTarget.getAttribute("data-time");
+            if (presetTime === "now") {
+              const now = new Date();
+              const h = now.getHours().toString().padStart(2, "0");
+              const m = now.getMinutes().toString().padStart(2, "0");
+              if (convTimeInput) convTimeInput.value = `${h}:${m}`;
+            } else if (convTimeInput) {
+              convTimeInput.value = presetTime;
+            }
+            renderConverter();
+          });
+        });
+
+        // Swap button
+        if (convSwapBtn && convFromCity && convToCity) {
+          convSwapBtn.addEventListener("click", () => {
+            const fromVal = convFromCity.value;
+            const toVal = convToCity.value;
+            if (toVal !== "ALL") {
+              convFromCity.value = toVal;
+              convToCity.value = fromVal;
+              renderConverter();
+            }
+          });
+        }
+
         if (convCopyBtn) {
           convCopyBtn.addEventListener("click", () => {
             const originCity = citiesMap.get(convFromCity.value) || WORLD_CITIES[0];
             const timeVal = convTimeInput.value;
             const dateVal = convDateInput.value;
-            let summaryText = `Timezone Conversion from ${originCity.name} at ${timeVal} on ${dateVal}:\n\n`;
+            let summaryText = `Timezone Conversion from ${originCity.flag} ${originCity.name} at ${timeVal} on ${dateVal}:\n\n`;
 
             const [y, mo, d] = dateVal.split("-").map((v) => Number.parseInt(v, 10));
             const [hStr, mStr] = timeVal.split(":");
@@ -1164,6 +1511,7 @@ const popularPills = [
           convShareBtn.addEventListener("click", () => {
             const url = new URL(window.location.href);
             url.searchParams.set("from", convFromCity.value);
+            url.searchParams.set("to", convToCity.value);
             url.searchParams.set("time", convTimeInput.value);
             url.searchParams.set("date", convDateInput.value);
             url.searchParams.set("tab", "converter");
@@ -1177,22 +1525,39 @@ const popularPills = [
           });
         }
 
-        // Initialize URL parameters if provided
+        // Initialize URL parameters and hash navigation
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has("tab")) {
-          switchTab(urlParams.get("tab"));
+        const hash = window.location.hash.replace("#", "");
+
+        if (hash === "converter" || urlParams.get("tab") === "converter") {
+          switchTab("converter");
+        } else if (hash === "matrix" || urlParams.get("tab") === "matrix") {
+          switchTab("matrix");
+        } else if (hash === "clocks" || urlParams.get("tab") === "clocks") {
+          switchTab("clocks");
         }
+
+        window.addEventListener("hashchange", () => {
+          const h = window.location.hash.replace("#", "");
+          if (h === "converter" || h === "matrix" || h === "clocks") {
+            switchTab(h);
+          }
+        });
+
         if (urlParams.has("from") && convFromCity) {
           convFromCity.value = urlParams.get("from");
+        }
+        if (urlParams.has("to") && convToCity) {
+          convToCity.value = urlParams.get("to");
         }
         if (urlParams.has("time") && convTimeInput) {
           convTimeInput.value = urlParams.get("time");
         }
 
-        // Real-time 1-second clock tick
+        // Real-time 1-second in-place tick (DOES NOT destroy DOM)
         setInterval(() => {
-          if (isLive && activeTab === "clocks") {
-            renderWorldClocks();
+          if (isLive) {
+            updateClockTimesInPlace();
           }
         }, 1000);
 

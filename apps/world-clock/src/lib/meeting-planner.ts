@@ -157,6 +157,7 @@ export function decodeMeetingFromQuery(params: URLSearchParams): MeetingDetails 
   const title = params.get("title") || "Global Team Sync";
   const desc = params.get("desc") || undefined;
   const startParam = params.get("start");
+  const utcHourParam = params.get("utcHour");
 
   let startTime = new Date();
   if (startParam) {
@@ -164,13 +165,21 @@ export function decodeMeetingFromQuery(params: URLSearchParams): MeetingDetails 
     if (!Number.isNaN(parsed.getTime())) {
       startTime = parsed;
     }
+  } else if (utcHourParam !== null) {
+    const h = Number.parseInt(utcHourParam, 10);
+    if (!Number.isNaN(h) && h >= 0 && h < 24) {
+      const now = new Date();
+      startTime = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), h, 0, 0),
+      );
+    }
   }
 
   const durParam = Number.parseInt(params.get("dur") || "45", 10);
   const durationMinutes = Number.isFinite(durParam) && durParam > 0 ? durParam : 45;
 
   const hostCityId = params.get("host") || "london";
-  const citiesParam = params.get("cities");
+  const citiesParam = params.get("cities") || params.get("participants");
   const participantCityIds = citiesParam
     ? citiesParam
         .split(",")
