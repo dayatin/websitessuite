@@ -1,4 +1,5 @@
 ---
+import "@suite/ui-theme/base.css";
 import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
 import { renderMetaTags, buildWebApplicationSchema } from "@suite/seo-core";
 import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
@@ -59,7 +60,6 @@ const defaultCityIds = ["london", "new-york", "san-francisco", "tokyo", "mumbai"
     <Fragment set:html={getConsentModeScript()} />
     <Fragment set:html={metaHtml} />
     <script type="application/ld+json" is:inline set:html={appSchema} />
-    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
     <style>
       .scrubber-track {
         display: grid;

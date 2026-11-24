@@ -1,4 +1,5 @@
 ---
+import "@suite/ui-theme/base.css";
 import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
 import { renderMetaTags, buildWebApplicationSchema } from "@suite/seo-core";
 import { renderAdSlotHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
@@ -32,7 +33,6 @@ const adSlot = renderAdSlotHTML({
     <script is:inline set:html={getAntiFOUCScript()} />
     <Fragment set:html={getConsentModeScript()} />
     <Fragment set:html={metaHtml} />
-    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
   </head>
   <body>
     <Fragment set:html={renderHeaderHTML({ siteTitle: "OmniLink", navItems: [{ label: "Home", href: "/" }, { label: "Unshorten", href: "/unshorten" }] })} />

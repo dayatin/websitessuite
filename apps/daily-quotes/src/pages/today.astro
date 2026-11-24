@@ -1,4 +1,5 @@
 ---
+import "@suite/ui-theme/base.css";
 import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
 import { renderMetaTags, buildQuotationSchema } from "@suite/seo-core";
 import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
@@ -55,7 +56,6 @@ const affiliateCard = renderAffiliateCardHTML({
     <Fragment set:html={getConsentModeScript()} />
     <Fragment set:html={metaHtml} />
     <script type="application/ld+json" is:inline set:html={quoteSchema} />
-    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
   </head>
   <body>
     <Fragment set:html={renderHeaderHTML({ siteTitle: "VerbaLogos", navItems: [{ label: "Today (#QOTD)", href: "/today" }, { label: "Wallpaper Studio", href: "/" }, { label: "Authors", href: "/" }, { label: "RSS Feed", href: "/feed.xml", external: true }] })} />

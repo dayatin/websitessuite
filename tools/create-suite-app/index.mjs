@@ -102,6 +102,7 @@ pages_build_output_dir = "./dist"
 
   // 5. src/pages/index.astro
   const indexAstro = `---
+import "@suite/ui-theme/base.css";
 import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
 import { renderMetaTags, buildWebApplicationSchema } from "@suite/seo-core";
 import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
@@ -164,7 +165,6 @@ const affiliateHtml = renderAffiliateCardHTML({
     <Fragment set:html={getConsentModeScript()} />
     <Fragment set:html={metaHtml} />
     <script type="application/ld+json" is:inline set:html={schemaJson} />
-    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
   </head>
   <body>
     <Fragment set:html={headerHtml} />
@@ -199,6 +199,7 @@ const affiliateHtml = renderAffiliateCardHTML({
 
   // 6. src/pages/privacy-policy.astro
   const privacyAstro = `---
+import "@suite/ui-theme/base.css";
 import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
 import { generatePrivacyPolicyHTML } from "@suite/compliance-pages";
 
@@ -214,6 +215,7 @@ const policyHtml = generatePrivacyPolicyHTML({
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Privacy Policy | {siteTitle}</title>
     <script is:inline set:html={getAntiFOUCScript()} />
   </head>
@@ -230,6 +232,7 @@ const policyHtml = generatePrivacyPolicyHTML({
 
   // 7. src/pages/terms-of-service.astro
   const termsAstro = `---
+import "@suite/ui-theme/base.css";
 import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
 import { generateTermsOfServiceHTML } from "@suite/compliance-pages";
 
@@ -244,6 +247,7 @@ const termsHtml = generateTermsOfServiceHTML({
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Terms of Service | {siteTitle}</title>
     <script is:inline set:html={getAntiFOUCScript()} />
   </head>
@@ -260,6 +264,7 @@ const termsHtml = generateTermsOfServiceHTML({
 
   // 8. src/pages/editorial-policy.astro
   const editorialAstro = `---
+import "@suite/ui-theme/base.css";
 import { generateEditorialPolicyHTML } from "@suite/compliance-pages";
 import { getAntiFOUCScript, renderFooterHTML, renderHeaderHTML } from "@suite/ui-theme";
 
@@ -274,6 +279,7 @@ const editorialHtml = generateEditorialPolicyHTML({
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Editorial Standards | {siteTitle}</title>
     <script is:inline set:html={getAntiFOUCScript()} />
   </head>
@@ -290,6 +296,7 @@ const editorialHtml = generateEditorialPolicyHTML({
 
   // 9. src/pages/about.astro & contact.astro
   const aboutAstro = `---
+import "@suite/ui-theme/base.css";
 import { generateAboutPageHTML } from "@suite/compliance-pages";
 import { getAntiFOUCScript, renderFooterHTML, renderHeaderHTML } from "@suite/ui-theme";
 
@@ -304,6 +311,7 @@ const aboutHtml = generateAboutPageHTML({
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>About Us | {siteTitle}</title>
     <script is:inline set:html={getAntiFOUCScript()} />
   </head>
@@ -319,6 +327,7 @@ const aboutHtml = generateAboutPageHTML({
   fs.writeFileSync(path.join(appDir, "src", "pages", "about.astro"), aboutAstro);
 
   const contactAstro = `---
+import "@suite/ui-theme/base.css";
 import { generateContactPageHTML } from "@suite/compliance-pages";
 import { getAntiFOUCScript, renderFooterHTML, renderHeaderHTML } from "@suite/ui-theme";
 
@@ -333,6 +342,7 @@ const contactHtml = generateContactPageHTML({
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Contact Support | {siteTitle}</title>
     <script is:inline set:html={getAntiFOUCScript()} />
   </head>

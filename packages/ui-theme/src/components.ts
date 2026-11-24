@@ -50,13 +50,35 @@ export function renderHeaderHTML(config?: HeaderConfig): string {
       </ul>
     </nav>
     <div class="suite-header-actions">
-      <button type="button" id="suite-theme-toggle" class="suite-btn-secondary suite-theme-btn" aria-label="Toggle visual theme" title="Switch Theme">
+      <button type="button" id="suite-theme-toggle" class="suite-theme-btn" aria-label="Toggle visual theme" title="Switch Theme">
         <span class="suite-theme-icon">🎨</span>
         <span class="suite-theme-label">Theme</span>
       </button>
     </div>
   </div>
 </header>
+<script is:inline>
+  (function() {
+    function wireThemeToggle() {
+      var btn = document.getElementById('suite-theme-toggle');
+      if (!btn || btn.__wired) return;
+      btn.__wired = true;
+      var themes = ['light-minimal', 'dark-oled', 'glass-aurora', 'cyberpunk-neon', 'a11y-contrast'];
+      btn.addEventListener('click', function() {
+        var current = document.documentElement.getAttribute('data-theme') || 'light-minimal';
+        var idx = themes.indexOf(current);
+        var next = themes[(idx + 1) % themes.length];
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('suite_active_theme', next); } catch (e) {}
+      });
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', wireThemeToggle);
+    } else {
+      wireThemeToggle();
+    }
+  })();
+</script>
   `.trim();
 }
 

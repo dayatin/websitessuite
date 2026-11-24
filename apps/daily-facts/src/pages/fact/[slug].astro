@@ -1,4 +1,5 @@
 ---
+import "@suite/ui-theme/base.css";
 import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
 import { renderMetaTags, buildClaimReviewSchema, buildBreadcrumbSchema } from "@suite/seo-core";
 import { renderAdSlotHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
@@ -63,7 +64,6 @@ const adSlot = renderAdSlotHTML({
     <Fragment set:html={metaHtml} />
     <script type="application/ld+json" is:inline set:html={claimSchema} />
     <script type="application/ld+json" is:inline set:html={breadcrumbs} />
-    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
   </head>
   <body>
     <Fragment set:html={renderHeaderHTML({ siteTitle: "FactSphere", navItems: [{ label: "Today", href: "/today" }, { label: "Categories", href: "/" }, { label: "RSS Feed", href: "/feed.xml", external: true }] })} />

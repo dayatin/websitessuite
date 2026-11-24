@@ -1,5 +1,6 @@
 ---
 import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui-theme";
+import "@suite/ui-theme/base.css";
 import { renderMetaTags, buildWebApplicationSchema } from "@suite/seo-core";
 import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
 import { PAPER_STANDARDS } from "../lib/print-layout.ts";
@@ -56,7 +57,6 @@ const affiliateOffer = renderAffiliateCardHTML({
     <Fragment set:html={getConsentModeScript()} />
     <Fragment set:html={metaHtml} />
     <script type="application/ld+json" is:inline set:html={appSchema} />
-    <link rel="stylesheet" href="/node_modules/@suite/ui-theme/src/styles/base.css" />
     <style>
       .studio-tab-btn {
         padding: 10px 18px;
