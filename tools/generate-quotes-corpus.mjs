@@ -392,6 +392,17 @@ const CORE_QUOTES = [
   },
 ];
 
+function getHistoricalEra(author) {
+  if (author.born_year.includes("BCE") || author.born_year.includes("CE")) {
+    return "ancient-classical";
+  }
+  const year = Number.parseInt(author.born_year, 10);
+  if (year < 1650) return "renaissance";
+  if (year < 1800) return "enlightenment";
+  if (year < 1900) return "19th-century";
+  return "modern";
+}
+
 function build1000Quotes() {
   const allQuotes = [];
   let id = 1;
@@ -407,15 +418,12 @@ function build1000Quotes() {
       id: id,
       slug: slug,
       quote_text: q.text,
-      character_count: q.text.length,
       author: author,
       work_title: q.work,
       mood_tags: q.moods,
       occasion_tags: q.occasions,
-      historical_era:
-        author.born_year.includes("BCE") || author.born_year.includes("CE")
-          ? "Classical Antiquity"
-          : "Modern Era",
+      historical_era: getHistoricalEra(author),
+      character_count: q.text.length,
       language: "en",
       day_of_year: ((id - 1) % 365) + 1,
     });
@@ -599,15 +607,12 @@ function build1000Quotes() {
       id: id,
       slug: slug,
       quote_text: `${theme.text}`,
-      character_count: theme.text.length,
       author: author,
       work_title: `Collected Works, Part ${Math.floor(id / 10) + 1}`,
       mood_tags: [...new Set([...theme.mood, mood])],
       occasion_tags: [...new Set([...theme.occ, occ])],
-      historical_era:
-        author.born_year.includes("BCE") || author.born_year.includes("CE")
-          ? "Classical Antiquity"
-          : "Modern Era",
+      historical_era: getHistoricalEra(author),
+      character_count: theme.text.length,
       language: "en",
       day_of_year: ((id - 1) % 365) + 1,
     });

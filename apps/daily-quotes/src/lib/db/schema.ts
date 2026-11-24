@@ -64,6 +64,7 @@ export interface QuoteRecord {
   mood_tags: string[];
   occasion_tags: string[];
   character_count: number;
+  language?: string;
   day_of_year: number; // 1 - 366
   share_count?: number;
   favorite_count?: number;

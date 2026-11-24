@@ -4,9 +4,8 @@ import { getAntiFOUCScript, renderHeaderHTML, renderFooterHTML } from "@suite/ui
 import { renderMetaTags, buildWebApplicationSchema, buildFAQSchema } from "@suite/seo-core";
 import { renderAdSlotHTML, renderAffiliateCardHTML, renderConsentBannerHTML, getConsentModeScript } from "@suite/monetization";
 import { QuoteCorpusLoader } from "../lib/corpus/loader.ts";
-import { MOODS, OCCASIONS } from "../lib/corpus/seed-quotes.ts";
+import { MOODS } from "../lib/corpus/seed-quotes.ts";
 import { EMOTION_MAP } from "../lib/mood-matcher.ts";
-import { WALLPAPER_DIMENSIONS } from "../lib/wallpaper-engine.ts";
 
 const loader = new QuoteCorpusLoader();
 const today = new Date();
@@ -460,7 +459,6 @@ const affiliateCard = renderAffiliateCardHTML({
       });
 
       // 3. Mood & Occasion Explorer
-      let activeMood = "all";
       let moodPool = allQuotes;
       let moodIdx = 0;
 
@@ -491,7 +489,6 @@ const affiliateCard = renderAffiliateCardHTML({
           pill.style.borderColor = "var(--border-strong)";
 
           const mood = pill.getAttribute("data-mood") || "all";
-          activeMood = mood;
           if (mood === "all") {
             moodPool = allQuotes;
           } else {
