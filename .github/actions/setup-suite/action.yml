@@ -5,7 +5,7 @@ inputs:
   node-version:
     description: "Node.js version to use"
     required: false
-    default: "20.x"
+    default: "22.x"
 
 runs:
   using: "composite"
@@ -41,3 +41,7 @@ runs:
     - name: Add node_modules/.bin to PATH
       shell: bash
       run: echo "${{ github.workspace }}/node_modules/.bin" >> $GITHUB_PATH
+
+    - name: Configure Node flags for TypeScript execution
+      shell: bash
+      run: echo "NODE_OPTIONS=--experimental-strip-types --no-warnings" >> $GITHUB_ENV
