@@ -18,6 +18,10 @@ export class QuoteCorpusLoader {
     return OCCASIONS;
   }
 
+  getAllQuotes(): QuoteRecord[] {
+    return this.quotes;
+  }
+
   getAllAuthors(): AuthorRecord[] {
     return Object.values(this.authors);
   }

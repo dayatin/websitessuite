@@ -207,7 +207,7 @@ const affiliateOffer = renderAffiliateCardHTML({
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ currentPath: "/" })} />
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "DevWorkbench", navItems: [{ label: "All Tools", href: "/#tools" }, { label: "JWT Debugger", href: "/tools/jwt-debugger" }, { label: "JSON Formatter", href: "/tools/json-formatter" }, { label: "Hash Generator", href: "/tools/hash-generator" }, { label: "UUID Generator", href: "/tools/uuid-generator" }, { label: "About", href: "/about" }] })} />
 
     <main class="container">
       <section class="hero-section">
@@ -282,7 +282,7 @@ const affiliateOffer = renderAffiliateCardHTML({
       </div>
     </main>
 
-    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderFooterHTML({ siteTitle: "DevWorkbench", tagline: "Developer utilities and formatters with client-side privacy." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
   </body>
 </html>

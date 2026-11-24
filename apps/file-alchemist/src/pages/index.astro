@@ -191,7 +191,7 @@ const affiliateOffer = renderAffiliateCardHTML({
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ currentPath: "/" })} />
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "FileAlchemist", navItems: [{ label: "Converters", href: "/#converters" }, { label: "CSV to JSON", href: "/convert/csv-to-json" }, { label: "JSON to CSV", href: "/convert/json-to-csv" }, { label: "SVG to PNG", href: "/convert/svg-to-png" }, { label: "About", href: "/about" }] })} />
 
     <main class="container">
       <section class="hero-section">
@@ -219,7 +219,7 @@ const affiliateOffer = renderAffiliateCardHTML({
       </section>
 
       <!-- Conversion Tools Catalog -->
-      <section id="tools">
+      <section id="converters">
         <h2 style="text-align: center; font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Transmutation Tools Catalog</h2>
         <p style="text-align: center; color: #64748b; margin-bottom: 2rem;">Instant client-side execution with zero subscription paywalls</p>
 
@@ -262,7 +262,7 @@ const affiliateOffer = renderAffiliateCardHTML({
       </div>
     </main>
 
-    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderFooterHTML({ siteTitle: "FileAlchemist", tagline: "Universal media and tabular data format transmutation suite." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
   </body>
 </html>

@@ -10,6 +10,7 @@ const loader = new FactCorpusLoader();
 const today = new Date();
 const todayFact = loader.getFactOfTheDay(today);
 const dailyQuiz = loader.getDailyQuiz(today, 5);
+const allFacts = loader.getAllFacts();
 
 const siteTitle = "FactSphere | Massive Verified Daily Fact Database & Fact or Myth Quiz";
 const canonicalUrl = Astro.site ? Astro.site.toString() : "https://daily-facts.suite.local/";
@@ -99,7 +100,7 @@ const affiliateCard = renderAffiliateCardHTML({
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ siteTitle: "FactSphere", navItems: [{ label: "Today's Fact", href: "/today" }, { label: "Categories", href: "/" }, { label: "RSS Feed", href: "/feed.xml", external: true }] })} />
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "FactSphere", navItems: [{ label: "Today's Fact", href: "/today" }, { label: "Categories", href: "/category/science" }, { label: "RSS Feed", href: "/feed.xml", external: true }] })} />
 
     <main class="suite-container" style="flex: 1; padding-block: 2.5rem;">
       <section style="text-align: center; margin-bottom: 2rem;">
@@ -265,8 +266,8 @@ const affiliateCard = renderAffiliateCardHTML({
     <Fragment set:html={renderFooterHTML({ siteTitle: "FactSphere", tagline: "Verified knowledge refreshed every 24 hours." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
 
-    <script is:inline>
-      // Tab switcher
+    <script is:inline define:vars={{ allFacts, dailyQuiz }}>
+      // 1. Tab switcher
       const tabs = document.querySelectorAll(".tab-btn");
       const panes = document.querySelectorAll(".tab-pane");
       tabs.forEach((tab) => {
@@ -279,14 +280,260 @@ const affiliateCard = renderAffiliateCardHTML({
         });
       });
 
+      // 2. Fact Explorer State & Category Filtering
+      let currentCategory = "all";
+      let pool = allFacts;
+      let currentIndex = 0;
+
+      function updateFactDisplay(fact) {
+        if (!fact) return;
+        const catBadge = document.getElementById("fact-cat-badge");
+        const readTime = document.getElementById("fact-read-time");
+        const headline = document.getElementById("fact-headline");
+        const details = document.getElementById("fact-details");
+        const sourceName = document.getElementById("fact-source-name");
+        const sourceLink = document.getElementById("fact-source-link");
+        const cardBox = document.getElementById("fact-card-box");
+
+        if (cardBox) {
+          cardBox.style.opacity = "0.4";
+          setTimeout(() => {
+            if (catBadge) catBadge.textContent = fact.category.toUpperCase() + (fact.subtopic ? " • " + fact.subtopic : "");
+            if (readTime) readTime.textContent = "⏱️ " + fact.reading_time_seconds + "s read";
+            if (headline) headline.textContent = '"' + fact.fact_text + '"';
+            if (details) details.textContent = fact.explanation;
+            if (sourceName) sourceName.textContent = fact.source_name;
+            if (sourceLink) {
+              sourceLink.href = fact.source_url;
+              sourceLink.textContent = "Verify Primary Source (" + fact.source_name + ") →";
+            }
+            cardBox.style.opacity = "1";
+          }, 120);
+        }
+
+        // Also update Social Card Preview
+        const socialCard = document.getElementById("social-card-preview");
+        if (socialCard) {
+          const badge = socialCard.querySelector("span");
+          const text = socialCard.querySelector("div:nth-child(2)");
+          const source = socialCard.querySelector("div:nth-child(3) div:first-child");
+          if (badge) badge.textContent = fact.category.toUpperCase();
+          if (text) text.textContent = '"' + fact.fact_text + '"';
+          if (source) source.textContent = "Verified by " + fact.source_name;
+        }
+      }
+
+      function filterCategory(cat) {
+        currentCategory = cat;
+        if (cat === "all") {
+          pool = allFacts;
+        } else {
+          pool = allFacts.filter((f) => f.category === cat);
+        }
+        currentIndex = 0;
+        updateFactDisplay(pool[0] || allFacts[0]);
+      }
+
+      // Wire Category Buttons
+      const catButtons = document.querySelectorAll(".cat-filter-btn");
+      catButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          catButtons.forEach((b) => {
+            b.classList.remove("active");
+            b.style.borderColor = "var(--border-subtle)";
+            b.style.background = "var(--bg-surface)";
+          });
+          btn.classList.add("active");
+          btn.style.borderColor = "var(--accent-primary)";
+          btn.style.background = "var(--bg-surface-elevated)";
+          const cat = btn.getAttribute("data-category") || "all";
+          filterCategory(cat);
+        });
+      });
+
+      // Next Fact Button
+      const nextBtn = document.getElementById("next-fact-btn");
+      if (nextBtn) {
+        nextBtn.addEventListener("click", () => {
+          if (!pool || pool.length === 0) pool = allFacts;
+          currentIndex = (currentIndex + 1) % pool.length;
+          updateFactDisplay(pool[currentIndex]);
+        });
+      }
+
       // Keyboard navigation for facts
       window.addEventListener("keydown", (e) => {
         if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
         if (e.code === "Space" || e.key === "j" || e.key === "J" || e.key === "ArrowRight") {
           e.preventDefault();
-          document.getElementById("next-fact-btn")?.click();
+          nextBtn?.click();
         }
       });
+
+      // 3. Quiz State & Interaction
+      let quizIndex = 0;
+      let quizScore = 0;
+      const quizBox = document.getElementById("quiz-question-box");
+
+      function renderQuizQuestion() {
+        if (!quizBox || !dailyQuiz || quizIndex >= dailyQuiz.length) {
+          showQuizSummary();
+          return;
+        }
+        const q = dailyQuiz[quizIndex];
+        const progress = document.getElementById("quiz-progress");
+        const statement = document.getElementById("quiz-statement");
+        const explanation = document.getElementById("quiz-explanation");
+
+        if (progress) progress.textContent = "Question " + (quizIndex + 1) + " of " + dailyQuiz.length;
+        if (statement) statement.textContent = '"' + q.question_text + '"';
+        if (explanation) {
+          explanation.style.display = "none";
+          explanation.innerHTML = "";
+        }
+
+        const answerBtns = document.querySelectorAll(".quiz-answer-btn");
+        answerBtns.forEach((btn) => {
+          btn.disabled = false;
+          btn.style.opacity = "1";
+          btn.style.cursor = "pointer";
+        });
+      }
+
+      function handleQuizAnswer(userGuess) {
+        if (!dailyQuiz || quizIndex >= dailyQuiz.length) return;
+        const q = dailyQuiz[quizIndex];
+        const isFact = q.is_fact;
+        const isCorrect = (userGuess === "fact" && isFact) || (userGuess === "myth" && !isFact);
+
+        if (isCorrect) quizScore++;
+
+        const answerBtns = document.querySelectorAll(".quiz-answer-btn");
+        answerBtns.forEach((btn) => {
+          btn.disabled = true;
+          btn.style.opacity = "0.6";
+          btn.style.cursor = "not-allowed";
+        });
+
+        const explanation = document.getElementById("quiz-explanation");
+        if (explanation) {
+          explanation.style.display = "block";
+          explanation.innerHTML = `
+            <div style="font-weight: 700; font-size: 1.1rem; color: ${isCorrect ? "#10b981" : "#ef4444"}; margin-bottom: 6px;">
+              ${isCorrect ? "✅ Correct!" : "❌ Not Quite!"} This is ${isFact ? "an AUTHENTIC FACT" : "a DEBUNKED MYTH"}.
+            </div>
+            <p style="margin-bottom: 12px; color: var(--text-secondary);">${q.explanation}</p>
+            <button type="button" id="next-quiz-q-btn" class="suite-btn-primary" style="padding: 8px 20px; font-size: 0.875rem;">
+              ${quizIndex + 1 < dailyQuiz.length ? "Next Question →" : "See Final Score 🏆"}
+            </button>
+          `;
+          document.getElementById("next-quiz-q-btn")?.addEventListener("click", () => {
+            quizIndex++;
+            renderQuizQuestion();
+          });
+        }
+      }
+
+      function showQuizSummary() {
+        if (!quizBox) return;
+        quizBox.innerHTML = `
+          <div style="padding: 1.5rem; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉</div>
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;">Daily Challenge Complete!</h3>
+            <p style="font-size: 1.125rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+              You scored <strong>${quizScore} / ${dailyQuiz.length}</strong> on today's Fact or Myth challenge!
+            </p>
+            <button type="button" id="restart-quiz-btn" class="suite-btn-primary" style="padding: 10px 24px;">
+              🔄 Play Again
+            </button>
+          </div>
+        `;
+        document.getElementById("restart-quiz-btn")?.addEventListener("click", () => {
+          quizIndex = 0;
+          quizScore = 0;
+          location.reload();
+        });
+      }
+
+      document.querySelectorAll(".quiz-answer-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const guess = btn.getAttribute("data-answer");
+          if (guess) handleQuizAnswer(guess);
+        });
+      });
+
+      // 4. Social Card Canvas Downloader
+      const downloadCardBtn = document.getElementById("download-card-btn");
+      if (downloadCardBtn) {
+        downloadCardBtn.addEventListener("click", () => {
+          const currentFact = pool[currentIndex] || allFacts[0];
+          if (!currentFact) return;
+
+          const canvas = document.createElement("canvas");
+          canvas.width = 1080;
+          canvas.height = 1080;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return;
+
+          // Background
+          const grad = ctx.createLinearGradient(0, 0, 1080, 1080);
+          grad.addColorStop(0, "#090d16");
+          grad.addColorStop(1, "#151b28");
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 1080, 1080);
+
+          // Card Border
+          ctx.strokeStyle = "#334155";
+          ctx.lineWidth = 6;
+          ctx.strokeRect(40, 40, 1000, 1000);
+
+          // Category Badge
+          ctx.fillStyle = "#6366f1";
+          ctx.font = "bold 28px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(currentFact.category.toUpperCase(), 540, 140);
+
+          // Fact Text (Auto-wrapped)
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 44px sans-serif";
+          ctx.textAlign = "center";
+
+          const words = ('"' + currentFact.fact_text + '"').split(" ");
+          let line = "";
+          let y = 380;
+          const maxWidth = 900;
+          const lineHeight = 60;
+
+          for (let n = 0; n < words.length; n++) {
+            const testLine = line + words[n] + " ";
+            const metrics = ctx.measureText(testLine);
+            if (metrics.width > maxWidth && n > 0) {
+              ctx.fillText(line, 540, y);
+              line = words[n] + " ";
+              y += lineHeight;
+            } else {
+              line = testLine;
+            }
+          }
+          ctx.fillText(line, 540, y);
+
+          // Attribution
+          ctx.fillStyle = "#94a3b8";
+          ctx.font = "30px sans-serif";
+          ctx.fillText("Verified by " + currentFact.source_name, 540, 880);
+
+          // Watermark
+          ctx.fillStyle = "#818cf8";
+          ctx.font = "bold 34px sans-serif";
+          ctx.fillText("FactSphere • Verified Daily Knowledge", 540, 950);
+
+          // Download trigger
+          const a = document.createElement("a");
+          a.download = "factsphere-" + currentFact.slug + ".png";
+          a.href = canvas.toDataURL("image/png");
+          a.click();
+        });
+      }
     </script>
   </body>
 </html>

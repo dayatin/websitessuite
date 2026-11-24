@@ -218,7 +218,7 @@ const affiliateOffer = renderAffiliateCardHTML({
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ currentPath: "/" })} />
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "PDF Forge", navItems: [{ label: "PDF Tools", href: "/#tools" }, { label: "Merge PDF", href: "/tools/merge-pdf" }, { label: "Split PDF", href: "/tools/split-pdf" }, { label: "Rotate PDF", href: "/tools/rotate-pdf" }, { label: "About", href: "/about" }] })} />
 
     <main class="container">
       <section class="hero-section">
@@ -289,7 +289,7 @@ const affiliateOffer = renderAffiliateCardHTML({
       </div>
     </main>
 
-    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderFooterHTML({ siteTitle: "PDF Forge", tagline: "Client-side PDF manipulation with zero cloud data transmission." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
   </body>
 </html>

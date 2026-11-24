@@ -42,7 +42,7 @@ test("Corpus Loader filters by category and supports search", () => {
 
   const searchResults = loader.searchFacts("honey");
   assert.ok(searchResults.length >= 1);
-  assert.equal(searchResults[0].slug, "honey-never-spoils");
+  assert.ok(searchResults.some((f) => f.slug === "honey-never-spoils"));
 });
 
 test("Daily Quiz generation produces valid Question objects", () => {

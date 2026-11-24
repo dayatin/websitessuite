@@ -189,7 +189,7 @@ const affiliateOffer = renderAffiliateCardHTML({
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ currentPath: `/tools/${tool.slug}` })} />
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "TextPulse", navItems: [{ label: "Text Tools", href: "/#tools" }, { label: "AI Token Counter", href: "/tools/ai-token-counter" }, { label: "Word Counter", href: "/tools/word-counter" }, { label: "Readability Analyzer", href: "/tools/readability-analyzer" }, { label: "About", href: "/about" }] })} />
 
     <main class="container">
       <section class="tool-hero">
@@ -246,7 +246,7 @@ const affiliateOffer = renderAffiliateCardHTML({
       </div>
     </main>
 
-    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderFooterHTML({ siteTitle: "TextPulse", tagline: "Linguistic text analysis and AI token estimation." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
   </body>
 </html>

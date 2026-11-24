@@ -155,7 +155,7 @@ const affiliateOffer = renderAffiliateCardHTML({
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ currentPath: `/convert/${pair.slug}` })} />
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "UnitAtlas", navItems: [{ label: "Converters", href: "/#converters" }, { label: "Meters to Feet", href: "/convert/meters-to-feet" }, { label: "Celsius to Fahrenheit", href: "/convert/celsius-to-fahrenheit" }, { label: "KG to Lbs", href: "/convert/kilograms-to-pounds" }, { label: "About", href: "/about" }] })} />
 
     <main class="container">
       <section class="converter-hero">
@@ -223,7 +223,7 @@ const affiliateOffer = renderAffiliateCardHTML({
       </div>
     </main>
 
-    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderFooterHTML({ siteTitle: "UnitAtlas", tagline: "Precision unit conversion matrices across international engineering systems." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
   </body>
 </html>

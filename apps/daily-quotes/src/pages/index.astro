@@ -11,6 +11,7 @@ import { WALLPAPER_DIMENSIONS } from "../lib/wallpaper-engine.ts";
 const loader = new QuoteCorpusLoader();
 const today = new Date();
 const todayQuote = loader.getQuoteOfTheDay(today);
+const allQuotes = loader.getAllQuotes();
 
 const siteTitle = "VerbaLogos | Massive Quote Database, 4K Wallpaper Studio & Stoic Wisdom";
 const canonicalUrl = Astro.site ? Astro.site.toString() : "https://daily-quotes.suite.local/";
@@ -100,7 +101,7 @@ const affiliateCard = renderAffiliateCardHTML({
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ siteTitle: "VerbaLogos", navItems: [{ label: "Today (#QOTD)", href: "/today" }, { label: "Wallpaper Studio", href: "/" }, { label: "Widget", href: "/widget.js", external: true }] })} />
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "VerbaLogos", navItems: [{ label: "Today (#QOTD)", href: "/today" }, { label: "Wallpaper Studio", href: "/" }, { label: "Wisdom Moods", href: "/mood/wisdom" }, { label: "Marcus Aurelius", href: "/author/marcus-aurelius" }, { label: "RSS Feed", href: "/feed.xml", external: true }] })} />
 
     <main class="suite-container" style="flex: 1; padding-block: 2.5rem;">
       <section style="text-align: center; margin-bottom: 2rem;">
@@ -152,8 +153,8 @@ const affiliateCard = renderAffiliateCardHTML({
 
           <!-- Live Preview Canvas Frame -->
           <div style="display: flex; justify-content: center; margin-bottom: 1.5rem; background: var(--bg-base); padding: 1.5rem; border-radius: 12px; border: 1px dashed var(--border-subtle);">
-            <div id="wp-preview-card" style="width: 100%; max-width: 440px; aspect-ratio: 9/16; background: #05070a; border-radius: 16px; padding: 2rem; display: flex; flex-direction: column; justify-content: center; text-align: center; border: 2px solid #1e293b; box-shadow: 0 10px 30px rgba(0,0,0,0.4); position: relative; transition: all 0.2s ease;">
-              <div style="font-size: 3rem; color: #6366f1; opacity: 0.35; font-serif; line-height: 1; margin-bottom: -0.5rem;">&ldquo;</div>
+            <div id="wp-preview-card" style="width: 100%; max-width: 360px; aspect-ratio: 9/16; background: #05070a; border-radius: 16px; padding: 2rem; display: flex; flex-direction: column; justify-content: center; text-align: center; border: 2px solid #1e293b; box-shadow: 0 10px 30px rgba(0,0,0,0.4); position: relative; transition: all 0.25s ease;">
+              <div id="wp-preview-glyph" style="font-size: 3rem; color: #6366f1; opacity: 0.35; font-family: Georgia, serif; line-height: 1; margin-bottom: -0.5rem;">&ldquo;</div>
               <blockquote id="wp-preview-text" style="font-size: 1.25rem; font-weight: 700; color: #ffffff; line-height: 1.45; font-style: italic; margin-bottom: 1.25rem;">
                 "{todayQuote.quote_text}"
               </blockquote>
@@ -163,9 +164,12 @@ const affiliateCard = renderAffiliateCardHTML({
             </div>
           </div>
 
-          <div style="display: flex; justify-content: center; gap: 12px;">
+          <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            <button type="button" id="shuffle-wp-quote-btn" class="suite-btn-secondary" style="padding: 10px 20px;">
+              🎲 New Random Quote
+            </button>
             <button type="button" id="download-wp-btn" class="suite-btn-primary" style="padding: 10px 26px;">
-              📥 Download Wallpaper (High-DPI Vector)
+              📥 Download Wallpaper (PNG)
             </button>
           </div>
         </div>
@@ -173,6 +177,9 @@ const affiliateCard = renderAffiliateCardHTML({
         <!-- TAB 2: Mood & Occasion Explorer -->
         <div id="tab-moods" class="tab-pane">
           <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem;">
+            <button type="button" class="suite-btn-secondary mood-pill-btn active" data-mood="all" style="font-size: 0.8125rem; min-height: 36px; padding: 4px 12px; background: var(--bg-surface-elevated); border-color: var(--border-strong);">
+              🌟 All Moods
+            </button>
             {MOODS.map((mood) => (
               <button type="button" class="suite-btn-secondary mood-pill-btn" data-mood={mood.slug} style="font-size: 0.8125rem; min-height: 36px; padding: 4px 12px;">
                 {mood.icon} {mood.label}
@@ -180,13 +187,16 @@ const affiliateCard = renderAffiliateCardHTML({
             ))}
           </div>
 
-          <div class="suite-card" style="padding: 2rem; background: var(--bg-base); margin-bottom: 1rem;">
+          <div class="suite-card" style="padding: 2rem; background: var(--bg-base); margin-bottom: 1rem; transition: opacity 0.15s ease;" id="explorer-card">
             <blockquote id="explorer-quote-text" style="font-size: 1.5rem; font-weight: 700; line-height: 1.4; font-style: italic; margin-bottom: 1.25rem;">
               "{todayQuote.quote_text}"
             </blockquote>
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 1rem;">
-              <div id="explorer-quote-author" style="font-weight: 600;">— {todayQuote.author.name} ({todayQuote.work_title || ""})</div>
-              <button type="button" id="next-quote-btn" class="suite-btn-primary" style="padding: 6px 16px; font-size: 0.875rem;">Next Quote &rarr;</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 1rem; flex-wrap: wrap; gap: 12px;">
+              <div id="explorer-quote-author" style="font-weight: 600;">— {todayQuote.author.name} {todayQuote.work_title ? `(${todayQuote.work_title})` : ""}</div>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" id="send-to-wallpaper-btn" class="suite-btn-secondary" style="padding: 6px 14px; font-size: 0.875rem;">🎨 Design as Wallpaper</button>
+                <button type="button" id="next-quote-btn" class="suite-btn-primary" style="padding: 6px 16px; font-size: 0.875rem;">Next Quote &rarr;</button>
+              </div>
             </div>
           </div>
         </div>
@@ -199,15 +209,15 @@ const affiliateCard = renderAffiliateCardHTML({
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 1.5rem;">
             {EMOTION_MAP.map((emotion) => (
-              <button type="button" class="suite-card emotion-select-btn" data-emotion={emotion.id} style="padding: 12px 14px; text-align: left; cursor: pointer; border: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 10px;">
+              <button type="button" class="suite-card emotion-select-btn" data-emotion={emotion.id} style="padding: 12px 14px; text-align: left; cursor: pointer; border: 1px solid var(--border-subtle); display: flex; align-items: center; gap: 10px; background: var(--bg-surface-elevated); transition: all 0.2s ease;">
                 <span style="font-size: 1.5rem;">{emotion.icon}</span>
                 <span style="font-weight: 600; font-size: 0.875rem;">{emotion.label}</span>
               </button>
             ))}
           </div>
 
-          <div id="matcher-result" style="display: none; padding: 1.5rem; background: var(--bg-base); border: 1px solid var(--border-strong); border-radius: 8px;">
-            <div id="matcher-prescription" style="font-size: 0.875rem; color: var(--accent-primary); font-weight: 600; margin-bottom: 8px;"></div>
+          <div id="matcher-result" style="display: none; padding: 1.5rem; background: var(--bg-base); border: 1px solid var(--border-strong); border-radius: 8px; transition: all 0.2s ease;">
+            <div id="matcher-prescription" style="font-size: 0.875rem; color: var(--accent-primary); font-weight: 700; margin-bottom: 10px;"></div>
             <blockquote id="matcher-quote-text" style="font-size: 1.25rem; font-weight: 700; font-style: italic; margin-bottom: 10px;"></blockquote>
             <div id="matcher-quote-author" style="font-size: 0.875rem; color: var(--text-muted); text-align: right;"></div>
           </div>
@@ -242,8 +252,8 @@ const affiliateCard = renderAffiliateCardHTML({
     <Fragment set:html={renderFooterHTML({ siteTitle: "VerbaLogos", tagline: "Classical wisdom and modern wallpaper design." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
 
-    <script is:inline>
-      // Tab switcher
+    <script is:inline define:vars={{ allQuotes, todayQuote, EMOTION_MAP }}>
+      // 1. Tab switcher
       const tabs = document.querySelectorAll(".tab-btn");
       const panes = document.querySelectorAll(".tab-pane");
       tabs.forEach((tab) => {
@@ -253,6 +263,288 @@ const affiliateCard = renderAffiliateCardHTML({
           tab.classList.add("active");
           const target = tab.getAttribute("data-tab");
           if (target) document.getElementById(target)?.classList.add("active");
+        });
+      });
+
+      // 2. Wallpaper Studio State & Theming
+      let activeWpQuote = todayQuote;
+      const THEMES = {
+        "glass-aurora": {
+          bg: "linear-gradient(135deg, #1a103c, #0b071a)",
+          border: "#4c1d95",
+          accent: "#ec4899",
+          textPrimary: "#ffffff",
+          textSecondary: "#c084fc",
+        },
+        "dark-oled": {
+          bg: "#05070a",
+          border: "#1e293b",
+          accent: "#6366f1",
+          textPrimary: "#ffffff",
+          textSecondary: "#94a3b8",
+        },
+        "cyberpunk-neon": {
+          bg: "linear-gradient(135deg, #0d0f1a, #05060a)",
+          border: "#00f0ff",
+          accent: "#00f0ff",
+          textPrimary: "#00f0ff",
+          textSecondary: "#ff007f",
+        },
+        "light-minimal": {
+          bg: "linear-gradient(135deg, #fafafa, #f4f4f5)",
+          border: "#e4e4e7",
+          accent: "#4f46e5",
+          textPrimary: "#18181b",
+          textSecondary: "#71717a",
+        },
+        "a11y-contrast": {
+          bg: "#000000",
+          border: "#ffffff",
+          accent: "#ffff00",
+          textPrimary: "#ffffff",
+          textSecondary: "#ffff00",
+        },
+      };
+
+      const DIMENSIONS = {
+        "phone-lockscreen": { w: 1080, h: 1920, maxW: "360px", ratio: "9/16" },
+        "instagram-square": { w: 1080, h: 1080, maxW: "460px", ratio: "1/1" },
+        "desktop-4k": { w: 1920, h: 1080, maxW: "640px", ratio: "16/9" },
+        "linkedin-banner": { w: 1200, h: 300, maxW: "720px", ratio: "4/1" },
+      };
+
+      const wpCard = document.getElementById("wp-preview-card");
+      const wpGlyph = document.getElementById("wp-preview-glyph");
+      const wpText = document.getElementById("wp-preview-text");
+      const wpAuthor = document.getElementById("wp-preview-author");
+      const wpFormatSelect = document.getElementById("wp-format");
+      const wpThemeSelect = document.getElementById("wp-theme");
+
+      function updateWallpaperPreview() {
+        if (!wpCard || !wpText || !wpAuthor) return;
+        const format = wpFormatSelect?.value || "phone-lockscreen";
+        const themeKey = wpThemeSelect?.value || "dark-oled";
+        const theme = THEMES[themeKey] || THEMES["dark-oled"];
+        const dim = DIMENSIONS[format] || DIMENSIONS["phone-lockscreen"];
+
+        wpCard.style.maxWidth = dim.maxW;
+        wpCard.style.aspectRatio = dim.ratio;
+        wpCard.style.background = theme.bg;
+        wpCard.style.borderColor = theme.border;
+
+        if (wpGlyph) wpGlyph.style.color = theme.accent;
+        wpText.style.color = theme.textPrimary;
+        wpAuthor.style.color = theme.textSecondary;
+
+        wpText.textContent = `"${activeWpQuote.quote_text}"`;
+        wpAuthor.textContent = `— ${activeWpQuote.author.name}`;
+      }
+
+      wpFormatSelect?.addEventListener("change", updateWallpaperPreview);
+      wpThemeSelect?.addEventListener("change", updateWallpaperPreview);
+
+      // Random Quote Shuffle in Wallpaper Studio
+      document.getElementById("shuffle-wp-quote-btn")?.addEventListener("click", () => {
+        const randIdx = Math.floor(Math.random() * allQuotes.length);
+        activeWpQuote = allQuotes[randIdx];
+        updateWallpaperPreview();
+      });
+
+      // Download Wallpaper via Canvas
+      document.getElementById("download-wp-btn")?.addEventListener("click", () => {
+        const format = wpFormatSelect?.value || "phone-lockscreen";
+        const themeKey = wpThemeSelect?.value || "dark-oled";
+        const theme = THEMES[themeKey] || THEMES["dark-oled"];
+        const dim = DIMENSIONS[format] || DIMENSIONS["phone-lockscreen"];
+
+        const canvas = document.createElement("canvas");
+        canvas.width = dim.w;
+        canvas.height = dim.h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        // Background
+        if (theme.bg.startsWith("linear-gradient")) {
+          const grad = ctx.createLinearGradient(0, 0, dim.w, dim.h);
+          if (themeKey === "glass-aurora") {
+            grad.addColorStop(0, "#1a103c");
+            grad.addColorStop(1, "#0b071a");
+          } else if (themeKey === "cyberpunk-neon") {
+            grad.addColorStop(0, "#0d0f1a");
+            grad.addColorStop(1, "#05060a");
+          } else if (themeKey === "light-minimal") {
+            grad.addColorStop(0, "#fafafa");
+            grad.addColorStop(1, "#f4f4f5");
+          }
+          ctx.fillStyle = grad;
+        } else {
+          ctx.fillStyle = theme.bg;
+        }
+        ctx.fillRect(0, 0, dim.w, dim.h);
+
+        // Ambient radial glow
+        const glowRad = Math.min(dim.w, dim.h) * 0.45;
+        const glowGrad = ctx.createRadialGradient(dim.w / 2, dim.h * 0.45, 10, dim.w / 2, dim.h * 0.45, glowRad);
+        glowGrad.addColorStop(0, theme.accent + "33");
+        glowGrad.addColorStop(1, "transparent");
+        ctx.fillStyle = glowGrad;
+        ctx.beginPath();
+        ctx.arc(dim.w / 2, dim.h * 0.45, glowRad, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Calculate typography
+        const fontSize = format === "desktop-4k" ? 64 : format === "linkedin-banner" ? 36 : format === "phone-lockscreen" ? 54 : 50;
+        ctx.font = `italic 700 ${fontSize}px system-ui, -apple-system, sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        const maxW = dim.w * 0.82;
+        const words = activeWpQuote.quote_text.split(" ");
+        const lines = [];
+        let currentLine = "";
+
+        for (let i = 0; i < words.length; i++) {
+          const testLine = currentLine ? currentLine + " " + words[i] : words[i];
+          const testW = ctx.measureText(testLine).width;
+          if (testW > maxW && currentLine) {
+            lines.push(currentLine);
+            currentLine = words[i];
+          } else {
+            currentLine = testLine;
+          }
+        }
+        if (currentLine) lines.push(currentLine);
+
+        const lineHeight = fontSize * 1.4;
+        const totalTextH = lines.length * lineHeight;
+        const startY = (dim.h / 2) - (totalTextH / 2) - 20;
+
+        // Quote mark glyph
+        ctx.font = `italic ${fontSize * 1.8}px Georgia, serif`;
+        ctx.fillStyle = theme.accent;
+        ctx.globalAlpha = 0.4;
+        ctx.fillText("“", dim.w / 2, startY - 30);
+        ctx.globalAlpha = 1.0;
+
+        // Lines
+        ctx.font = `italic 700 ${fontSize}px system-ui, -apple-system, sans-serif`;
+        ctx.fillStyle = theme.textPrimary;
+        lines.forEach((l, idx) => {
+          ctx.fillText('"' + l + (idx === lines.length - 1 ? '"' : ""), dim.w / 2, startY + (idx * lineHeight));
+        });
+
+        // Author
+        const authorY = startY + totalTextH + 40;
+        ctx.font = `600 ${Math.round(fontSize * 0.52)}px system-ui, sans-serif`;
+        ctx.fillStyle = theme.textSecondary;
+        ctx.fillText("— " + activeWpQuote.author.name.toUpperCase(), dim.w / 2, authorY);
+
+        if (activeWpQuote.work_title) {
+          ctx.font = `400 ${Math.round(fontSize * 0.38)}px system-ui, sans-serif`;
+          ctx.globalAlpha = 0.75;
+          ctx.fillText("(" + activeWpQuote.work_title + ")", dim.w / 2, authorY + 36);
+          ctx.globalAlpha = 1.0;
+        }
+
+        // Watermark
+        ctx.font = `600 ${Math.round(fontSize * 0.3)}px system-ui, sans-serif`;
+        ctx.fillStyle = theme.accent;
+        ctx.globalAlpha = 0.65;
+        ctx.fillText("VerbaLogos.suite", dim.w / 2, dim.h - 36);
+        ctx.globalAlpha = 1.0;
+
+        const link = document.createElement("a");
+        link.download = `verbalogos-${activeWpQuote.author.slug || "quote"}-${format}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      });
+
+      // 3. Mood & Occasion Explorer
+      let activeMood = "all";
+      let moodPool = allQuotes;
+      let moodIdx = 0;
+
+      const explorerCard = document.getElementById("explorer-card");
+      const explorerText = document.getElementById("explorer-quote-text");
+      const explorerAuthor = document.getElementById("explorer-quote-author");
+      const moodPills = document.querySelectorAll(".mood-pill-btn");
+
+      function updateMoodDisplay(quote) {
+        if (!quote || !explorerText || !explorerAuthor) return;
+        if (explorerCard) explorerCard.style.opacity = "0.3";
+        setTimeout(() => {
+          explorerText.textContent = `"${quote.quote_text}"`;
+          explorerAuthor.textContent = `— ${quote.author.name} ${quote.work_title ? `(${quote.work_title})` : ""}`;
+          if (explorerCard) explorerCard.style.opacity = "1";
+        }, 120);
+      }
+
+      moodPills.forEach((pill) => {
+        pill.addEventListener("click", () => {
+          moodPills.forEach((p) => {
+            p.classList.remove("active");
+            p.style.background = "";
+            p.style.borderColor = "";
+          });
+          pill.classList.add("active");
+          pill.style.background = "var(--bg-surface-elevated)";
+          pill.style.borderColor = "var(--border-strong)";
+
+          const mood = pill.getAttribute("data-mood") || "all";
+          activeMood = mood;
+          if (mood === "all") {
+            moodPool = allQuotes;
+          } else {
+            moodPool = allQuotes.filter((q) => q.mood_tags.includes(mood));
+            if (moodPool.length === 0) moodPool = allQuotes;
+          }
+          moodIdx = Math.floor(Math.random() * moodPool.length);
+          updateMoodDisplay(moodPool[moodIdx]);
+        });
+      });
+
+      document.getElementById("next-quote-btn")?.addEventListener("click", () => {
+        moodIdx = (moodIdx + 1) % moodPool.length;
+        updateMoodDisplay(moodPool[moodIdx]);
+      });
+
+      document.getElementById("send-to-wallpaper-btn")?.addEventListener("click", () => {
+        const currentQuote = moodPool[moodIdx] || todayQuote;
+        activeWpQuote = currentQuote;
+        updateWallpaperPreview();
+        // Switch to Wallpaper tab
+        document.querySelector('.tab-btn[data-tab="tab-wallpaper"]')?.click();
+      });
+
+      // 4. "How Do You Feel?" Mood Matcher
+      const emotionBtns = document.querySelectorAll(".emotion-select-btn");
+      const matcherResult = document.getElementById("matcher-result");
+      const matcherPrescription = document.getElementById("matcher-prescription");
+      const matcherQuoteText = document.getElementById("matcher-quote-text");
+      const matcherQuoteAuthor = document.getElementById("matcher-quote-author");
+
+      emotionBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          emotionBtns.forEach((b) => {
+            b.style.borderColor = "var(--border-subtle)";
+            b.style.background = "var(--bg-surface-elevated)";
+          });
+          btn.style.borderColor = "var(--accent-primary)";
+          btn.style.background = "var(--bg-surface-hover, var(--bg-surface-elevated))";
+
+          const emotionId = btn.getAttribute("data-emotion");
+          const emotion = EMOTION_MAP.find((e) => e.id === emotionId) || EMOTION_MAP[0];
+          const matchedQuotes = allQuotes.filter((q) => q.mood_tags.includes(emotion.mappedMood));
+          const chosenQuote = matchedQuotes.length > 0
+            ? matchedQuotes[Math.floor(Math.random() * matchedQuotes.length)]
+            : allQuotes[0];
+
+          if (matcherResult && matcherPrescription && matcherQuoteText && matcherQuoteAuthor) {
+            matcherResult.style.display = "block";
+            matcherPrescription.textContent = `💡 Prescription: ${emotion.prescription}`;
+            matcherQuoteText.textContent = `"${chosenQuote.quote_text}"`;
+            matcherQuoteAuthor.textContent = `— ${chosenQuote.author.name} ${chosenQuote.work_title ? `(${chosenQuote.work_title})` : ""}`;
+          }
         });
       });
     </script>

@@ -199,7 +199,7 @@ const affiliateOffer = renderAffiliateCardHTML({
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ currentPath: "/" })} />
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "FocusArcade", navItems: [{ label: "Arcade Modes", href: "/#modes" }, { label: "Deep Focus", href: "/play/deep-focus" }, { label: "Pomodoro Timer", href: "/play/pomodoro-timer" }, { label: "Binaural Beats", href: "/play/binaural-beats" }, { label: "About", href: "/about" }] })} />
 
     <main class="container">
       <section class="hero-section">
@@ -276,7 +276,7 @@ const affiliateOffer = renderAffiliateCardHTML({
       </div>
     </main>
 
-    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderFooterHTML({ siteTitle: "FocusArcade", tagline: "Cognitive endurance and spatial focus games for high performers." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
   </body>
 </html>

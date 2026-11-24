@@ -78,7 +78,7 @@ const affiliateOffer = renderAffiliateCardHTML({
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ siteTitle: "OmniCalc", navItems: [{ label: "Calculators", href: "/" }, { label: "Finance", href: "/#finance" }, { label: "Health", href: "/#health" }, { label: "About", href: "/about" }] })} />
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "OmniCalc", navItems: [{ label: "All Calculators", href: "/#calculators" }, { label: "Mortgage", href: "/calc/mortgage-payment" }, { label: "Compound Interest", href: "/calc/compound-interest" }, { label: "BMI", href: "/calc/bmi-calculator" }, { label: "About", href: "/about" }] })} />
 
     <main class="suite-container" style="flex: 1; padding-block: 2rem; max-width: 1050px;">
       <!-- Hero -->
@@ -151,7 +151,7 @@ const affiliateOffer = renderAffiliateCardHTML({
       </section>
 
       <!-- Calculator Catalog Grid -->
-      <section style="margin-bottom: 2.5rem;">
+      <section id="calculators" style="margin-bottom: 2.5rem;">
         <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.25rem;">
           Explore All Calculators ({CALCULATORS.length})
         </h2>

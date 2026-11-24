@@ -191,7 +191,7 @@ const dimensionList = Object.values(DIMENSIONS);
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ currentPath: "/" })} />
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "UnitAtlas", navItems: [{ label: "Converters", href: "/#converters" }, { label: "Meters to Feet", href: "/convert/meters-to-feet" }, { label: "Celsius to Fahrenheit", href: "/convert/celsius-to-fahrenheit" }, { label: "KG to Lbs", href: "/convert/kilograms-to-pounds" }, { label: "About", href: "/about" }] })} />
 
     <main class="container">
       <section class="hero-section">
@@ -245,7 +245,7 @@ const dimensionList = Object.values(DIMENSIONS);
       </section>
 
       <!-- Popular Conversions Matrix -->
-      <section id="conversions">
+      <section id="converters">
         <h2 style="text-align: center; font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem;">Popular Conversions Matrix</h2>
         <p style="text-align: center; color: #64748b; margin-bottom: 2rem;">Pre-calculated high-traffic pairwise conversion guides with full reference tables</p>
 
@@ -284,7 +284,7 @@ const dimensionList = Object.values(DIMENSIONS);
       </div>
     </main>
 
-    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderFooterHTML({ siteTitle: "UnitAtlas", tagline: "Precision unit conversion matrices across international engineering systems." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
   </body>
 </html>

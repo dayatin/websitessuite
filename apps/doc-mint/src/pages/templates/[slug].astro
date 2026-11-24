@@ -175,7 +175,7 @@ const affiliateOffer = renderAffiliateCardHTML({
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ currentPath: `/templates/${template.slug}` })} />
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "DocMint", navItems: [{ label: "Templates", href: "/#templates" }, { label: "Freelance Invoice", href: "/templates/freelance-invoice" }, { label: "Software Resume", href: "/templates/software-engineer-resume" }, { label: "Sales Receipt", href: "/templates/sales-receipt" }, { label: "About", href: "/about" }] })} />
 
     <main class="container">
       <section class="doc-hero">
@@ -244,7 +244,7 @@ const affiliateOffer = renderAffiliateCardHTML({
       </div>
     </main>
 
-    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderFooterHTML({ siteTitle: "DocMint", tagline: "Professional PDF document generators with instant client-side rendering." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
   </body>
 </html>

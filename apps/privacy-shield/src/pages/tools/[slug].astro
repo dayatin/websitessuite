@@ -163,7 +163,7 @@ const affiliateOffer = renderAffiliateCardHTML({
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ currentPath: `/tools/${tool.slug}` })} />
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "PrivacyShield", navItems: [{ label: "Auditors", href: "/#auditors" }, { label: "Fingerprint Test", href: "/tools/browser-fingerprint-test" }, { label: "WebRTC Leak", href: "/tools/webrtc-leak-test" }, { label: "Security Headers", href: "/tools/security-headers-checker" }, { label: "About", href: "/about" }] })} />
 
     <main class="container">
       <section class="tool-hero">
@@ -229,7 +229,7 @@ const affiliateOffer = renderAffiliateCardHTML({
       </div>
     </main>
 
-    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderFooterHTML({ siteTitle: "PrivacyShield", tagline: "Hardware sensor, WebRTC leak and browser fingerprint diagnostic tools." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
   </body>
 </html>

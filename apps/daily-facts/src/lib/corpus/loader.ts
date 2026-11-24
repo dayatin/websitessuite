@@ -12,6 +12,10 @@ export class FactCorpusLoader {
     return CATEGORIES;
   }
 
+  getAllFacts(): FactRecord[] {
+    return this.facts;
+  }
+
   getFactById(id: number): FactRecord | null {
     return this.facts.find((f) => f.id === id) || null;
   }

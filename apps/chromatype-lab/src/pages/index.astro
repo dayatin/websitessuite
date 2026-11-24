@@ -204,7 +204,7 @@ const affiliateOffer = renderAffiliateCardHTML({
     </style>
   </head>
   <body>
-    <Fragment set:html={renderHeaderHTML({ currentPath: "/" })} />
+    <Fragment set:html={renderHeaderHTML({ siteTitle: "ChromaType Lab", navItems: [{ label: "All Tools", href: "/#tools" }, { label: "OKLCH Picker", href: "/tools/oklch-color-picker" }, { label: "Contrast Checker", href: "/tools/contrast-checker" }, { label: "Fluid Type Scale", href: "/tools/fluid-type-scale" }, { label: "About", href: "/about" }] })} />
 
     <main class="container">
       <section class="hero-section">
@@ -274,7 +274,7 @@ const affiliateOffer = renderAffiliateCardHTML({
       </div>
     </main>
 
-    <Fragment set:html={renderFooterHTML()} />
+    <Fragment set:html={renderFooterHTML({ siteTitle: "ChromaType Lab", tagline: "Modern color science and fluid responsive typography." })} />
     <Fragment set:html={renderConsentBannerHTML()} />
   </body>
 </html>
