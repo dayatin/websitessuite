@@ -60,23 +60,29 @@ jobs:
           if [ "$MODE" = "single" ]; then
             APPS_JSON="[\"${{ inputs.target_app }}\"]"
           elif [ "$MODE" = "selected" ]; then
-            APPS_LIST=$(echo "${{ inputs.selected_apps }}" | tr ',' '\n' | sed 's/^[ \t]*//;s/[ \t]*$//' | jq -R . | jq -s .)
+            APPS_LIST=$(echo "${{ inputs.selected_apps }}" | tr ',' '\n' | sed 's/^[ \t]*//;s/[ \t]*$//' | grep -v '^$' | jq -R . | jq -s -c .)
             APPS_JSON="$APPS_LIST"
           elif [ "$MODE" = "all" ]; then
             # Discover all directories in apps/
-            APPS_JSON=$(ls -d apps/*/ 2>/dev/null | xargs -n 1 basename | jq -R . | jq -s .)
+            APPS_JSON=$(ls -d apps/*/ 2>/dev/null | xargs -n 1 basename | jq -R . | jq -s -c .)
           else
             # Affected mode via turborepo
             # If no apps dir exists yet, default to empty
             if [ -d "apps" ] && [ "$(ls -A apps)" ]; then
-              APPS_JSON=$(ls -d apps/*/ 2>/dev/null | xargs -n 1 basename | jq -R . | jq -s .)
+              APPS_JSON=$(ls -d apps/*/ 2>/dev/null | xargs -n 1 basename | jq -R . | jq -s -c .)
             else
               APPS_JSON="[]"
             fi
           fi
 
+          if [ -z "$APPS_JSON" ] || [ "$APPS_JSON" = "null" ]; then
+            APPS_JSON="[]"
+          fi
+
           echo "Selected Apps Matrix: $APPS_JSON"
-          echo "apps=$APPS_JSON" >> $GITHUB_OUTPUT
+          echo "apps<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$APPS_JSON" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
   deploy-matrix:
     name: Deploy App (${{ matrix.app }})
